@@ -1,6 +1,6 @@
-#' Prepare data input file
+#' Map the sites
 #'
-#' Function to prepare data input file. The input data file can easily be prepared in excel or other programs. The function below may help the user in checking the right input format. Function only for the general data file, 'varves' and 'proxy' input data have to be formated separately.
+#' Function to map the different sites an user worked on.
 #'
 #' @export
 #' @param which_lakes Name of the sites to be plotted. Must match folders names. Default: all the folder in the Cores folder.
