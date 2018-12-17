@@ -50,7 +50,7 @@ serac_map(which_lakes = c(), output_name = c())
 ##--	or do  help(data=index)  for the standard data sets.
 
 ## The function is currently defined as
-function (which_lakes = c(), output_name = c()) 
+function (which_lakes = c(), output_name = c())
 .serac_map(which_lakes, output_name)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
