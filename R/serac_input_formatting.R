@@ -3,7 +3,7 @@
 #' Function to prepare data input file. The input data file can easily be prepared in excel or other programs. The function below may help the user in checking the right input format. Function only for the general data file, 'varves' and 'proxy' input data have to be formated separately.
 #'
 #' @export
-#' @param name
+#' @param name Name of the core, given using quotes. Use preferably the published name of the core for traceability.
 #' @keywords visualisation
 #' @examples serac_input_formatting('PB06')
 #'
