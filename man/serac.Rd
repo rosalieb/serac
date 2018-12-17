@@ -2,7 +2,7 @@
 \alias{serac}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Main function for age-depth modelling
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
