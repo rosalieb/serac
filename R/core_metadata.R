@@ -3,7 +3,7 @@
 #' Question the user on core International Geo Sample Number, sampling number, etc.
 #'
 #' @export
-#' @param name
+#' @param name Name of the core, given using quotes. Use preferably the published name of the core for traceability.
 #' @keywords age-depth modelling
 #' @keywords visualisation
 #' @examples user_infos()
