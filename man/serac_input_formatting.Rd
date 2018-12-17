@@ -2,10 +2,10 @@
 \alias{serac_input_formatting}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Formatting input file
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Help format the input file
 }
 \usage{
 serac_input_formatting(name)
@@ -30,7 +30,7 @@ serac_input_formatting(name)
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+Rosalie Bruel
 }
 \note{
 %%  ~~further notes~~
