@@ -1,20 +1,6 @@
-# serac -
-#
-# first time user function - enter some metadata
-#
-# You can learn more about package authoring with RStudio at:
-#
-#   http://r-pkgs.had.co.nz/
-#
-# Some useful keyboard shortcuts for package authoring:
-#
-#   Build and Reload Package:  'Cmd + Shift + B'
-#   Check Package:             'Cmd + Shift + E'
-#   Test Package:              'Cmd + Shift + T'
-
 #' Information on the user
 #'
-#' Question the user on professional ID (name, ORCID, email, Institute). These metadata are then included in the general metadata file output every time a model is created.
+#' Question the user on professional ID (name, ORCID, email, Institute), the first time serac is used.. These metadata are then included in the general metadata file output every time a model is created.
 #'
 #' @export
 #' @keywords age-depth modelling
