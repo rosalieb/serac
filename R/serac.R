@@ -3,45 +3,63 @@
 #' This is the main age-depth modelling function. The default values can be changed permanently within this file or temporarily when calling serac(). If there is any options you would like to see included in future version, please contact one of the authors
 #'
 #' @export
-#' @param name
-#' @param coring_yr
-#' @param model
-#' @param Cher
-#' @param NWT
-#' @param Hemisphere
-#' @param FF
-#' @param inst_deposit
-#' @param ignore
-#' @param plotpdf
-#' @param preview
-#' @param plotphoto
-#' @param minphoto
-#' @param maxphoto
-#' @param Pbcol
-#' @param inst_depositcol
-#' @param modelcol
-#' @param historic_d
-#' @param historic_a
-#' @param historic_n
-#' @param historic_test
-#' @param suppdescriptor
-#' @param descriptor_lab
-#' @param suppdescriptorcol
-#' @param plot_Am,plot_Cs,plot_Pb
-#' @param plot_Pb_inst_deposit
-#' @param plot_CFCS_regression
-#' @param varves
-#' @param dmin
-#' @param dmax
-#' @param sedchange
-#' @param min_yr
-#' @param SML
-#' @param stepout
-#' @param mycex
-#' @param archive_metadata
+#' @param name Name of the core, given using quotes. Defaults to the core provided with serac. Use preferably the published name of the core for traceability.
+#' @param coring_yr Year of coring.
+#' @param model Select 1 to 3 item between c("CFCS", "CIC", "CRS"). If several models are selected, they will all be plotted together in the last window.
+#' @param Cher If 137Cs measurement were done, where do you detect the Chernobyl peak? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the 1986 Chernobyl event. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty.
+#' @param NWT If 137Cs measurement were done, where do you detect the Nuclear Weapon Test peak? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the 1960s Nuclear Weapon Test event. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty.
+#' @param Hemisphere Chose between North Hemisphere "NH" and South Hemisphere "SH" depending on the location of your system. This argument is required if you chose to plot NWT.
+#' @param FF If 137Cs measurement were done, where do you detect the First Fallout period? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the First Fallout period in 1955. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty.
+#' @param inst_deposit Upper and lower depths (in mm) of sections of abrupt accumulation that inst_deposit c() should be excised, e.g., c(100, 120, 185, 195) for two sections of 10.0-12.0 cm and 18.5-19.5 cm depth
+#' @param ignore The depth (in mm) of any sample that should be ignored from the age-depth model computation, e.g., c(55) will remove the measurement done at 5.5 cm. The data will be ploted by default in grey on the output graph (you can change this with the inst_depositcol argument)
+#' @param plotpdf Logical argument to indicate whether you want the output graph to be saved to your folder.
+#' @param preview Logical argument to indicate whether you want the output graph to be ploted. Default is TRUE, and the graph is ploted within your R session. It might be convenient to turn this argument to FALSE if errors keep coming telling you your R window is too small.
+#' @param plotphoto Logical argument to indicate whether you want to plot the photo of the core along your age-model. If plotphoto=TRUE, you need to indicate the upper and lower limit of the photo in mm in following arguments.
+#' @param minphoto Mandatory if plotphoto=TRUE. Lower limit of the core photo in mm, e.g., minphoto=0 indicates that the photo starts at 0 mm. The photo will automatically be truncated acording to the minimum and maximum depth of the age model given in other arguments.
+#' @param maxphoto Mandatory if plotphoto=TRUE. Upper limit of the core photo in mm, e.g., maxphoto=320 indicates that the photo ends at 32 cm. The photo will automatically be truncated acording to the minimum and maximum depth of the age model given in other arguments.
+#' @param Pbcol Vector of color to plot 210Pbex data. If length(Pbcol)>1, the different colors will be used to plot the different slopes in between change(s) in sedimentation rate. Example of color vector: Pbcol=c("black","midnightblue","darkgreen").
+#' @param inst_depositcol A color to plot the data points within instantaneous deposit or ignored data. Example: inst_depositcol=grey(0.85).
+#' @param modelcol Vector of color to plot different model if length(model)>1. If length(modelcol)>1, the different colors will be used to plot the different change in sedimentation rate. Example of color vector: modelcol=c("black","red","darkorange") to plot "CFCS", "CIC", "CRS" models in this order.
+#' @param historic_d Vector with upper and lower depth of historical event(s), e.g., historic_d=c(120,130) will identify the event between 12 and 13 cm on the last window with the age model.
+#' @param historic_a Vector of year of different historical events, e.g., historic_a=c(1895) will add the point 1895 on the last window with the age model. Historical events can be older than the dated section, in which case the depth is obtained from the model if historic_d is not specified. historic_a is a vector twice as short as historic_d, as each age correspond to an upper+lower limit in the vector 'historic_d'. If not all ages are known, put NA in the vector, e.g., historic_a=c(NA,1895)
+#' @param historic_n Vector of names of different historical events, e.g., historic_n=c("1895 flood"). Optional. If you plot several events, and don't want to plot all the names, add a NA in the vector, e.g., historic_n=c(NA,"1895 flood") will understand that the first event doesn't have a name, but the second does.
+#' @param historic_test Visualisation tool for known ages. This argument will plot a vertical line in the last window (the one with the age-depth model). Can be useful when the user know specific ages that may have resulted in changes in sedimentation rates. E.g., historic_test=c(1996).
+#' @param suppdescriptor Up to two supplementary descriptor(s) to plot in an additional window. Logical argument. The decision on ploting more than one supplementary descriptor depends on the length of the vector descriptor_lab. An additional input file with these data should be included in the folder with the initial data.
+#' @param descriptor_lab Label used on the axis, e.g., descriptor_lab=c("LOI", "Ca/Fe") if two supplementary descriptors are specified.
+#' @param suppdescriptorcol Vector of color to plot different descriptor if length(descriptor_lab)>1. If length(descriptor_lab)>1, the different colors will be used to plot the different change in sedimentation rate. Example of color vector: suppdescriptorcol=c("black","purple").
+#' @param plot_Am Logical argument indicating whether or not serac should plot 241Am.
+#' @param plot_Cs Logical argument indicating whether or not serac should plot 137Cs.
+#' @param plot_Pb Logical argument indicating whether or not serac should plot 210Pbex.
+#' @param plot_Pb_inst_deposit Logical argument indicating whether or not serac should plot 210Pbex without instantaneous deposit. If TRUE, inst_deposit shouldn't be a null vector.
+#' @param plot_CFCS_regression Whether to plot or not the linear regression. If the parameter is not specified, it will automatically turn to TRUE, but will also automatically turn to FALSE if instantaneous deposit are present but the argument 'plot_Pb_inst_deposit' is turned to FALSE. Linear regression won't match if there are some instantaneous deposit. In other words, in most cases, the user shouldn't need to modify this parameter.
+#' @param varves Logical argument to indicate whether varve counting results should be ploted on the last window. An additional input file with these data should be included in the folder with the initial data.
+#' @param dmin Maximum depth of age-depth model (useful if the user doesn't want to plot the lower region).
+#' @param dmax Maximum depth of age-depth model (useful if the user doesn't want to plot the lower region). dmax cannot be in the middle of an instantaneous deposit. e.g. if there is an instantaneous deposit between 180 and 200 mm, dmax cannot be 190 mm, and will be converted to 200 mm automatically.
+#' @param sedchange Up to two changes in sedimentation rate, e.g., sedchange=c(175,290) indicates two changes of sedimentation rate at 17.5 and 29.0 cm.
+#' @param min_yr The minimum year limit for the age-depth model plot. The user can adjust this argument after a first computation of the model
+#' @param SML Surface Mixed Layer: a depth in mm above which the sediment is considered to be mixed. E.g., SML=30 indicates that the first 3 cm are mixed sediment: the data point are ploted but not included in the Pb models.
+#' @param stepout Depth resolution for the file out in mm.
+#' @param mycex Graphical parameter: a multiplication factor to increase (mycex>1) ou decrease (mycex<1) label sizes.
+#' @param archive_metadata Logical argument. If TRUE, require fields regarding the measurements on the core. Allows missing information; just press 'ENTER' in your computer (leave an empty field).
 #' @keywords age-depth modelling
 #' @keywords visualisation
-#' @examples serac_input_formatting('PB06')
+#' @examples
+#' # Lake Bourget
+#' serac(name="LDB",coring_yr=2004)
+#' serac(name="LDB",coring_yr=2004,model=c("CFCS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(370),plot_Pb=T,plot_Pb_inst_deposit=T,plot_Cs=T,plot_Am=T,Cher=c(75,85),Hemisphere=c("NH"),NWT=c(172,180),inst_deposit=c(197,210),historic_d=c(197,210),historic_a=c(1958),historic_n=c("earthquake 1958"),varves=T,plotpdf=T,preview=T,stepout=1)
+#'
+#' # Lake Iseo
+#' serac(name="Iseo",coring_yr=2010)
+#' serac(name="Iseo",coring_yr=2010,model=c("CFCS","CIC","CRS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(320),plot_Pb=T,plot_Am=T,plot_Cs=T,Cher=c(70,75),Hemisphere=c("NH"),NWT=c(130,140),FF=c(164,173),varves=TRUE,plotpdf=T,preview=T,stepout=5)
+#'
+#' # Lake Saint-Andre
+#' serac(name="SAN",coring_yr=2011,model=c("CFCS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(420),plot_Pb=T,plot_Am=T,plot_Cs=T,Cher=c(195,205),Hemisphere=c("NH"),NWT=c(275,295),FF=c(315,325),sedchange=c(165,260),plotpdf=TRUE)
+#'
+#' # Lake Allos
+#' serac(name="ALO09P12",coring_yr=2009,model=c("CFCS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(210),plot_Pb=T,plot_Am=T,plot_Cs=T,Cher=c(30,40),Hemisphere=c("NH"),NWT=c(51,61),sedchange=c(75.5),plot_Pb_inst_deposit=T,inst_deposit=c(20,28,100,107,135,142,158,186),suppdescriptor=TRUE,descriptor_lab=c("Ca/Fe"),historic_d=c(20,28,100,107,135,142,158,186),historic_a=c(1994,1920,1886,1868),historic_n=c("sept1 994 flood","1920 flood","1886 flood","1868 flood ?"), min_yr=c(1750),dmax=c(180), plotpdf=TRUE,preview=F)
+#'
+#' # Pierre-Blanche lagoon
+#' serac(name="PB06",coring_yr=2006,model=c("CFCS","CRS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(350),plot_Pb=T,plot_Cs=T,Cher=c(50,60),Hemisphere=c("NH"),NWT=c(100,120),suppdescriptor=T,descriptor_lab=c("Si/Al"),SML=30,inst_deposit=c(315,350),historic_d=c(315,350),historic_a=c(1893),historic_n=c("1894storm"),min_yr=1870,dmax=c(350),plotpdf=TRUE)
 #'
 
 serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(),inst_deposit=c(0),
@@ -1342,3 +1360,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
   cat("\n\n ________________________\n")
   cat(paste("\n The calculation took ", round(new_time,3), " seconds.", sep=""))
 }
+
+library(roxygen2)
+setwd("../serac")
+document()
