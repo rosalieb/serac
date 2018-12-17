@@ -1360,3 +1360,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
   cat("\n\n ________________________\n")
   cat(paste("\n The calculation took ", round(new_time,3), " seconds.", sep=""))
 }
+
+library(roxygen2)
+setwd("../serac")
+document()
