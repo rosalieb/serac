@@ -13,118 +13,121 @@ serac(name = "", model = c("CFCS"), Cher = c(), NWT = c(), Hemisphere = c(), FF 
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{name}{
-%%     ~~Describe \code{name} here~~
-}
-  \item{model}{
-%%     ~~Describe \code{model} here~~
-}
-  \item{Cher}{
-%%     ~~Describe \code{Cher} here~~
-}
-  \item{NWT}{
-%%     ~~Describe \code{NWT} here~~
-}
-  \item{Hemisphere}{
-%%     ~~Describe \code{Hemisphere} here~~
-}
-  \item{FF}{
-%%     ~~Describe \code{FF} here~~
-}
-  \item{inst_deposit}{
-%%     ~~Describe \code{inst_deposit} here~~
-}
-  \item{ignore}{
-%%     ~~Describe \code{ignore} here~~
-}
-  \item{plotpdf}{
-%%     ~~Describe \code{plotpdf} here~~
-}
-  \item{preview}{
-%%     ~~Describe \code{preview} here~~
-}
-  \item{plotphoto}{
-%%     ~~Describe \code{plotphoto} here~~
-}
-  \item{minphoto}{
-%%     ~~Describe \code{minphoto} here~~
-}
-  \item{maxphoto}{
-%%     ~~Describe \code{maxphoto} here~~
-}
-  \item{Pbcol}{
-%%     ~~Describe \code{Pbcol} here~~
-}
-  \item{inst_depositcol}{
-%%     ~~Describe \code{inst_depositcol} here~~
-}
-  \item{modelcol}{
-%%     ~~Describe \code{modelcol} here~~
-}
-  \item{historic_d}{
-%%     ~~Describe \code{historic_d} here~~
-}
-  \item{historic_a}{
-%%     ~~Describe \code{historic_a} here~~
-}
-  \item{historic_n}{
-%%     ~~Describe \code{historic_n} here~~
-}
-  \item{historic_test}{
-%%     ~~Describe \code{historic_test} here~~
-}
-  \item{suppdescriptor}{
-%%     ~~Describe \code{suppdescriptor} here~~
-}
-  \item{descriptor_lab}{
-%%     ~~Describe \code{descriptor_lab} here~~
-}
-  \item{suppdescriptorcol}{
-%%     ~~Describe \code{suppdescriptorcol} here~~
+Name of the core, given using quotes. Defaults to the core provided with serac. Use preferably the published name of the core for traceability.
 }
   \item{coring_yr}{
-%%     ~~Describe \code{coring_yr} here~~
+Year of coring.
+}
+  \item{model}{
+Select 1 to 3 item between c("CFCS", "CIC", "CRS"). If several models are selected, they will all be plotted together in the last window.
+}
+  \item{Cher}{
+If 137Cs measurement were done, where do you detect the Chernobyl peak? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the 1986 Chernobyl event. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty.
+}
+  \item{NWT}{
+If 137Cs measurement were done, where do you detect the Nuclear Weapon Test peak? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the 1960s Nuclear Weapon Test event. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty.
+}
+  \item{Hemisphere}{
+Chose between North Hemisphere "NH" and South Hemisphere "SH" depending on the location of your system. This argument is required if you chose to plot NWT.
+}
+  \item{FF}{
+If 137Cs measurement were done, where do you detect the First Fallout period? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the First Fallout period in 1955. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty.
+}
+  \item{inst_deposit}{
+Upper and lower depths (in mm) of sections of abrupt accumulation that inst_deposit c() should be excised, e.g., c(100, 120, 185, 195) for two sections of 10.0-12.0 cm and 18.5-19.5 cm depth
+}
+  \item{ignore}{
+The depth (in mm) of any sample that should be ignored from the age-depth model computation, e.g., c(55) will remove the measurement done at 5.5 cm. The data will be ploted by default in grey on the output graph (you can change this with the inst_depositcol argument)
+}
+  \item{plotpdf}{
+Logical argument to indicate whether you want the output graph to be saved to your folder.
+}
+  \item{preview}{
+Logical argument to indicate whether you want the output graph to be ploted. Default is TRUE, and the graph is ploted within your R session. It might be convenient to turn this argument to FALSE if errors keep coming telling you your R window is too small.
+}
+  \item{plotphoto}{
+Logical argument to indicate whether you want to plot the photo of the core along your age-model. If plotphoto=TRUE, you need to indicate the upper and lower limit of the photo in mm in following arguments.
+}
+  \item{minphoto}{
+Mandatory if plotphoto=TRUE. Lower limit of the core photo in mm, e.g., minphoto=0 indicates that the photo starts at 0 mm. The photo will automatically be truncated acording to the minimum and maximum depth of the age model given in other arguments.
+}
+  \item{maxphoto}{
+Mandatory if plotphoto=TRUE. Upper limit of the core photo in mm, e.g., maxphoto=320 indicates that the photo ends at 32 cm. The photo will automatically be truncated acording to the minimum and maximum depth of the age model given in other arguments.
+}
+  \item{Pbcol}{
+Vector of color to plot 210Pbex data. If length(Pbcol)>1, the different colors will be used to plot the different slopes in between change(s) in sedimentation rate. Example of color vector: Pbcol=c("black","midnightblue","darkgreen").
+}
+  \item{inst_depositcol}{
+A color to plot the data points within instantaneous deposit or ignored data. Example: inst_depositcol=grey(0.85).
+}
+  \item{modelcol}{
+Vector of color to plot different model if length(model)>1. If length(modelcol)>1, the different colors will be used to plot the different change in sedimentation rate. Example of color vector: modelcol=c("black","red","darkorange") to plot "CFCS", "CIC", "CRS" models in this order.
+}
+  \item{historic_d}{
+Vector with upper and lower depth of historical event(s), e.g., historic_d=c(120,130) will identify the event between 12 and 13 cm on the last window with the age model.
+}
+  \item{historic_a}{
+Vector of year of different historical events, e.g., historic_a=c(1895) will add the point 1895 on the last window with the age model. Historical events can be older than the dated section, in which case the depth is obtained from the model if historic_d is not specified. historic_a is a vector twice as short as historic_d, as each age correspond to an upper+lower limit in the vector 'historic_d'. If not all ages are known, put NA in the vector, e.g., historic_a=c(NA,1895)
+}
+  \item{historic_n}{
+Vector of names of different historical events, e.g., historic_n=c("1895 flood"). Optional. If you plot several events, and don't want to plot all the names, add a NA in the vector, e.g., historic_n=c(NA,"1895 flood") will understand that the first event doesn't have a name, but the second does.
+}
+  \item{historic_test}{
+Visualisation tool for known ages. This argument will plot a vertical line in the last window (the one with the age-depth model). Can be useful when the user know specific ages that may have resulted in changes in sedimentation rates. E.g., historic_test=c(1996).
+}
+  \item{suppdescriptor}{
+Up to two supplementary descriptor(s) to plot in an additional window. Logical argument. The decision on ploting more than one supplementary descriptor depends on the length of the vector descriptor_lab. An additional input file with these data should be included in the folder with the initial data.
+}
+  \item{descriptor_lab}{
+Label used on the axis, e.g., descriptor_lab=c("LOI", "Ca/Fe") if two supplementary descriptors are specified.
+}
+  \item{suppdescriptorcol}{
+Vector of color to plot different descriptor if length(descriptor_lab)>1. If length(descriptor_lab)>1, the different colors will be used to plot the different change in sedimentation rate. Example of color vector: suppdescriptorcol=c("black","purple").
 }
   \item{plot_Am}{
-%%     ~~Describe \code{plot_Am} here~~
+Logical argument indicating whether or not serac should plot 241Am.
 }
   \item{plot_Cs}{
-%%     ~~Describe \code{plot_Cs} here~~
+Logical argument indicating whether or not serac should plot 137Cs.
 }
   \item{plot_Pb}{
-%%     ~~Describe \code{plot_Pb} here~~
+Logical argument indicating whether or not serac should plot 210Pbex.
 }
   \item{plot_Pb_inst_deposit}{
-%%     ~~Describe \code{plot_Pb_inst_deposit} here~~
+Logical argument indicating whether or not serac should plot 210Pbex without instantaneous deposit. If TRUE, inst_deposit shouldn't be a null vector.
 }
   \item{plot_CFCS_regression}{
-%%     ~~Describe \code{plot_CFCS_regression} here~~
+Whether to plot or not the linear regression. If the parameter is not specified, it will automatically turn to TRUE, but will also automatically turn to FALSE if instantaneous deposit are present but the argument 'plot_Pb_inst_deposit' is turned to FALSE. Linear regression won't match if there are some instantaneous deposit. In other words, in most cases, the user shouldn't need to modify this parameter.
 }
   \item{varves}{
-%%     ~~Describe \code{varves} here~~
+Logical argument to indicate whether varve counting results should be ploted on the last window. An additional input file with these data should be included in the folder with the initial data.
 }
   \item{dmin}{
-%%     ~~Describe \code{dmin} here~~
+Minimum depth of age-depth model (useful if the user doesn't want to plot the upper region).
 }
   \item{dmax}{
-%%     ~~Describe \code{dmax} here~~
+Maximum depth of age-depth model (useful if the user doesn't want to plot the lower region). dmax cannot be in the middle of an instantaneous deposit. e.g. if there is an instantaneous deposit between 180 and 200 mm, dmax cannot be 190 mm, and will be converted to 200 mm automatically.
+}
+  \item{dmax}{
+Maximum depth of age-depth model (useful if the user doesn't want to plot the lower region).
 }
   \item{sedchange}{
-%%     ~~Describe \code{sedchange} here~~
+Up to two changes in sedimentation rate, e.g., sedchange=c(175,290) indicates two changes of sedimentation rate at 17.5 and 29.0 cm.
 }
   \item{min_yr}{
-%%     ~~Describe \code{min_yr} here~~
+The minimum year limit for the age-depth model plot. The user can adjust this argument after a first computation of the model
 }
   \item{SML}{
-%%     ~~Describe \code{SML} here~~
+Surface Mixed Layer: a depth in mm above which the sediment is considered to be mixed. E.g., SML=30 indicates that the first 3 cm are mixed sediment: the data point are ploted but not included in the Pb models.
 }
   \item{stepout}{
-%%     ~~Describe \code{stepout} here~~
+Depth resolution for the file out in mm.
 }
   \item{mycex}{
-%%     ~~Describe \code{mycex} here~~
+Graphical parameter: a multiplication factor to increase (mycex>1) ou decrease (mycex<1) label sizes.
 }
   \item{archive_metadata}{
-%%     ~~Describe \code{archive_metadata} here~~
+Logical argument. If TRUE, require fields regarding the measurements on the core. Allows missing information; just press 'ENTER' in your computer (leave an empty field).
 }
 }
 \details{
@@ -141,7 +144,7 @@ serac(name = "", model = c("CFCS"), Cher = c(), NWT = c(), Hemisphere = c(), FF 
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+Rosalie Bruel, Pierre Sabatier
 }
 \note{
 %%  ~~further notes~~
@@ -158,24 +161,24 @@ serac(name = "", model = c("CFCS"), Cher = c(), NWT = c(), Hemisphere = c(), FF 
 ##--	or do  help(data=index)  for the standard data sets.
 
 ## The function is currently defined as
-function (name = "", model = c("CFCS"), Cher = c(), NWT = c(), 
-    Hemisphere = c(), FF = c(), inst_deposit = c(0), ignore = c(), 
-    plotpdf = FALSE, preview = TRUE, plotphoto = FALSE, minphoto = c(), 
-    maxphoto = c(), Pbcol = c("black", "midnightblue", "darkgreen"), 
-    inst_depositcol = grey(0.85), modelcol = c("black", "red", 
-        "darkorange"), historic_d = c(), historic_a = c(), historic_n = c(), 
-    historic_test = c(), suppdescriptor = FALSE, descriptor_lab = c(), 
-    suppdescriptorcol = c("black", "purple"), coring_yr = c(), 
-    plot_Am = FALSE, plot_Cs = FALSE, plot_Pb = TRUE, plot_Pb_inst_deposit = FALSE, 
-    plot_CFCS_regression = c(), varves = FALSE, dmin = c(), dmax = c(), 
-    sedchange = c(0), min_yr = 1880, SML = c(0), stepout = 5, 
-    mycex = 1, archive_metadata = FALSE) 
-.serac(name, model, Cher, NWT, Hemisphere, FF, inst_deposit, 
-    ignore, plotpdf, preview, plotphoto, minphoto, maxphoto, 
-    Pbcol, inst_depositcol, modelcol, historic_d, historic_a, 
-    historic_n, historic_test, suppdescriptor, descriptor_lab, 
-    suppdescriptorcol, coring_yr, plot_Am, plot_Cs, plot_Pb, 
-    plot_Pb_inst_deposit, plot_CFCS_regression, varves, dmin, 
+function (name = "", model = c("CFCS"), Cher = c(), NWT = c(),
+    Hemisphere = c(), FF = c(), inst_deposit = c(0), ignore = c(),
+    plotpdf = FALSE, preview = TRUE, plotphoto = FALSE, minphoto = c(),
+    maxphoto = c(), Pbcol = c("black", "midnightblue", "darkgreen"),
+    inst_depositcol = grey(0.85), modelcol = c("black", "red",
+        "darkorange"), historic_d = c(), historic_a = c(), historic_n = c(),
+    historic_test = c(), suppdescriptor = FALSE, descriptor_lab = c(),
+    suppdescriptorcol = c("black", "purple"), coring_yr = c(),
+    plot_Am = FALSE, plot_Cs = FALSE, plot_Pb = TRUE, plot_Pb_inst_deposit = FALSE,
+    plot_CFCS_regression = c(), varves = FALSE, dmin = c(), dmax = c(),
+    sedchange = c(0), min_yr = 1880, SML = c(0), stepout = 5,
+    mycex = 1, archive_metadata = FALSE)
+.serac(name, model, Cher, NWT, Hemisphere, FF, inst_deposit,
+    ignore, plotpdf, preview, plotphoto, minphoto, maxphoto,
+    Pbcol, inst_depositcol, modelcol, historic_d, historic_a,
+    historic_n, historic_test, suppdescriptor, descriptor_lab,
+    suppdescriptorcol, coring_yr, plot_Am, plot_Cs, plot_Pb,
+    plot_Pb_inst_deposit, plot_CFCS_regression, varves, dmin,
     dmax, sedchange, min_yr, SML, stepout, mycex, archive_metadata)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

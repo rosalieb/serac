@@ -30,7 +30,7 @@ user_infos()(x)
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+Rosalie Bruel
 }
 \note{
 %%  ~~further notes~~

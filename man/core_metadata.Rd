@@ -30,7 +30,7 @@ Name of the core, given using quotes. Use preferably the published name of the c
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+Rosalie Bruel
 }
 \note{
 %%  ~~further notes~~

@@ -13,10 +13,10 @@ serac_map(which_lakes = c(), output_name = c())
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{which_lakes}{
-%%     ~~Describe \code{which_lakes} here~~
+Name of the sites to be plotted. Must match folders names. Default: all the folder in the Cores folder.
 }
   \item{output_name}{
-%%     ~~Describe \code{output_name} here~~
+Extension to be added to the output name (can be left blank).
 }
 }
 \details{
@@ -33,7 +33,7 @@ serac_map(which_lakes = c(), output_name = c())
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+Rosalie Bruel
 }
 \note{
 %%  ~~further notes~~
