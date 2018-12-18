@@ -1,11 +1,11 @@
 Package: serac
 Type: Package
-Title: What the Package Does (Title Case)
+Title: ShortlivEd RAdionuclide Chronology of recent sediment cores
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Rosalie Bruel, Pierre Sabatier
+Maintainer: rosaliebruel@gmail.com
+Description: serac allows the user to compute age-depth model and provide an output graph, as well as age model in a text file and metadata, on the free open-source statistical software R.
+    serac ensure the reproducibility of age-depth model, and grant the possibility to test several 210Pbex models (CFCS, CIC, CRS) and sedimentation hypotheses (change in sedimentation rates, instantaneous deposits, varved sedimentation, etc.). 
+License: MIT
 Encoding: UTF-8
 LazyData: true
