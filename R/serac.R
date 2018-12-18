@@ -419,7 +419,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
     # Puis cf l'équation de désintégration du Plomb : plomb excess(t) = plomb excess (0) * e^(lambda*t)
     # Par analogie ta pente = -lambda/V, V étant le taux de sédimentation
     lambda = log(2)/22.3
-
+    lambda_err = 0.00017
 
     if(any(model=="CFCS")) {
       lm_sed1 <- lm(log(dt_sed1$Pbex[!is.na(dt_sed1$d)&dt_sed1$Pbex>0]) ~ dt_sed1$d[!is.na(dt_sed1$d)&dt_sed1$Pbex>0])
