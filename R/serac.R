@@ -415,17 +415,19 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
   if(length(model)>=1) {
     # Write the result of the model
     # Calculate sedimentation rate
-    # Le 0.031 dans l'équation du taux de sédimentation est issus de la periode de demi-vie du 210Pb qui est de 22,3 ans (T) donc il faut calculer le lambda qui est la constante de désintégration lambda = ln(2)/T=0,031.
+    # Le 0.031 dans l'équation du taux de sédimentation est issus de la periode de demi-vie du 210Pb qui est de 22.3 ans (T) donc il faut calculer le lambda qui est la constante de désintégration lambda = ln(2)/T=0.031.
     # Puis cf l'équation de désintégration du Plomb : plomb excess(t) = plomb excess (0) * e^(lambda*t)
-    # Par analogie ta pente = -lambda/V, V étant le taux de sédimentation
+    # Par analogie la pente = -lambda/V, V étant le taux de sédimentation
     lambda = log(2)/22.3
     lambda_err = 0.00017
 
     if(any(model=="CFCS")) {
       lm_sed1 <- lm(log(dt_sed1$Pbex[!is.na(dt_sed1$d)&dt_sed1$Pbex>0]) ~ dt_sed1$d[!is.na(dt_sed1$d)&dt_sed1$Pbex>0])
       sr_sed1 <- lambda/lm_sed1$coefficients[2]
+      sr_sed1_err = sr_sed1*((lambda_err/lambda)^2+(summary(lm_sed1)$coefficients[2,2]/lm_sed1$coefficients[2])^2)^(-0.5)
 
-      #error low & high
+      # error low & high
+      # calculation age error: delta(t)=depth*delta(V)/V
       sr_sed1_low <- as.numeric(lambda/c(lm_sed1$coefficients[2]-summary(lm_sed1)$coefficients[2,2])) #sed rate
       sr_sed1_high <- as.numeric(lambda/c(lm_sed1$coefficients[2]+summary(lm_sed1)$coefficients[2,2])) #sed rate
       if (max(sedchange)==0) {
