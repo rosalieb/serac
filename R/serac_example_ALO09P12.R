@@ -1,10 +1,10 @@
-#' Lake Allos shortlived radionuclide data
+#' Lake Allos shortlived radionuclide and proxy data
 #'
 #' Example of data used for serac
 #'
 #' @docType data
 #'
-#' @usage data(grav)
+#' @usage serac_example_ALO09P12
 #'
 #' @format txt file
 #'
@@ -17,13 +17,12 @@
 #'
 #' @examples
 #' # Radionuclides data
-#' data(serac_example_ALO09P12)
+#' View(serac_example_ALO09P12)
 #'
 #' # proxy data
-#' data(serac_example_ALO09P12_proxy)
+#' View(serac_example_ALO09P12_proxy)
 #'
-#' View()
-#' times <- attr(grav, "time")
-#' phe <- grav$pheno
-#' \donttest{iplotCurves(phe, times)}
+#' # Go to serac
+#' # e.g.
+#' serac("serac_example_ALO09P12", coring_yr = 2009)
 "serac_example_ALO09P12"
