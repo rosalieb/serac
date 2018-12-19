@@ -64,7 +64,7 @@ serac_input_formatting <- function(name)
 
   if (all(is.na(dt$depth_min))) dt$depth_min <- dt$Depth-dt$thickness
   if (all(is.na(dt$depth_min))) dt$depth_max <- dt$Depth+dt$thickness
-  
+
   # Density
   message("\nDo you have the density information in your table and/or \ndo you wish to calculate it (write Y for yes or N for no \nin the console)?\nDensity is needed for inventory calculation and CRS model.")
   answer <- readline()
@@ -156,10 +156,10 @@ serac_input_formatting <- function(name)
   # View result
   cat("_______________________________________________________")
   if(nrow(dt2)<=15) {
-    message(paste("You're all set! Below is the file you created. Now run serac. \nReminder, minimum function would be: serac('",name,"', coring_year = ",format(Sys.Date(), "%Y"),") \nEdit coring year accordingly.",sep=""))
+    message(paste("You're all set! Below is the file you created. Now run serac. \nReminder, minimum function would be: serac('",name,"', coring_yr = ",format(Sys.Date(), "%Y"),") \nEdit coring year accordingly.",sep=""))
     print(dt2)
   } else {
-    message(paste("You're all set! Below is the file you created (first 15 rows). \nNow run serac.\nReminder, minimum function would be: serac('",name,"', coring_year = ",format(Sys.Date(), "%Y"),") \nEdit coring year accordingly.",sep=""))
+    message(paste("You're all set! Below is the file you created (first 15 rows). \nNow run serac.\nReminder, minimum function would be: serac('",name,"', coring_yr = ",format(Sys.Date(), "%Y"),") \nEdit coring year accordingly.",sep=""))
     print(dt2[1:15,])
     cat("              [...........]\n")
   }
