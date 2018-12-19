@@ -479,6 +479,8 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
     }
 
     if(any(model=="CIC")) {
+      # calculation age error: delta(tx)= 1/lambda*[(0.00017*t)^2+(delta(A0)/A0)^2+(delta(Ax)/Ax)^2]^(-0.5)
+      # with Ax: activity at depth x; A0: initial activity
       m_CIC <- rep(NA,nrow(dt))
       m_CIC_low <- rep(NA,nrow(dt))
       m_CIC_high <- rep(NA,nrow(dt))
