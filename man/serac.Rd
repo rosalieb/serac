@@ -156,32 +156,32 @@ Rosalie Bruel, Pierre Sabatier
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+# Line below will create the 'Cores' folder if it doesn't exist already
+dir.create(file.path(getwd(), 'Cores'), showWarnings = FALSE)
 
-## The function is currently defined as
-function (name = "", model = c("CFCS"), Cher = c(), NWT = c(),
-    Hemisphere = c(), FF = c(), inst_deposit = c(0), ignore = c(),
-    plotpdf = FALSE, preview = TRUE, plotphoto = FALSE, minphoto = c(),
-    maxphoto = c(), Pbcol = c("black", "midnightblue", "darkgreen"),
-    inst_depositcol = grey(0.85), modelcol = c("black", "red",
-        "darkorange"), historic_d = c(), historic_a = c(), historic_n = c(),
-    historic_test = c(), suppdescriptor = FALSE, descriptor_lab = c(),
-    suppdescriptorcol = c("black", "purple"), coring_yr = c(),
-    plot_Am = FALSE, plot_Cs = FALSE, plot_Pb = TRUE, plot_Pb_inst_deposit = FALSE,
-    plot_CFCS_regression = c(), varves = FALSE, dmin = c(), dmax = c(),
-    sedchange = c(0), min_yr = 1880, SML = c(0), stepout = 5,
-    mycex = 1, archive_metadata = FALSE)
-.serac(name, model, Cher, NWT, Hemisphere, FF, inst_deposit,
-    ignore, plotpdf, preview, plotphoto, minphoto, maxphoto,
-    Pbcol, inst_depositcol, modelcol, historic_d, historic_a,
-    historic_n, historic_test, suppdescriptor, descriptor_lab,
-    suppdescriptorcol, coring_yr, plot_Am, plot_Cs, plot_Pb,
-    plot_Pb_inst_deposit, plot_CFCS_regression, varves, dmin,
-    dmax, sedchange, min_yr, SML, stepout, mycex, archive_metadata)
+# Within the 'Cores' folder, user need to create one folder per core
+dir.create(file.path(paste(getwd(),'/Cores',sep=""), 'serac_example_ALO09P12'), showWarnings = FALSE)
+
+# We are writing in this subfolder an example dataset
+# Format your own data following this template, or get help with formatting using
+#   the serac_input_formatting() function
+?serac_example_ALO09P12
+write.table(x = serac_example_ALO09P12, file = paste(getwd(),'/Cores/serac_example_ALO09P12/serac_example_ALO09P12.txt',sep=""),col.names = T, row.names = F)
+# Including proxy data for this core too
+write.table(x = serac_example_ALO09P12_proxy, file = paste(getwd(),'/Cores/serac_example_ALO09P12/serac_example_ALO09P12_proxy.txt',sep=""),col.names = T, row.names = F)
+
+# Now run serac
+# At the minimum, your function will be:
+serac(name="ALO09P12",coring_yr=2009)
+
+# Several sedimentation hypotheses were tested, and this is what the author chose
+#   as the best model
+serac(name="ALO09P12",coring_yr=2009,model=c("CFCS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(210),plot_Pb=T,plot_Am=T,plot_Cs=T,Cher=c(30,40),Hemisphere=c("NH"),NWT=c(51,61),sedchange=c(75.5),plot_Pb_inst_deposit=T,inst_deposit=c(20,28,100,107,135,142,158,186),suppdescriptor=TRUE,descriptor_lab=c("Ca/Fe"),historic_d=c(20,28,100,107,135,142,158,186),historic_a=c(1994,1920,1886,1868),historic_n=c("sept1 994 flood","1920 flood","1886 flood","1868 flood ?"), min_yr=c(1750),dmax=c(180), plotpdf=TRUE,preview=F)
+# If you want to see the preview, change preview=T in the code
+# Before that, make sure to extend your window in RStudio (large plot!)
+
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ age-depth modelling }% use one of  RShowDoc("KEYWORDS")
+\keyword{ visualisation }% __ONLY ONE__ keyword per line
