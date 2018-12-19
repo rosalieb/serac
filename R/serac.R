@@ -1,4 +1,4 @@
-#' serac
+#' serac age-depth modelling function
 #'
 #' This is the main age-depth modelling function. The default values can be changed permanently within this file or temporarily when calling serac(). If there is any options you would like to see included in future version, please contact one of the authors
 #'
