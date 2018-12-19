@@ -497,6 +497,9 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
     if(any(model=="CRS")) {
       if(rev(dt$Pbex)[1] >= dt$Pbex[1]/16) cat("\n Warning, it seems that 210Pb_excess has not reached equilibrium. \n Make sure the conditions of application for CRS model are fulfilled.")
 
+      # calculation age error: delta(tx)=1/lambda*[(0.00017*lambda)^2+(delta(I0)/I0)^2+(1-2*Ix/Io)*(delta(Ix)/Ix)^2]^(-0.5)
+      # with I0: iInventory, Ix= Inventory below depth x
+
       m_CRS <- rep(NA,length(Inventory_CRS))
       m_CRS_low <- rep(NA,length(Inventory_CRS))
       m_CRS_high <- rep(NA,length(Inventory_CRS))
