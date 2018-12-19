@@ -16,8 +16,14 @@
 #' @source \href{https://www.sciencedirect.com/science/article/pii/S0033589412000294}{Science Direct}
 #'
 #' @examples
-#' data(grav)
+#' # Radionuclides data
+#' data(serac_example_ALO09P12)
+#'
+#' # proxy data
+#' data(serac_example_ALO09P12_proxy)
+#'
+#' View()
 #' times <- attr(grav, "time")
 #' phe <- grav$pheno
 #' \donttest{iplotCurves(phe, times)}
-"grav"
+"serac_example_ALO09P12"
