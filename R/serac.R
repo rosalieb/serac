@@ -425,58 +425,71 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
     lambda_err = 0.00017
 
     if(any(model=="CFCS")) {
+      # Linear model and V calculation (sedimentation rate)
       lm_sed1 <- lm(log(dt_sed1$Pbex[!is.na(dt_sed1$d)&dt_sed1$Pbex>0]) ~ dt_sed1$d[!is.na(dt_sed1$d)&dt_sed1$Pbex>0])
       sr_sed1 <- lambda/lm_sed1$coefficients[2]
-      sr_sed1_err = sr_sed1*((lambda_err/lambda)^2+(summary(lm_sed1)$coefficients[2,2]/lm_sed1$coefficients[2])^2)^(-0.5)
+      sr_sed1_err = sr_sed1*((lambda_err/lambda)^2+(summary(lm_sed1)$coefficients[2,2]/lm_sed1$coefficients[2])^2)^(0.5)
 
-      # error low & high
+      # Year at depth (year to be substracted to coring_yr eventually)
+      Tm_CFCS_sed1 <- dt_sed1$depth/sr_sed1
       # calculation age error: delta(t)=depth*delta(V)/V
-      sr_sed1_low <- as.numeric(lambda/c(lm_sed1$coefficients[2]-summary(lm_sed1)$coefficients[2,2])) #sed rate
-      sr_sed1_high <- as.numeric(lambda/c(lm_sed1$coefficients[2]+summary(lm_sed1)$coefficients[2,2])) #sed rate
+      Tm_CFCS_sed1_err <- dt_sed1$depth*sr_sed1_err/sr_sed1
+
+      # Print sed rate and error
       if (max(sedchange)==0) {
         cat(paste("\n Sedimentation rate (CFCS model): V= ",abs(round(sr_sed1,3)),"mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
-        cat(paste("                             Error low: V= ",abs(round(sr_sed1_low,3)),"mm/yr\n", sep=""))
-        cat(paste("                            Error high: V= ",abs(round(sr_sed1_high,3)),"mm/yr\n\n", sep=""))
+        cat(paste("                          Error:     +/- ",abs(round(sr_sed1_err,3)),"mm/yr\n", sep=""))
       }
 
       if (max(sedchange)>0) {
         if(length(sedchange)==1) {
+          # Linear model and V calculation (sedimentation rate)
           lm_sed2 <- lm(log(dt_sed2$Pbex[!is.na(dt_sed2$d)&dt_sed2$Pbex>0]) ~ dt_sed2$d[!is.na(dt_sed2$d)&dt_sed2$Pbex>0])
           sr_sed2 <- lambda/lm_sed2$coefficients[2]
-          #error low & high
-          sr_sed2_low <- as.numeric(lambda/c(lm_sed2$coefficients[2]-summary(lm_sed2)$coefficients[2,2])) #sed rate
-          sr_sed2_high <- as.numeric(lambda/c(lm_sed2$coefficients[2]+summary(lm_sed2)$coefficients[2,2])) #sed rate
+          sr_sed2_err = sr_sed2*((lambda_err/lambda)^2+(summary(lm_sed2)$coefficients[2,2]/lm_sed2$coefficients[2])^2)^(0.5)
+
+          # Year at depth (year to be substracted to coring_yr eventually)
+          Tm_CFCS_sed2 <- dt_sed2$depth/sr_sed2
+          # calculation age error: delta(t)=depth*delta(V)/V
+          Tm_CFCS_sed2_err <- dt_sed2$depth*sr_sed2_err/sr_sed2
+
+          # Print sed rate and error
           cat(paste("\n Sedimentation rate (CFCS model) ", SML,"-",sedchange[1],"mm: V= ",abs(round(sr_sed1,3)),"mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
-          cat(paste("                             Error low: V= ",abs(round(sr_sed1_low,3)),"mm/yr\n", sep=""))
-          cat(paste("                             Error high: V= ",abs(round(sr_sed1_high,3)),"mm/yr\n", sep=""))
-          cat(paste(" Sedimentation rate (CFCS model) ", sedchange[1],"mm-bottom",": V= ",abs(round(sr_sed2,3)),"mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4),"\n", sep=""))
-          cat(paste("                             Error low: V= ",abs(round(sr_sed2_low,3)),"mm/yr\n", sep=""))
-          cat(paste("                             Error high: V= ",abs(round(sr_sed2_high,3)),"mm/yr\n\n", sep=""))
+          cat(paste("                          Error:     +/- ",abs(round(sr_sed1_err,3)),"mm/yr\n", sep=""))
+          cat(paste("\n Sedimentation rate (CFCS model) ", sedchange[1],"mm-bottom",": V= ",abs(round(sr_sed2,3)),"mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4),"\n", sep=""))
+          cat(paste("                          Error:     +/- ",abs(round(sr_sed2_err,3)),"mm/yr\n", sep=""))
         }
         if(length(sedchange)==2) {
-          lm_sed2 <- lm(log(dt_sed2$Pbex) ~ dt_sed2$d)
+          ## 2nd change in sedimentation rate
+          # Linear model and V calculation (sedimentation rate)
+          lm_sed2 <- lm(log(dt_sed2$Pbex[!is.na(dt_sed2$d)&dt_sed2$Pbex>0]) ~ dt_sed2$d[!is.na(dt_sed2$d)&dt_sed2$Pbex>0])
           sr_sed2 <- lambda/lm_sed2$coefficients[2]
+          sr_sed2_err = sr_sed2*((lambda_err/lambda)^2+(summary(lm_sed2)$coefficients[2,2]/lm_sed2$coefficients[2])^2)^(0.5)
 
-          #error low & high
-          sr_sed2_low <- as.numeric(lambda/c(lm_sed2$coefficients[2]-summary(lm_sed2)$coefficients[2,2])) #sed rate
-          sr_sed2_high <- as.numeric(lambda/c(lm_sed2$coefficients[2]+summary(lm_sed2)$coefficients[2,2])) #sed rate
+          # Year at depth (year to be substracted to coring_yr eventually)
+          Tm_CFCS_sed2 <- dt_sed2$depth/sr_sed2
+          # calculation age error: delta(t)=depth*delta(V)/V
+          Tm_CFCS_sed2_err <- dt_sed2$depth*sr_sed2_err/sr_sed2
 
+          ## 3rd change in sedimentation rate
+          # Linear model and V calculation (sedimentation rate)
           lm_sed3 <- lm(log(dt_sed3$Pbex[!is.na(dt_sed3$d)&dt_sed3$Pbex>0]) ~ dt_sed3$d[!is.na(dt_sed3$d)&dt_sed3$Pbex>0])
           sr_sed3 <- lambda/lm_sed3$coefficients[2]
+          sr_sed3_err = sr_sed3*((lambda_err/lambda)^2+(summary(lm_sed3)$coefficients[2,2]/lm_sed3$coefficients[2])^2)^(0.5)
 
-          #error low & high
-          sr_sed3_low <- as.numeric(lambda/c(lm_sed3$coefficients[2]-summary(lm_sed3)$coefficients[2,2])) #sed rate
-          sr_sed3_high <- as.numeric(lambda/c(lm_sed3$coefficients[2]+summary(lm_sed3)$coefficients[2,2])) #sed rate
+          # Year at depth (year to be substracted to coring_yr eventually)
+          Tm_CFCS_sed3 <- dt_sed3$depth/sr_sed3
+          # calculation age error: delta(t)=depth*delta(V)/V
+          Tm_CFCS_sed3_err <- dt_sed3$depth*sr_sed3_err/sr_sed3
 
-          cat(paste("\n Sedimentation rate (CFCS model) ", SML,"-",sedchange[1],"mm: V= ",abs(round(sr_sed1,3)),"mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
-          cat(paste("                             Error low: V= ",abs(round(sr_sed1_low,3)),"mm/yr\n", sep=""))
-          cat(paste("                             Error high: V= ",abs(round(sr_sed1_high,3)),"mm/yr\n", sep=""))
-          cat(paste(" Sedimentation rate (CFCS model) ", sedchange[1],"-",sedchange[2],"mm: V= ",abs(round(sr_sed2,3)),"mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4),"\n", sep=""))
-          cat(paste("                             Error low: V= ",abs(round(sr_sed2_low,3)),"mm/yr\n", sep=""))
-          cat(paste("                             Error high: V= ",abs(round(sr_sed2_high,3)),"mm/yr\n", sep=""))
-          cat(paste(" Sedimentation rate (CFCS model) ", sedchange[2],"mm-bottom",": V= ",abs(round(sr_sed3,3)),"mm/yr, R2= ", round(summary(lm_sed3)$r.squared,4),"\n", sep=""))
-          cat(paste("                             Error low: V= ",abs(round(sr_sed3_low,3)),"mm/yr\n", sep=""))
-          cat(paste("                             Error high: V= ",abs(round(sr_sed3_high,3)),"mm/yr\n\n", sep=""))
+          # Print sed rate and error
+                    cat(paste("\n Sedimentation rate (CFCS model) ", SML,"-",sedchange[1],"mm: V= ",abs(round(sr_sed1,3)),"mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
+          cat(paste("                          Error:     +/- ",abs(round(sr_sed1_err,3)),"mm/yr\n", sep=""))
+          cat(paste("\n Sedimentation rate (CFCS model) ", sedchange[1],"-",sedchange[2],"mm: V= ",abs(round(sr_sed2,3)),"mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4),"\n", sep=""))
+          cat(paste("                          Error:     +/- ",abs(round(sr_sed2_err,3)),"mm/yr\n", sep=""))
+          cat(paste("\n Sedimentation rate (CFCS model) ", sedchange[2],"mm-bottom",": V= ",abs(round(sr_sed3,3)),"mm/yr, R2= ", round(summary(lm_sed3)$r.squared,4),"\n", sep=""))
+          cat(paste("                          Error:     +/- ",abs(round(sr_sed3_err,3)),"mm/yr\n", sep=""))
+
         }
       }
     }
