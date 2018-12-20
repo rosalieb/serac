@@ -484,7 +484,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
       Pbex <- dt$Pbex
       Pbex[is.na(Pbex)] <- 0
       Pbex_er <- dt$Pbex_er
-      Pbex_er[is.na(Pbex_err)] <- 0
+      Pbex_er[is.na(Pbex_er)] <- 0
       # 2) Actual error
       Tm_CIC_err <- (1/lambda)*((lambda_err*Tm_CIC)^2+(Pbex_er[1]/Pbex[1])^2+(Pbex_er/Pbex)^2)^(0.5)
 
