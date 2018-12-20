@@ -500,12 +500,15 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
     if(any(model=="CRS")) {
       if(rev(dt$Pbex)[1] >= dt$Pbex[1]/16) cat("\n Warning, it seems that 210Pb_excess has not reached equilibrium. \n Make sure the conditions of application for CRS model are fulfilled.")
 
-      m_CRS <- coring_yr-1/lambda*log(Inventory_CRS[1]/Inventory_CRS)
+      Tm_CRS <- 1/lambda*log(Inventory_CRS[1]/Inventory_CRS)
       # calculation age error: delta(tx)=1/lambda*((0.00017*t)^2+(delta(I0)/I0)^2+(1-2*Ix/Io)*(delta(Ix)/Ix)^2)^(-0.5)
       # with I0: iInventory, Ix= Inventory below depth x
-      m_CRS_err <- 1/lambda*((lambda_err*m_CRS)^2+(Inventory_CRS_error[1]/Inventory_CRS[1])^2+(1-2*Inventory_CRS/Inventory_CRS[1])*(Inventory_CRS_error/Inventory_CRS)^2)^(-0.5)
-      m_CRS_low <- m_CRS-m_CRS_err
-      m_CRS_high <- m_CRS+m_CRS_err
+      Tm_CRS_err <- 1/lambda*((lambda_err*Tm_CRS)^2+(Inventory_CRS_error[1]/Inventory_CRS[1])^2+(1-2*Inventory_CRS/Inventory_CRS[1])*(Inventory_CRS_error/Inventory_CRS)^2)^(0.5)
+
+      # calculation of Best Age and errors
+      m_CRS <- coring_yr - Tm_CRS
+      m_CRS_low <- m_CRS - Tm_CRS_err
+      m_CRS_high <- m_CRS + Tm_CRS_err
     }
   }
 
