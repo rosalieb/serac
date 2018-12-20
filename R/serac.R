@@ -482,26 +482,30 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
     }
 
     if(any(model=="CIC")) {
-      # calculation age error: delta(tx)= 1/lambda*[(0.00017*t)^2+(delta(A0)/A0)^2+(delta(Ax)/Ax)^2]^(-0.5)
+      # Calculation of age to be substracted
+      Tm_CIC <- (1/lambda)*log(dt$Pbex[1]/dt$Pbex)
+      # calculation age error: delta(tx)= 1/lambda*[(lambda_err*t)^2+(delta(A0)/A0)^2+(delta(Ax)/Ax)^2]^(0.5)
       # with Ax: activity at depth x; A0: initial activity
-      m_CIC <- rep(NA,nrow(dt))
-      m_CIC_low <- rep(NA,nrow(dt))
-      m_CIC_high <- rep(NA,nrow(dt))
-      for(i in 1:nrow(dt)) {
-        m_CIC[i] <- (1/lambda)*log(dt$Pbex[1]/dt$Pbex[i])
-        m_CIC_low[i] <- (1/lambda)*log((dt$Pbex[1]-dt$Pbex_er[1])/(dt$Pbex[i]-dt$Pbex_er[i]))
-        m_CIC_high[i] <- (1/lambda)*log((dt$Pbex[1]+dt$Pbex_er[1])/(dt$Pbex[i]+dt$Pbex_er[i]))
-      }
-      m_CIC <- coring_yr-m_CIC
-      m_CIC_low <- coring_yr-m_CIC_low
-      m_CIC_high <- coring_yr-m_CIC_high
+      # Two steps, 1 and 2
+      # 1) replace any NA per 0 (just for this calculation, in temporary vectors)
+      Pbex <- dt$Pbex
+      Pbex[is.na(Pbex)] <- 0
+      Pbex_er <- dt$Pbex_er
+      Pbex_er[is.na(Pbex_err)] <- 0
+      # 2) Actual error
+      Tm_CIC_err <- (1/lambda)*((lambda_err*Tm_CIC)^2+(Pbex_er[1]/Pbex[1])^2+(Pbex_er/Pbex)^2)^(0.5)
+
+      # calculation of Best Age and errors
+      m_CIC <- coring_yr - Tm_CIC
+      m_CIC_low <- m_CIC - Tm_CIC_err
+      m_CIC_high <- m_CIC + Tm_CIC_err
     }
 
     if(any(model=="CRS")) {
       if(rev(dt$Pbex)[1] >= dt$Pbex[1]/16) cat("\n Warning, it seems that 210Pb_excess has not reached equilibrium. \n Make sure the conditions of application for CRS model are fulfilled.")
 
       Tm_CRS <- 1/lambda*log(Inventory_CRS[1]/Inventory_CRS)
-      # calculation age error: delta(tx)=1/lambda*((0.00017*t)^2+(delta(I0)/I0)^2+(1-2*Ix/Io)*(delta(Ix)/Ix)^2)^(-0.5)
+      # calculation age error: delta(tx)=1/lambda*((0.00017*t)^2+(delta(I0)/I0)^2+(1-2*Ix/Io)*(delta(Ix)/Ix)^2)^(0.5)
       # with I0: iInventory, Ix= Inventory below depth x
       Tm_CRS_err <- 1/lambda*((lambda_err*Tm_CRS)^2+(Inventory_CRS_error[1]/Inventory_CRS[1])^2+(1-2*Inventory_CRS/Inventory_CRS[1])*(Inventory_CRS_error/Inventory_CRS)^2)^(0.5)
 
