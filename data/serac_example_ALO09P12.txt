@@ -1,4 +1,4 @@
-"depth_min"	"depth_max"	"density"	"X210Pbex"	"X210Pbex_er"	"X137Cs"	"X137Cs_er"	"X241Am"	"X241Am_er"
+"depth_min"	"depth_max"	"density"	"Pb210ex"	"Pb210ex_er"	"Cs137"	"Cs137_er"	"Am241"	"Am241_er"
 0	5	0.47	642	11	772	3	1	0.51
 5	14	0.31	504	14	535	4.3	1.3	0.9
 14	21	0.38	371	7	540	2	1.3	0.4
