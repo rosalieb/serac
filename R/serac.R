@@ -406,10 +406,13 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
     # The inventory should account only for the continuous deposition:
     # [whichkeep] allows to keep only the data for the depth that are not in an instantaneous deposit
     Inventory_CRS <- complete_core_Pbex[whichkeep]*complete_core_density[whichkeep]*complete_core_thickness[whichkeep]
-    Inventory_CRS_low <- (complete_core_Pbex-complete_core_Pbex_err)[whichkeep]*complete_core_density[whichkeep]*complete_core_thickness[whichkeep]
-    Inventory_CRS_low[is.na(Inventory_CRS_low)] <- Inventory_CRS[is.na(Inventory_CRS_low)]
-    Inventory_CRS_high <- (complete_core_Pbex+complete_core_Pbex_err)[whichkeep]*complete_core_density[whichkeep]*complete_core_thickness[whichkeep]
-    Inventory_CRS_high[is.na(Inventory_CRS_high)] <- Inventory_CRS[is.na(Inventory_CRS_high)]
+    Inventory_CRS_error <- complete_core_Pbex_err[whichkeep]*complete_core_density[whichkeep]*complete_core_thickness[whichkeep]
+    Inventory_CRS_error[is.na(Inventory_CRS_error)] <- 0
+    # Inventory: sum from depth to the bottom
+    for(i in 1:length(Inventory_CRS)) {
+      Inventory_CRS[i] <- sum(Inventory_CRS[i:length(Inventory_CRS)])
+      Inventory_CRS_error[i] <- sum(Inventory_CRS_error[i:length(Inventory_CRS_error)])
+    }
   }
 
   if(length(model)>=1) {
@@ -497,20 +500,12 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
     if(any(model=="CRS")) {
       if(rev(dt$Pbex)[1] >= dt$Pbex[1]/16) cat("\n Warning, it seems that 210Pb_excess has not reached equilibrium. \n Make sure the conditions of application for CRS model are fulfilled.")
 
-      # calculation age error: delta(tx)=1/lambda*[(0.00017*lambda)^2+(delta(I0)/I0)^2+(1-2*Ix/Io)*(delta(Ix)/Ix)^2]^(-0.5)
+      m_CRS <- coring_yr-1/lambda*log(Inventory_CRS[1]/Inventory_CRS)
+      # calculation age error: delta(tx)=1/lambda*((0.00017*t)^2+(delta(I0)/I0)^2+(1-2*Ix/Io)*(delta(Ix)/Ix)^2)^(-0.5)
       # with I0: iInventory, Ix= Inventory below depth x
-
-      m_CRS <- rep(NA,length(Inventory_CRS))
-      m_CRS_low <- rep(NA,length(Inventory_CRS))
-      m_CRS_high <- rep(NA,length(Inventory_CRS))
-      for(i in 1:length(Inventory_CRS)) {
-        m_CRS[i] <- sum(Inventory_CRS[i:length(Inventory_CRS)])
-        m_CRS_low[i] <- sum(Inventory_CRS_low[i:length(Inventory_CRS)])
-        m_CRS_high[i] <- sum(Inventory_CRS_high[i:length(Inventory_CRS)])
-      }
-      m_CRS <- coring_yr-1/lambda*log(m_CRS[1]/m_CRS)
-      m_CRS_low <- coring_yr-1/lambda*log(m_CRS_low[1]/m_CRS_low)
-      m_CRS_high <- coring_yr-1/lambda*log(m_CRS_high[1]/m_CRS_high)
+      m_CRS_err <- 1/lambda*((lambda_err*m_CRS)^2+(Inventory_CRS_error[1]/Inventory_CRS[1])^2+(1-2*Inventory_CRS/Inventory_CRS[1])*(Inventory_CRS_error/Inventory_CRS)^2)^(-0.5)
+      m_CRS_low <- m_CRS-m_CRS_err
+      m_CRS_high <- m_CRS+m_CRS_err
     }
   }
 
@@ -702,7 +697,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
   # Inventory Lead
   if(length(grep("Pb",x = colnames(dt)))>1 & length(grep("density",x = colnames(dt)))>=1) {
     # We multiply the value by 10 because we ask for the depth in mm, and the density in g/cm3
-    cat(paste(" Inventory (Lead): ",round(sum(Inventory_CRS,na.rm=T),3), " Bq/m2 (range: ",round(sum(Inventory_CRS_low,na.rm=T)), "-",round(sum(Inventory_CRS_high,na.rm=T))," Bq/m2)\n", sep=""))
+    cat(paste(" Inventory (Lead): ",round(Inventory_CRS[1],3), " Bq/m2 (range: ",round(Inventory_CRS[1]-Inventory_CRS_error[1]), "-",round(Inventory_CRS[1]+Inventory_CRS_error[1])," Bq/m2)\n", sep=""))
   }
 
   # Inventory Cesium
@@ -804,7 +799,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
   # Add in output the inventory of Lead if CRS hypothesis was selected
   if(length(grep("Pb",x = colnames(dt)))>1 & length(grep("density",x = colnames(dt)))>=1) {
     metadata <- rbind(metadata,
-                      c("Inventory (Lead)",paste(round(sum(Inventory_CRS,na.rm=T),3), " Bq/m2 (range: ",round(sum(Inventory_CRS_low,na.rm=T)), "-",round(sum(Inventory_CRS_high,na.rm=T))," Bq/m2)\n", sep="")))
+                      c("Inventory (Lead)",paste(round(Inventory_CRS[1],3), " Bq/m2 (range: ",round(Inventory_CRS[1]-Inventory_CRS_error[1]), "-",round(Inventory_CRS[1]+Inventory_CRS_error[1])," Bq/m2)\n", sep="")))
   }
 
   # Add in output the inventory of Cesium if Cs and density available
