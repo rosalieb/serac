@@ -173,9 +173,9 @@ dir.create(file.path(paste(getwd(),'/Cores',sep=""), 'serac_example_ALO09P12'), 
 ## Format your own data following this template, or get help with formatting using
 #    the serac_input_formatting() function
 ?serac_example_ALO09P12
-write.table(x = serac_example_ALO09P12, file = paste(getwd(),'/Cores/serac_example_ALO09P12/serac_example_ALO09P12.txt',sep=""),col.names = T, row.names = F)
+write.table(x = serac_example_ALO09P12, file = paste(getwd(),'/Cores/serac_example_ALO09P12/serac_example_ALO09P12.txt',sep=""),col.names = T, row.names = F,sep="\t")
 ## Including proxy data for this core too
-write.table(x = serac_example_ALO09P12_proxy, file = paste(getwd(),'/Cores/serac_example_ALO09P12/serac_example_ALO09P12_proxy.txt',sep=""),col.names = T, row.names = F)
+write.table(x = serac_example_ALO09P12_proxy, file = paste(getwd(),'/Cores/serac_example_ALO09P12/serac_example_ALO09P12_proxy.txt',sep=""),col.names = T, row.names = F,sep="\t")
 
 ## Now run serac
 ## At the minimum, your function will be:
