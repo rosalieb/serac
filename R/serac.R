@@ -430,11 +430,6 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
       sr_sed1 <- lambda/lm_sed1$coefficients[2]
       sr_sed1_err = sr_sed1*((lambda_err/lambda)^2+(summary(lm_sed1)$coefficients[2,2]/lm_sed1$coefficients[2])^2)^(0.5)
 
-      # Year at depth (year to be substracted to coring_yr eventually)
-      Tm_CFCS_sed1 <- dt_sed1$depth/sr_sed1
-      # calculation age error: delta(t)=depth*delta(V)/V
-      Tm_CFCS_sed1_err <- dt_sed1$depth*sr_sed1_err/sr_sed1
-
       # Print sed rate and error
       if (max(sedchange)==0) {
         cat(paste("\n Sedimentation rate (CFCS model): V= ",abs(round(sr_sed1,3)),"mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
@@ -447,11 +442,6 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
           lm_sed2 <- lm(log(dt_sed2$Pbex[!is.na(dt_sed2$d)&dt_sed2$Pbex>0]) ~ dt_sed2$d[!is.na(dt_sed2$d)&dt_sed2$Pbex>0])
           sr_sed2 <- lambda/lm_sed2$coefficients[2]
           sr_sed2_err = sr_sed2*((lambda_err/lambda)^2+(summary(lm_sed2)$coefficients[2,2]/lm_sed2$coefficients[2])^2)^(0.5)
-
-          # Year at depth (year to be substracted to coring_yr eventually)
-          Tm_CFCS_sed2 <- dt_sed2$depth/sr_sed2
-          # calculation age error: delta(t)=depth*delta(V)/V
-          Tm_CFCS_sed2_err <- dt_sed2$depth*sr_sed2_err/sr_sed2
 
           # Print sed rate and error
           cat(paste("\n Sedimentation rate (CFCS model) ", SML,"-",sedchange[1],"mm: V= ",abs(round(sr_sed1,3)),"mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
@@ -466,24 +456,14 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
           sr_sed2 <- lambda/lm_sed2$coefficients[2]
           sr_sed2_err = sr_sed2*((lambda_err/lambda)^2+(summary(lm_sed2)$coefficients[2,2]/lm_sed2$coefficients[2])^2)^(0.5)
 
-          # Year at depth (year to be substracted to coring_yr eventually)
-          Tm_CFCS_sed2 <- dt_sed2$depth/sr_sed2
-          # calculation age error: delta(t)=depth*delta(V)/V
-          Tm_CFCS_sed2_err <- dt_sed2$depth*sr_sed2_err/sr_sed2
-
           ## 3rd change in sedimentation rate
           # Linear model and V calculation (sedimentation rate)
           lm_sed3 <- lm(log(dt_sed3$Pbex[!is.na(dt_sed3$d)&dt_sed3$Pbex>0]) ~ dt_sed3$d[!is.na(dt_sed3$d)&dt_sed3$Pbex>0])
           sr_sed3 <- lambda/lm_sed3$coefficients[2]
           sr_sed3_err = sr_sed3*((lambda_err/lambda)^2+(summary(lm_sed3)$coefficients[2,2]/lm_sed3$coefficients[2])^2)^(0.5)
 
-          # Year at depth (year to be substracted to coring_yr eventually)
-          Tm_CFCS_sed3 <- dt_sed3$depth/sr_sed3
-          # calculation age error: delta(t)=depth*delta(V)/V
-          Tm_CFCS_sed3_err <- dt_sed3$depth*sr_sed3_err/sr_sed3
-
           # Print sed rate and error
-                    cat(paste("\n Sedimentation rate (CFCS model) ", SML,"-",sedchange[1],"mm: V= ",abs(round(sr_sed1,3)),"mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
+          cat(paste("\n Sedimentation rate (CFCS model) ", SML,"-",sedchange[1],"mm: V= ",abs(round(sr_sed1,3)),"mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
           cat(paste("                          Error:     +/- ",abs(round(sr_sed1_err,3)),"mm/yr\n", sep=""))
           cat(paste("\n Sedimentation rate (CFCS model) ", sedchange[1],"-",sedchange[2],"mm: V= ",abs(round(sr_sed2,3)),"mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4),"\n", sep=""))
           cat(paste("                          Error:     +/- ",abs(round(sr_sed2_err,3)),"mm/yr\n", sep=""))
@@ -567,13 +547,13 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
   if(any(model=="CFCS")) {
     if(max(sedchange)>0) {
       age_break <- c(-coring_yr+c(-sedchange_corr[1])/sr_sed1)
-      age_break_low <- c(-coring_yr+c(-sedchange_corr[1])/sr_sed1_low)
-      age_break_high <- c(-coring_yr+c(-sedchange_corr[1])/sr_sed1_high)
+      age_break_low <- c(-coring_yr-(-sedchange_corr[1])*sr_sed1_err/sr_sed1^2)
+      age_break_high <- c(-coring_yr+(-sedchange_corr[1])*sr_sed1_err/sr_sed1^2)
       cat(paste(" Approximation of age at change(s) in sedimentation rate:\n"))
       if(length(sedchange)==2) {
         age_break2 <- c(age_break+c(-(sedchange_corr[2]-sedchange_corr[1]))/sr_sed2)
-        age_break2_low <- c(age_break_low+c(-(sedchange_corr[2]-sedchange_corr[1]))/sr_sed2_low)
-        age_break2_high <- c(age_break_high+c(-(sedchange_corr[2]-sedchange_corr[1]))/sr_sed2_high)
+        age_break2_low <- c(age_break_low-(-(sedchange_corr[2]-sedchange_corr[1]))*sr_sed2_err/sr_sed2^2)
+        age_break2_high <- c(age_break_high-(-(sedchange_corr[2]-sedchange_corr[1]))*sr_sed2_err/sr_sed2^2)
         cat(paste("     Best Age (1st change): ",abs(round(age_break,0))," (incertitude: ",abs(round(age_break_low,0)),"-",abs(round(age_break_high,0)),")\n",sep=""))
         cat(paste("     Best Age (2nd change): ",abs(round(age_break2,0))," (incertitude: ",abs(round(age_break2_low,0)),"-",abs(round(age_break2_high,0)),")\n\n",sep=""))
       } else {
@@ -584,29 +564,30 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
     output_agemodel_CFCS <- matrix(rep(NA,length(depth_avg_to_date)*4), ncol=4)
     for(i in seq_along(depth_avg_to_date)){
       output_agemodel_CFCS[i,1] <- depth_avg_to_date[i]
-      output_agemodel_CFCS[i,2] <- -c(-coring_yr+c(-depth_avg_to_date_corr[i])/sr_sed1)
-      output_agemodel_CFCS[i,3] <- -c(-coring_yr+c(-depth_avg_to_date_corr[i])/sr_sed1_low)
-      output_agemodel_CFCS[i,4] <- -c(-coring_yr+c(-depth_avg_to_date_corr[i])/sr_sed1_high)
+      output_agemodel_CFCS[i,2] <- -c(-coring_yr+(-depth_avg_to_date_corr[i])/sr_sed1)
+      output_agemodel_CFCS[i,3] <- -c(-coring_yr-(-depth_avg_to_date_corr[i])*sr_sed1_err/sr_sed1^2)
+      output_agemodel_CFCS[i,4] <- -c(-coring_yr+(-depth_avg_to_date_corr[i])*sr_sed1_err/sr_sed1^2)
 
       if(max(sedchange)>0 && depth_avg_to_date[i]>=sedchange[1]) {
         output_agemodel_CFCS[i,2] <- -c(age_break+c(-depth_avg_to_date_corr[i]-(-sedchange_corr[1]))/sr_sed2)
-        output_agemodel_CFCS[i,3] <- -c(age_break_low+c(-depth_avg_to_date_corr[i]-(-sedchange_corr[1]))/sr_sed2_low)
-        output_agemodel_CFCS[i,4] <- -c(age_break_high+c(-depth_avg_to_date_corr[i]-(-sedchange_corr[1]))/sr_sed2_high)
+        output_agemodel_CFCS[i,3] <- -c(age_break_low-(-depth_avg_to_date_corr[i]-(-sedchange_corr[1]))*sr_sed2_err/sr_sed2^2)
+        output_agemodel_CFCS[i,4] <- -c(age_break_high+(-depth_avg_to_date_corr[i]-(-sedchange_corr[1]))*sr_sed2_err/sr_sed2^2)
       }
       if(length(sedchange)>1 && depth_avg_to_date[i]>=sedchange[2]) {
-        output_agemodel_CFCS[i,2] <- -c(age_break2+c(-depth_avg_to_date_corr[i]-(-sedchange_corr[2]))/sr_sed3)
-        output_agemodel_CFCS[i,3] <- -c(age_break2_low+c(-depth_avg_to_date_corr[i]-(-sedchange_corr[2]))/sr_sed3_low)
-        output_agemodel_CFCS[i,4] <- -c(age_break2_high+c(-depth_avg_to_date_corr[i]-(-sedchange_corr[2]))/sr_sed3_high)
+        output_agemodel_CFCS[i,2] <- -c(age_break2+(-depth_avg_to_date_corr[i]-(-sedchange_corr[2]))/sr_sed3)
+        output_agemodel_CFCS[i,3] <- -c(age_break2_low-(-depth_avg_to_date_corr[i]-(-sedchange_corr[2]))*sr_sed3_err/sr_sed3^2)
+        output_agemodel_CFCS[i,4] <- -c(age_break2_high+(-depth_avg_to_date_corr[i]-(-sedchange_corr[2]))*sr_sed3_err/sr_sed3^2)
       }
     }
     output_agemodel_CFCS <- as.data.frame(output_agemodel_CFCS)
-    colnames(output_agemodel_CFCS) <- c("depth_avg", "BestAD", "MinAD", "MaxAD")
-    output_agemodel_CFCS_inter <- as.data.frame(seq(0,max(output_agemodel_CFCS$depth_avg,na.rm = T),by=stepout))
+    colnames(output_agemodel_CFCS) <- c("depth", "BestAD", "MinAD", "MaxAD")
+    output_agemodel_CFCS <- output_agemodel_CFCS[!duplicated(output_agemodel_CFCS[,1]),]
+    output_agemodel_CFCS_inter <- as.data.frame(seq(0,max(output_agemodel_CFCS$depth,na.rm = T),by=stepout))
     if (length(historic_d)>=1 && any(is.na(historic_a))) {
       whichNA <- which(is.na(historic_a))
       historic_d_dt <- matrix(historic_d, ncol = 2, byrow = T)
-      myage_low <- approx(x= output_agemodel_CFCS$depth_avg, output_agemodel_CFCS$MinAD, xout= historic_d_dt[is.na(historic_a),2])$y
-      myage_high <- approx(x= output_agemodel_CFCS$depth_avg, output_agemodel_CFCS$MaxAD, xout= historic_d_dt[is.na(historic_a),1])$y
+      myage_low <- approx(x= output_agemodel_CFCS$depth, output_agemodel_CFCS$MinAD, xout= historic_d_dt[is.na(historic_a),2])$y
+      myage_high <- approx(x= output_agemodel_CFCS$depth, output_agemodel_CFCS$MaxAD, xout= historic_d_dt[is.na(historic_a),1])$y
       cat(paste("\n Age approximation of non-dated historical events from CFCS model:\n"))
       for (i in whichNA) {
         cat(paste("     The historical event at ",historic_d_dt[whichNA,1][i],"-", historic_d_dt[whichNA,2][i]," mm has an estimated range of: ",round(myage_low[i]),"-",round(myage_high[i]),".\n",sep=""))
@@ -623,15 +604,15 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
 
     # Interpolate to get the age-depth model with the input stepout
     # We were extra-cautious and first interpolated to a 0.1 mm resolution to be sure we wouldn't miss a change in sedimentation rate.
-    temporary <- approx(x= output_agemodel_CFCS$depth_avg, output_agemodel_CFCS$BestAD, xout= seq(0,max(output_agemodel_CFCS$depth_avg,na.rm = T),.1))
-    output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter,approx(x= temporary$x, temporary$y, xout= seq(0,max(output_agemodel_CFCS$depth_avg,na.rm = T),stepout))$y)
-    temporary <- approx(x= output_agemodel_CFCS$depth_avg, output_agemodel_CFCS$MinAD, xout= seq(0,max(output_agemodel_CFCS$depth_avg,na.rm = T),.1))
-    output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter,approx(x= temporary$x, temporary$y, xout= seq(0,max(output_agemodel_CFCS$depth_avg,na.rm = T),stepout))$y)
-    temporary <- approx(x= output_agemodel_CFCS$depth_avg, output_agemodel_CFCS$MaxAD, xout= seq(0,max(output_agemodel_CFCS$depth_avg,na.rm = T),.1))
-    output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter,approx(x= temporary$x, temporary$y, xout= seq(0,max(output_agemodel_CFCS$depth_avg,na.rm = T),stepout))$y)
+    temporary <- approx(x= output_agemodel_CFCS$depth, output_agemodel_CFCS$BestAD, xout= seq(0,max(output_agemodel_CFCS$depth,na.rm = T),.1))
+    output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter,approx(x= temporary$x, temporary$y, xout= seq(0,max(output_agemodel_CFCS$depth,na.rm = T),stepout))$y)
+    temporary <- approx(x= output_agemodel_CFCS$depth, output_agemodel_CFCS$MinAD, xout= seq(0,max(output_agemodel_CFCS$depth,na.rm = T),.1))
+    output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter,approx(x= temporary$x, temporary$y, xout= seq(0,max(output_agemodel_CFCS$depth,na.rm = T),stepout))$y)
+    temporary <- approx(x= output_agemodel_CFCS$depth, output_agemodel_CFCS$MaxAD, xout= seq(0,max(output_agemodel_CFCS$depth,na.rm = T),.1))
+    output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter,approx(x= temporary$x, temporary$y, xout= seq(0,max(output_agemodel_CFCS$depth,na.rm = T),stepout))$y)
 
     colnames(output_agemodel_CFCS_inter) <- c("depth_avg", "BestAD", "MinAD", "MaxAD")
-    write.table(x = output_agemodel_CFCS[order(output_agemodel_CFCS$depth_avg, decreasing = F),], file = paste(getwd(),"/Cores/",name,"/",name,"_CFCS.txt",sep = ""),col.names = T, row.names = F)
+    write.table(x = output_agemodel_CFCS[order(output_agemodel_CFCS$depth, decreasing = F),], file = paste(getwd(),"/Cores/",name,"/",name,"_CFCS.txt",sep = ""),col.names = T, row.names = F)
     write.table(x = output_agemodel_CFCS_inter[order(output_agemodel_CFCS_inter$depth_avg, decreasing = F),], file = paste(getwd(),"/Cores/",name,"/",name,"_CFCS_interpolation.txt",sep = ""),col.names = T, row.names = F)
 
     # Parameters for legend
@@ -783,23 +764,30 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
   }
 
   # Add in output the results of the sedimentation rate
+  cat(paste("\n Sedimentation rate (CFCS model) ", SML,"-",sedchange[1],"mm: V= ",abs(round(sr_sed1,3)),"mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
+  cat(paste("                          Error:     +/- ",abs(round(sr_sed1_err,3)),"mm/yr\n", sep=""))
+  cat(paste("\n Sedimentation rate (CFCS model) ", sedchange[1],"-",sedchange[2],"mm: V= ",abs(round(sr_sed2,3)),"mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4),"\n", sep=""))
+  cat(paste("                          Error:     +/- ",abs(round(sr_sed2_err,3)),"mm/yr\n", sep=""))
+  cat(paste("\n Sedimentation rate (CFCS model) ", sedchange[2],"mm-bottom",": V= ",abs(round(sr_sed3,3)),"mm/yr, R2= ", round(summary(lm_sed3)$r.squared,4),"\n", sep=""))
+  cat(paste("                          Error:     +/- ",abs(round(sr_sed3_err,3)),"mm/yr\n", sep=""))
+
   if(any(model=="CFCS")) {
     if (max(sedchange)>0) {
       metadata <- rbind(metadata,
-                        c(paste("Sedimentation rate (CFCS model) ", SML,"-",sedchange[1],"mm",sep=""),paste("V= ",abs(round(sr_sed1,3)),"mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),", Error low V= ",abs(round(sr_sed1_low,3)),"mm/yr", ", Error high V= ",abs(round(sr_sed1_high,3)),"mm/yr", sep="")))
+                        c(paste("Sedimentation rate (CFCS model) ", SML,"-",sedchange[1],"mm",sep=""),paste("V= ",abs(round(sr_sed1,3)),"mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),", Error +/- ",abs(round(sr_sed1_err,3)),"mm/yr", sep="")))
     } else {
       metadata <- rbind(metadata,
-                        c("Sedimentation rate (CFCS model)",paste("V= ",abs(round(sr_sed1,3)),"mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),", Error low V= ",abs(round(sr_sed1_low,3)),"mm/yr", ", Error high V= ",abs(round(sr_sed1_high,3)),"mm/yr", sep="")))
+                        c("Sedimentation rate (CFCS model)",paste("V= ",abs(round(sr_sed1,3)),"mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),", Error +/- ",abs(round(sr_sed1_err,3)),"mm/yr", sep="")))
     }
     if (max(sedchange)>0) {
       if(length(sedchange)==1) {
         metadata <- rbind(metadata,
-                          c(paste("Sedimentation rate (CFCS model) ", sedchange[1],"mm-bottom", sep=""),paste("V= ",abs(round(sr_sed2,3)),"mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4), ", Error low V= ",abs(round(sr_sed2_low,3)),"mm/yr", ", Error high V= ",abs(round(sr_sed2_high,3)),"mm/yr",sep="")))
+                          c(paste("Sedimentation rate (CFCS model) ", sedchange[1],"mm-bottom", sep=""),paste("V= ",abs(round(sr_sed2,3)),"mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4), ", Error +/- ",abs(round(sr_sed1_err,3)),"mm/yr",sep="")))
       }
       if(length(sedchange)==2) {
         metadata <- rbind(metadata,
-                          c(paste("Sedimentation rate (CFCS model) ", sedchange[1],"-",sedchange[2],"mm", sep=""),paste("V= ",abs(round(sr_sed2,3)),"mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4), ", Error low V= ",abs(round(sr_sed2_low,3)),"mm/yr", ", Error high V= ",abs(round(sr_sed2_high,3)),"mm/yr",sep="")),
-                          c(paste("Sedimentation rate (CFCS model) ", sedchange[2],"mm-bottom", sep=""),paste("V= ",abs(round(sr_sed3,3)),"mm/yr, R2= ", round(summary(lm_sed3)$r.squared,4), ", Error low V= ",abs(round(sr_sed3_low,3)),"mm/yr", ", Error high V= ",abs(round(sr_sed3_high,3)),"mm/yr",sep="")))
+                          c(paste("Sedimentation rate (CFCS model) ", sedchange[1],"-",sedchange[2],"mm", sep=""),paste("V= ",abs(round(sr_sed2,3)),"mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4), ", Error +/- ",abs(round(sr_sed1_err,3)),"mm/yr",sep="")),
+                          c(paste("Sedimentation rate (CFCS model) ", sedchange[2],"mm-bottom", sep=""),paste("V= ",abs(round(sr_sed3,3)),"mm/yr, R2= ", round(summary(lm_sed3)$r.squared,4), ", Error +/- ",abs(round(sr_sed1_err,3)),"mm/yr",sep="")))
       }
     }
   }
@@ -1296,11 +1284,11 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
       mtext(text = "Year (C.E.)", side = 3, line=2.2, cex=cex_1)
 
       if(any(model=="CFCS")) {
-        lines(-output_agemodel_CFCS$BestAD,-output_agemodel_CFCS$depth_avg, col=modelcol[1],lty=2,lwd=.5)
+        lines(-output_agemodel_CFCS$BestAD,-output_agemodel_CFCS$depth, col=modelcol[1],lty=2,lwd=.5)
         pol_x <- c(-output_agemodel_CFCS$MinAD, rev(-output_agemodel_CFCS$MaxAD))
-        pol_y <- c(-output_agemodel_CFCS$depth_avg, rev(-output_agemodel_CFCS$depth_avg))
+        pol_y <- c(-output_agemodel_CFCS$depth, rev(-output_agemodel_CFCS$depth))
         polygon(x=pol_x, y = pol_y, col=adjustcolor(modelcol[1], alpha.f=0.2), border=NA)
-        lines(-output_agemodel_CFCS$BestAD[output_agemodel_CFCS$depth_avg>=SML&output_agemodel_CFCS$depth_avg<=max(dt$depth_avg[!is.na(dt$d)])],-output_agemodel_CFCS$depth_avg[output_agemodel_CFCS$depth_avg>=SML&output_agemodel_CFCS$depth_avg<=max(dt$depth_avg[!is.na(dt$d)])], col=modelcol[1])
+        lines(-output_agemodel_CFCS$BestAD[output_agemodel_CFCS$depth>=SML&output_agemodel_CFCS$depth<=max(dt$depth_avg[!is.na(dt$d)])],-output_agemodel_CFCS$depth[output_agemodel_CFCS$depth>=SML&output_agemodel_CFCS$depth<=max(dt$depth_avg[!is.na(dt$d)])], col=modelcol[1])
       }
 
       if(any(model=="CIC")) {
