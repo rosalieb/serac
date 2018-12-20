@@ -546,14 +546,14 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
 
   if(any(model=="CFCS")) {
     if(max(sedchange)>0) {
-      age_break <- c(-coring_yr+c(-sedchange_corr[1])/sr_sed1)
-      age_break_low <- c(-age_break-(-sedchange_corr[1])*sr_sed1_err/sr_sed1^2)
-      age_break_high <- c(-age_break+(-sedchange_corr[1])*sr_sed1_err/sr_sed1^2)
+      age_break <- coring_yr-sedchange_corr[1]/abs(sr_sed1)
+      age_break_low <- age_break-sedchange_corr[1]*abs(sr_sed1_err)/abs(sr_sed1)^2
+      age_break_high <- age_break+sedchange_corr[1]*abs(sr_sed1_err)/abs(sr_sed1)^2
       cat(paste(" Approximation of age at change(s) in sedimentation rate:\n"))
       if(length(sedchange)==2) {
-        age_break2 <- c(age_break+c(-(sedchange_corr[2]-sedchange_corr[1]))/sr_sed2)
-        age_break2_low <- c(age_break2-(-(sedchange_corr[2]-sedchange_corr[1]))*sr_sed2_err/sr_sed2^2)
-        age_break2_high <- c(age_break2-(-(sedchange_corr[2]-sedchange_corr[1]))*sr_sed2_err/sr_sed2^2)
+        age_break2 <- age_break-(sedchange_corr[2]-sedchange_corr[1])/abs(sr_sed2)
+        age_break2_low <- age_break2-((sedchange_corr[2]-sedchange_corr[1]))*abs(sr_sed2_err)/abs(sr_sed2)^2
+        age_break2_high <- age_break2+((sedchange_corr[2]-sedchange_corr[1]))*abs(sr_sed2_err)/abs(sr_sed2)^2
         cat(paste("     Best Age (1st change): ",abs(round(age_break,0))," (incertitude: ",abs(round(age_break_low,0)),"-",abs(round(age_break_high,0)),")\n",sep=""))
         cat(paste("     Best Age (2nd change): ",abs(round(age_break2,0))," (incertitude: ",abs(round(age_break2_low,0)),"-",abs(round(age_break2_high,0)),")\n\n",sep=""))
       } else {
@@ -564,19 +564,19 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
     output_agemodel_CFCS <- matrix(rep(NA,length(depth_avg_to_date)*4), ncol=4)
     for(i in seq_along(depth_avg_to_date)){
       output_agemodel_CFCS[i,1] <- depth_avg_to_date[i]
-      output_agemodel_CFCS[i,2] <- -c(-coring_yr+(-depth_avg_to_date_corr[i])/sr_sed1)
-      output_agemodel_CFCS[i,3] <- -c(-output_agemodel_CFCS[i,2]-(-depth_avg_to_date_corr[i])*sr_sed1_err/sr_sed1^2)
-      output_agemodel_CFCS[i,4] <- -c(-output_agemodel_CFCS[i,2]+(-depth_avg_to_date_corr[i])*sr_sed1_err/sr_sed1^2)
+      output_agemodel_CFCS[i,2] <- coring_yr-depth_avg_to_date_corr[i]/abs(sr_sed1)
+      output_agemodel_CFCS[i,3] <- output_agemodel_CFCS[i,2]-depth_avg_to_date_corr[i]*abs(sr_sed1_err)/abs(sr_sed1)^2
+      output_agemodel_CFCS[i,4] <- output_agemodel_CFCS[i,2]+depth_avg_to_date_corr[i]*abs(sr_sed1_err)/abs(sr_sed1)^2
 
-      if(max(sedchange)>0 && depth_avg_to_date[i]>=sedchange[1]) {
-        output_agemodel_CFCS[i,2] <- -c(age_break+c(-depth_avg_to_date_corr[i]-(-sedchange_corr[1]))/sr_sed2)
-        output_agemodel_CFCS[i,3] <- -c(age_break_low-(-depth_avg_to_date_corr[i]-(-sedchange_corr[1]))*sr_sed2_err/sr_sed2^2)
-        output_agemodel_CFCS[i,4] <- -c(age_break_high+(-depth_avg_to_date_corr[i]-(-sedchange_corr[1]))*sr_sed2_err/sr_sed2^2)
+      if(max(sedchange)>0 && depth_avg_to_date[i]>sedchange[1]) {
+        output_agemodel_CFCS[i,2] <- age_break-(depth_avg_to_date_corr[i]-sedchange_corr[1])/abs(sr_sed2)
+        output_agemodel_CFCS[i,3] <- output_agemodel_CFCS[i,2]-(depth_avg_to_date_corr[i])*abs(sr_sed2_err)/abs(sr_sed2)^2
+        output_agemodel_CFCS[i,4] <- output_agemodel_CFCS[i,2]+(depth_avg_to_date_corr[i])*abs(sr_sed2_err)/abs(sr_sed2)^2
       }
-      if(length(sedchange)>1 && depth_avg_to_date[i]>=sedchange[2]) {
-        output_agemodel_CFCS[i,2] <- -c(age_break2+(-depth_avg_to_date_corr[i]-(-sedchange_corr[2]))/sr_sed3)
-        output_agemodel_CFCS[i,3] <- -c(age_break2_low-(-depth_avg_to_date_corr[i]-(-sedchange_corr[2]))*sr_sed3_err/sr_sed3^2)
-        output_agemodel_CFCS[i,4] <- -c(age_break2_high+(-depth_avg_to_date_corr[i]-(-sedchange_corr[2]))*sr_sed3_err/sr_sed3^2)
+      if(length(sedchange)>1 && depth_avg_to_date[i]>sedchange[2]) {
+        output_agemodel_CFCS[i,2] <- age_break2-(depth_avg_to_date_corr[i]-sedchange_corr[2])/abs(sr_sed3)
+        output_agemodel_CFCS[i,3] <- output_agemodel_CFCS[i,2]-(depth_avg_to_date_corr[i])*abs(sr_sed3_err)/abs(sr_sed3)^2
+        output_agemodel_CFCS[i,4] <- output_agemodel_CFCS[i,2]+(depth_avg_to_date_corr[i])*abs(sr_sed3_err)/abs(sr_sed3)^2
       }
     }
     output_agemodel_CFCS <- as.data.frame(output_agemodel_CFCS)
