@@ -157,6 +157,12 @@ Rosalie Bruel, Pierre Sabatier
 }
 \examples{
 ## First time user - setting up the folders
+
+## Which folder are your currently working in?
+getwd()
+# If you want to work in another folder, change it with setwd(""), e.g., setwd("/myProject/Age depth model")
+?setwd
+
 ## Line below will create the 'Cores' folder if it doesn't exist already
 dir.create(file.path(getwd(), 'Cores'), showWarnings = FALSE)
 
@@ -173,11 +179,11 @@ write.table(x = serac_example_ALO09P12_proxy, file = paste(getwd(),'/Cores/serac
 
 ## Now run serac
 ## At the minimum, your function will be:
-serac(name="ALO09P12",coring_yr=2009)
+serac(name="serac_example_ALO09P12",coring_yr=2009)
 
 ## Several sedimentation hypotheses were tested, and this is what the author chose
 #    as the best model
-serac(name="ALO09P12",coring_yr=2009,model=c("CFCS"),plotphoto=FALSE,minphoto=c(0),maxphoto=c(210),plot_Pb=T,plot_Am=T,plot_Cs=T,Cher=c(30,40),Hemisphere=c("NH"),NWT=c(51,61),sedchange=c(75.5),plot_Pb_inst_deposit=T,inst_deposit=c(20,28,100,107,135,142,158,186),suppdescriptor=TRUE,descriptor_lab=c("Ca/Fe"),historic_d=c(20,28,100,107,135,142,158,186),historic_a=c(1994,1920,1886,1868),historic_n=c("sept1 994 flood","1920 flood","1886 flood","1868 flood ?"), min_yr=c(1750),dmax=c(180), plotpdf=TRUE,preview=F)
+serac(name="serac_example_ALO09P12",coring_yr=2009,model=c("CFCS"),plotphoto=FALSE,minphoto=c(0),maxphoto=c(210),plot_Pb=T,plot_Am=T,plot_Cs=T,Cher=c(30,40),Hemisphere=c("NH"),NWT=c(51,61),sedchange=c(75.5),plot_Pb_inst_deposit=T,inst_deposit=c(20,28,100,107,135,142,158,186),suppdescriptor=TRUE,descriptor_lab=c("Ca/Fe"),historic_d=c(20,28,100,107,135,142,158,186),historic_a=c(1994,1920,1886,1868),historic_n=c("sept1 994 flood","1920 flood","1886 flood","1868 flood ?"), min_yr=c(1750),dmax=c(180), plotpdf=TRUE,preview=F)
 ## If you want to see the preview, change preview=T in the code
 ## Before that, make sure to extend your window in RStudio (large plot!)
 

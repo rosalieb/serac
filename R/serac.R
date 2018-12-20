@@ -45,21 +45,21 @@
 #' @keywords visualisation
 #' @examples
 #' # Lake Bourget
-#' serac(name="LDB",coring_yr=2004)
-#' serac(name="LDB",coring_yr=2004,model=c("CFCS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(370),plot_Pb=T,plot_Pb_inst_deposit=T,plot_Cs=T,plot_Am=T,Cher=c(75,85),Hemisphere=c("NH"),NWT=c(172,180),inst_deposit=c(197,210),historic_d=c(197,210),historic_a=c(1958),historic_n=c("earthquake 1958"),varves=T,plotpdf=T,preview=T,stepout=1)
+#' # serac(name="LDB",coring_yr=2004)
+#' # serac(name="LDB",coring_yr=2004,model=c("CFCS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(370),plot_Pb=T,plot_Pb_inst_deposit=T,plot_Cs=T,plot_Am=T,Cher=c(75,85),Hemisphere=c("NH"),NWT=c(172,180),inst_deposit=c(197,210),historic_d=c(197,210),historic_a=c(1958),historic_n=c("earthquake 1958"),varves=T,plotpdf=T,preview=T,stepout=1)
 #'
 #' # Lake Iseo
-#' serac(name="Iseo",coring_yr=2010)
-#' serac(name="Iseo",coring_yr=2010,model=c("CFCS","CIC","CRS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(320),plot_Pb=T,plot_Am=T,plot_Cs=T,Cher=c(70,75),Hemisphere=c("NH"),NWT=c(130,140),FF=c(164,173),varves=TRUE,plotpdf=T,preview=T,stepout=5)
+#' # serac(name="Iseo",coring_yr=2010)
+#' # serac(name="Iseo",coring_yr=2010,model=c("CFCS","CIC","CRS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(320),plot_Pb=T,plot_Am=T,plot_Cs=T,Cher=c(70,75),Hemisphere=c("NH"),NWT=c(130,140),FF=c(164,173),varves=TRUE,plotpdf=T,preview=T,stepout=5)
 #'
 #' # Lake Saint-Andre
-#' serac(name="SAN",coring_yr=2011,model=c("CFCS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(420),plot_Pb=T,plot_Am=T,plot_Cs=T,Cher=c(195,205),Hemisphere=c("NH"),NWT=c(275,295),FF=c(315,325),sedchange=c(165,260),plotpdf=TRUE)
+#' # serac(name="SAN",coring_yr=2011,model=c("CFCS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(420),plot_Pb=T,plot_Am=T,plot_Cs=T,Cher=c(195,205),Hemisphere=c("NH"),NWT=c(275,295),FF=c(315,325),sedchange=c(165,260),plotpdf=TRUE)
 #'
 #' # Lake Allos
-#' serac(name="ALO09P12",coring_yr=2009,model=c("CFCS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(210),plot_Pb=T,plot_Am=T,plot_Cs=T,Cher=c(30,40),Hemisphere=c("NH"),NWT=c(51,61),sedchange=c(75.5),plot_Pb_inst_deposit=T,inst_deposit=c(20,28,100,107,135,142,158,186),suppdescriptor=TRUE,descriptor_lab=c("Ca/Fe"),historic_d=c(20,28,100,107,135,142,158,186),historic_a=c(1994,1920,1886,1868),historic_n=c("sept1 994 flood","1920 flood","1886 flood","1868 flood ?"), min_yr=c(1750),dmax=c(180), plotpdf=TRUE,preview=F)
+#' # serac(name="ALO09P12",coring_yr=2009,model=c("CFCS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(210),plot_Pb=T,plot_Am=T,plot_Cs=T,Cher=c(30,40),Hemisphere=c("NH"),NWT=c(51,61),sedchange=c(75.5),plot_Pb_inst_deposit=T,inst_deposit=c(20,28,100,107,135,142,158,186),suppdescriptor=TRUE,descriptor_lab=c("Ca/Fe"),historic_d=c(20,28,100,107,135,142,158,186),historic_a=c(1994,1920,1886,1868),historic_n=c("sept1 994 flood","1920 flood","1886 flood","1868 flood ?"), min_yr=c(1750),dmax=c(180), plotpdf=TRUE,preview=F)
 #'
 #' # Pierre-Blanche lagoon
-#' serac(name="PB06",coring_yr=2006,model=c("CFCS","CRS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(350),plot_Pb=T,plot_Cs=T,Cher=c(50,60),Hemisphere=c("NH"),NWT=c(100,120),suppdescriptor=T,descriptor_lab=c("Si/Al"),SML=30,inst_deposit=c(315,350),historic_d=c(315,350),historic_a=c(1893),historic_n=c("1894storm"),min_yr=1870,dmax=c(350),plotpdf=TRUE)
+#' # serac(name="PB06",coring_yr=2006,model=c("CFCS","CRS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(350),plot_Pb=T,plot_Cs=T,Cher=c(50,60),Hemisphere=c("NH"),NWT=c(100,120),suppdescriptor=T,descriptor_lab=c("Si/Al"),SML=30,inst_deposit=c(315,350),historic_d=c(315,350),historic_a=c(1893),historic_n=c("1894storm"),min_yr=1870,dmax=c(350),plotpdf=TRUE)
 #'
 
 serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(),inst_deposit=c(0),
