@@ -819,24 +819,28 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
   }
 
   # Add the code that was used
+  # First save the history to folder
   savehistory(file = "myhistory.Rhistory")
 
+  # The code may extend on several lines (true for RStudio users at least)
+  # This loop find the beginning of the function, serac
   whichline=NULL
   for (i in 1:30) {
-    if (length(grep(pattern = "serac", rev(readLines(con = "myhistory.Rhistory"))[i]))>0) whichline <- c(whichline,i)
+    if (length(grep(pattern = "serac(", rev(readLines(con = "myhistory.Rhistory"))[i]))>0) whichline <- c(whichline,i)
   }
   whichline <- min(whichline, na.rm=T)
   mycode=NULL
   for (i in whichline:1) {
     mycode <- paste(mycode, rev(readLines(con = "myhistory.Rhistory"))[i], sep="")
   }
-
+  # Remove the history
   if (file.exists(myhistory.Rhistory)) file.remove(myhistory.Rhistory)
 
   metadata <- rbind(metadata,
                     c("",""),
-                    c("code",mycode))
+                    c("code",mycode)) # Add line to metadata
 
+  # Write final output
   write.table(x = metadata, file = paste(getwd(),"/Cores/",name,"/",name,"_Metadata_",Sys.Date(),".txt",sep = ""),col.names = F, row.names = F, sep = "\t")
 
 
