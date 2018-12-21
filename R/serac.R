@@ -834,7 +834,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
     mycode <- paste(mycode, rev(readLines(con = "myhistory.Rhistory"))[i], sep="")
   }
   # Remove the history
-  if (file.exists(myhistory.Rhistory)) file.remove(myhistory.Rhistory)
+  if (file.exists("myhistory.Rhistory")) file.remove("myhistory.Rhistory")
 
   metadata <- rbind(metadata,
                     c("",""),
