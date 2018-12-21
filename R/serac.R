@@ -844,7 +844,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
   if(plotpdf) run <- c(run,2)
   if(!is.null(run)) {
     for(whichrun in c(run)) {
-      if (whichrun==1) {plot(0,0, axes=F, xlab="",ylab="",pch=NA); dev.off()}
+      if (whichrun==1) {plot(0,0, axes=F, xlab="",ylab="",pch=NA); dev.off(); dev.new()}
       # size for output plot
       cex_1=.8*mycex
       cex_2=1.1*mycex
