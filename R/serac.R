@@ -819,7 +819,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
   }
 
   # Add the code that was used
-  savehistory(file = "Cores/myhistory.Rhistory")
+  savehistory(file = "myhistory.Rhistory")
 
   whichline=NULL
   for (i in 1:30) {
@@ -830,6 +830,8 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
   for (i in whichline:1) {
     mycode <- paste(mycode, rev(readLines(con = "myhistory.Rhistory"))[i], sep="")
   }
+
+  if (file.exists(myhistory.Rhistory)) file.remove(myhistory.Rhistory)
 
   metadata <- rbind(metadata,
                     c("",""),
