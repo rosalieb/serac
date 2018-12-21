@@ -819,7 +819,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
   }
 
   # Add the code that was used
-  savehistory(file = "myhistory.Rhistory")
+  savehistory(file = "Cores/myhistory.Rhistory")
 
   whichline=NULL
   for (i in 1:30) {
