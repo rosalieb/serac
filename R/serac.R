@@ -826,7 +826,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
   # This loop find the beginning of the function, serac
   whichline=NULL
   for (i in 1:30) {
-    if (length(grep(pattern = "serac(", rev(readLines(con = "myhistory.Rhistory"))[i]))>0) whichline <- c(whichline,i)
+    if (length(grep(pattern = "serac", rev(readLines(con = "myhistory.Rhistory"))[i]))>0) whichline <- c(whichline,i)
   }
   whichline <- min(whichline, na.rm=T)
   mycode=NULL
