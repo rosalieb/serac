@@ -623,7 +623,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
   }
 
   if(any(model=="CIC")) {
-    output_agemodel_CIC <- as.data.frame(matrix(c(dt$depth_avg,m_CIC,m_CIC_low,m_CIC_high), byrow = F, ncol=4))
+    output_agemodel_CIC <- as.data.frame(matrix(c(c(0,dt$depth_avg),c(coring_yr,m_CIC),c(coring_yr,m_CIC_low),c(coring_yr,m_CIC_high)), byrow = F, ncol=4))
     colnames(output_agemodel_CIC) <- c("depth_avg", "BestAD_CIC", "MinAD_CIC", "MaxAD_CIC")
     output_agemodel_CIC_inter <- as.data.frame(seq(0,max(output_agemodel_CIC$depth_avg,na.rm = T),stepout))
     output_agemodel_CIC_inter <- cbind(output_agemodel_CIC_inter,approx(x= output_agemodel_CIC$depth_avg, output_agemodel_CIC$BestAD_CIC, xout= seq(0,max(output_agemodel_CIC$depth_avg,na.rm = T),stepout))$y)
