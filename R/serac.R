@@ -828,11 +828,17 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
   for (i in 1:30) {
     if (length(grep(pattern = "serac", rev(readLines(con = "myhistory.Rhistory"))[i]))>0) whichline <- c(whichline,i)
   }
-  whichline <- min(whichline, na.rm=T)
-  mycode=NULL
-  for (i in whichline:1) {
-    mycode <- paste(mycode, rev(readLines(con = "myhistory.Rhistory"))[i], sep="")
+  if(!is.null(whichline))
+  {
+    whichline <- min(whichline, na.rm=T)
+    mycode=NULL
+    for (i in whichline:1) {
+      mycode <- paste(mycode, rev(readLines(con = "myhistory.Rhistory"))[i], sep="")
+    }
+  } else {
+    mycode <- "serac could not read the code you used to produce your model"
   }
+
   # Remove the history
   if (file.exists("myhistory.Rhistory")) file.remove("myhistory.Rhistory")
 
