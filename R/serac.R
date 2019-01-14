@@ -1221,14 +1221,14 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
         par(xpd=TRUE)
         #Chernobyl
         if (exists("Cher")&&!is.null(Cher)) {
-          lines(rep(max(dt$Cs[dt$depth_avg>min(Cher-10) & dt$depth_avg<max(Cher+10)],na.rm = T)*1.1,2),c(-Cher[1],-Cher[2]), lwd=2)
+          lines(rep(max(dt$Cs[dt$depth_avg>min(Cher-10) & dt$depth_avg<max(Cher+10)],na.rm = T)*1.1,2),c(-Cher[1],-Cher[2]), lwd=1.5)
           shadowtext(max(dt$Cs[dt$depth_avg>min(Cher-10) & dt$depth_avg<max(Cher+10)],na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(min(Cher)),
                      labels = c("C 1986"), pos = 3,col="black", bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
           lines(c(max(dt$Cs[dt$depth_avg>min(Cher-10) & dt$depth_avg<max(Cher+10)],na.rm = T)*1.1, max(dt$Cs,na.rm = T)*2),rep(peakCher,2), lty=2)
         }
         #NWT
         if (exists("NWT")&&!is.null(NWT)) {
-          lines(rep(max(dt$Cs[dt$depth_avg>min(NWT-10) & dt$depth_avg<max(NWT+10)],na.rm = T)*1.1,2),c(-NWT[1],-NWT[2]), lwd=2)
+          lines(rep(max(dt$Cs[dt$depth_avg>min(NWT-10) & dt$depth_avg<max(NWT+10)],na.rm = T)*1.1,2),c(-NWT[1],-NWT[2]), lwd=1.5)
           if (Hemisphere == "NH") shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(min(NWT)),
                                              labels = "NWT 1963", pos = 3, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
           if (Hemisphere == "SH") shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(min(NWT)),
@@ -1237,7 +1237,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
         }
         #First radionuclides fallout
         if (exists("FF")&&!is.null(FF)) {
-          lines(rep(max(dt$Cs[dt$depth_avg>min(FF-10) & dt$depth_avg<max(FF+10)],na.rm = T)*1.1,2),c(-FF[1],-FF[2]), lwd=2)
+          lines(rep(max(dt$Cs[dt$depth_avg>min(FF-10) & dt$depth_avg<max(FF+10)],na.rm = T)*1.1,2),c(-FF[1],-FF[2]), lwd=1.5)
           shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(max(FF)),
                      labels = c("FF 1955"), pos = 1, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
           lines(c(max(dt$Cs[dt$depth_avg>min(FF-10) & dt$depth_avg<max(FF+10)],na.rm = T)*1.1, max(dt$Cs,na.rm = T)*2),rep(peakFF,2), lty=2)
