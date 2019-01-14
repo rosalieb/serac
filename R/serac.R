@@ -1346,8 +1346,8 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
             lines(rep(-dates[i],2), c(err_dated_depth_avg[1,i], err_dated_depth_avg[2,i]), type="o", pch="_", col="black")
           }
           for (i in 1:length(dates)) {
-            lines(c(-dates[i]+err_dates_avg[i],-dates[i]-err_dates_avg[i]), rep(dates_depth_avg[i],2), col="black")
-            points(c(-dates[i]+err_dates_avg[i],-dates[i]-err_dates_avg[i]), pch= "|", rep(dates_depth_avg[i],2), col="black")
+            if(!is.na(err_dates_avg[i])) lines(c(-dates[i]+err_dates_avg[i],-dates[i]-err_dates_avg[i]), rep(dates_depth_avg[i],2), col="black")
+            if(!is.na(err_dates_avg[i])) points(c(-dates[i]+err_dates_avg[i],-dates[i]-err_dates_avg[i]), pch= "|", rep(dates_depth_avg[i],2), col="black")
           }
           points(-dates,dates_depth_avg, pch=16, cex=.8)
 
