@@ -1201,7 +1201,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
           lines(c(dt$Cs[i]+dt$Cs_er[i],dt$Cs[i]-dt$Cs_er[i]),
                 rep(-dt$depth_avg[i],2), type="o", pch="|", cex=.5, col=Pbcol[1])
         }
-        lines(dt$Cs[!is.na(dt$Cs) & dt$depth_avg>=SML],-dt$depth_avg[!is.na(dt$Cs) & dt$depth_avg>=SML])
+        lines(dt$Cs[which(dt$depth_avg>=SML)],-dt$depth_avg[which(dt$depth_avg>=SML)])
 
         axis(3,  cex.axis=cex_2)
         mtext(text = bquote(~""^137*"Cs (mBq/g)"), side = 3, line=2.2, cex=cex_1)
