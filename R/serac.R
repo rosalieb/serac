@@ -1186,9 +1186,9 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
         )
 
 
-        for (i in which(dt$Cs>0 & !is.na(dt$Cs_er) & dt$depth_avg<SML)) {
-          lines(c(dt$Cs[which(dt$Cs>=0)][i]+dt$Cs_er[which(dt$Cs>=0)][i],dt$Cs[which(dt$Cs>=0)][i]-dt$Cs_er[which(dt$Cs>=0)][i]),
-                rep(-dt$depth_avg[which(dt$Cs>=0)][i],2), type="o", pch="|", cex=.5, col=grey(.65))
+        for (i in which(dt$Cs>=0 & !is.na(dt$Cs_er) & dt$depth_avg<SML)) {
+          lines(c(dt$Cs[i]+dt$Cs_er[i],dt$Cs[i]-dt$Cs_er[i]),
+                rep(-dt$depth_avg[i],2), type="o", pch="|", cex=.5, col=grey(.65))
         }
         lines(dt$Cs[which(dt$depth_avg<SML+2)],-dt$depth_avg[which(dt$depth_avg<SML+2)], col=grey(.65), lwd=.5)
 
@@ -1198,8 +1198,8 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
           , expr = errbar(Cs,-depth_avg,c(-depth_avg+thickness/2),c(-depth_avg-thickness/2), pch=16, cap=.01, xlab="",ylab="", axes=F,ylim=myylim, xlim=c(myxlim_min,myxlim_max), col=Pbcol[1], errbar.col = Pbcol[1], cex=.8)
         )
         for (i in which(dt$Cs>0 & !is.na(dt$Cs_er) & dt$depth_avg>=SML)) {
-          lines(c(dt$Cs[which(dt$Cs>=0)][i]+dt$Cs_er[which(dt$Cs>=0)][i],dt$Cs[which(dt$Cs>=0)][i]-dt$Cs_er[which(dt$Cs>=0)][i]),
-                rep(-dt$depth_avg[which(dt$Cs>=0)][i],2), type="o", pch="|", cex=.5, col=Pbcol[1])
+          lines(c(dt$Cs[i]+dt$Cs_er[i],dt$Cs[i]-dt$Cs_er[i]),
+                rep(-dt$depth_avg[i],2), type="o", pch="|", cex=.5, col=Pbcol[1])
         }
         lines(dt$Cs[which(dt$depth_avg>=SML)],-dt$depth_avg[which(dt$depth_avg>=SML)])
 
