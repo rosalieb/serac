@@ -1181,7 +1181,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
         )
 
         par(xpd=TRUE)
-        if(inst_deposit_present) for (i in 1:nrow(inst_deposit)) rect(xleft = -2000, ybottom = -inst_deposit[i,2], xright = max(dt$Cs,na.rm=T)*1.5, ytop = -inst_deposit[i,1],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+        if(inst_deposit_present) for (i in 1:nrow(inst_deposit)) rect(xleft = -2000, ybottom = -inst_deposit[i,2], xright = max(dt$Cs,na.rm=T)*1.5+2000, ytop = -inst_deposit[i,1],col=inst_depositcol, border=inst_depositcol, lwd=.4)
         if(SML>0) rect(xleft = -2000, ybottom = -SML, xright = max(dt$Cs,na.rm=T)*1.5, ytop = 0, col=grey(0.97), border=NA)
         par(xpd=FALSE)
 
