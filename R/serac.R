@@ -289,6 +289,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
   dates <- NULL
   dates_depth_avg <- NULL
   err_dated_depth_avg <- matrix(nrow=2)
+  err_dates_avg <- NULL
   mylegend <- NULL
   mypchlegend <- NULL
   myltylegend <- NULL
@@ -518,6 +519,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
       dates <- c(dates,1986)
       dates_depth_avg <- c(dates_depth_avg,peakCher)
       err_dated_depth_avg <- cbind(err_dated_depth_avg,Cher)
+      err_dates_avg <- c(err_dates_avg,NA)
     }
     #NWT
     if (exists("NWT")&&!is.null(NWT)) {
@@ -525,6 +527,8 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
       dates <- c(dates,NWT_a)
       dates_depth_avg <- c(dates_depth_avg,peakNWT)
       err_dated_depth_avg <- cbind(err_dated_depth_avg,NWT)
+      if (Hemisphere =="NH") err_dates_avg <- c(err_dates_avg,NA)
+      if (Hemisphere =="SH") err_dates_avg <- c(err_dates_avg,.5)
     }
     #First radionuclides fallout
     if (exists("FF")&&!is.null(FF)) {
@@ -532,6 +536,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
       dates <- c(dates,1955)
       dates_depth_avg <- c(dates_depth_avg,peakFF)
       err_dated_depth_avg <- cbind(err_dated_depth_avg,FF)
+      err_dates_avg <- c(err_dates_avg,NA)
     }
 
 
@@ -1224,8 +1229,10 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
         #NWT
         if (exists("NWT")&&!is.null(NWT)) {
           lines(rep(max(dt$Cs[dt$depth_avg>min(NWT-10) & dt$depth_avg<max(NWT+10)],na.rm = T)*1.1,2),c(-NWT[1],-NWT[2]), lwd=2)
-          shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(min(NWT)),
-                     labels = paste("NWT",NWT_a,sep=" "), pos = 3, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
+          if (Hemisphere == "NH") shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(min(NWT)),
+                                             labels = "NWT 1963", pos = 3, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
+          if (Hemisphere == "SH") shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(min(NWT)),
+                                             labels = "NWT 1964/1965", pos = 3, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
           lines(c(max(dt$Cs[dt$depth_avg>min(NWT-10) & dt$depth_avg<max(NWT+10)],na.rm = T)*1.1, max(dt$Cs,na.rm = T)*2),rep(peakNWT,2), lty=2)
         }
         #First radionuclides fallout
@@ -1337,6 +1344,10 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
         if(!is.null(dates)) {
           for (i in 1:length(dates)) {
             lines(rep(-dates[i],2), c(err_dated_depth_avg[1,i], err_dated_depth_avg[2,i]), type="o", pch="_", col="black")
+          }
+          for (i in 1:length(dates)) {
+            lines(c(-dates+err_dates_avg,-dates-err_dates_avg), rep(dates_depth_avg[i],2), col="black")
+            points(c(-dates+err_dates_avg,-dates-err_dates_avg), pch= "|", rep(dates_depth_avg[i],2), col="black")
           }
           points(-dates,dates_depth_avg, pch=16, cex=.8)
 
