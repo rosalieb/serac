@@ -156,10 +156,10 @@ serac_input_formatting <- function(name)
   # View result
   cat("_______________________________________________________")
   if(nrow(dt2)<=15) {
-    message(paste("You're all set! Below is the file you created. Now run serac. \nReminder, minimum function would be: serac('",name,"', coring_yr = ",format(Sys.Date(), "%Y"),") \nEdit coring year accordingly.",sep=""))
+    message(paste("\nYou're all set! Below is the file you created. Now run serac. \nReminder, minimum function would be: serac('",name,"', coring_yr = ",format(Sys.Date(), "%Y"),") \nEdit coring year accordingly.",sep=""))
     print(dt2)
   } else {
-    message(paste("You're all set! Below is the file you created (first 15 rows). \nNow run serac.\nReminder, minimum function would be: serac('",name,"', coring_yr = ",format(Sys.Date(), "%Y"),") \nEdit coring year accordingly.",sep=""))
+    message(paste("\nYou're all set! Below is the file you created (first 15 rows). \nNow run serac.\nReminder, minimum function would be: serac('",name,"', coring_yr = ",format(Sys.Date(), "%Y"),") \nEdit coring year accordingly.",sep=""))
     print(dt2[1:15,])
     cat("              [...........]\n")
   }
