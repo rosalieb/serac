@@ -8,7 +8,7 @@ Formatting input file
 Help format the input file in a format used by the main serac function. Note that your raw input file will also be saved in the folder, with the extension '_raw'.
 }
 \usage{
-serac_input_formatting(name)
+serac_input_formatting(name="")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
