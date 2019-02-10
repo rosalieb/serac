@@ -62,8 +62,8 @@ serac_input_formatting <- function(name)
   if (all(is.na(dt$depth_max))&all(is.na(dt$Depth))) cat(' Warning, you need to include the depth in your input file. \n You have the choice between average depth + thickness OR minimun and maximum depth of a sample.')
   if (all(is.na(dt$thickness))&all(is.na(dt$Depth))) cat(' Warning, you need to include the depth in your input file. \n You have the choice between average depth + thickness OR minimun and maximum depth of a sample.')
 
-  if (all(is.na(dt$depth_min))) dt$depth_min <- dt$Depth-dt$thickness
-  if (all(is.na(dt$depth_max))) dt$depth_max <- dt$Depth+dt$thickness
+  if (all(is.na(dt$depth_min))) dt$depth_min <- dt$Depth-dt$thickness/2
+  if (all(is.na(dt$depth_max))) dt$depth_max <- dt$Depth+dt$thickness/2
 
   # Density
   message("\nDo you have the density information in your table and/or \ndo you wish to calculate it (write Y for yes or N for no \nin the console)?\nDensity is needed for inventory calculation and CRS model.")
