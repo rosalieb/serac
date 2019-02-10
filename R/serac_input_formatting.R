@@ -25,7 +25,7 @@ serac_input_formatting <- function(name)
   print(tail(dt,4))
 
   # multiplication factor if wrong unit used
-  message("Note that serac uses mm as a default depth unit. \nIf your unit is different, what is the converter to get mm?\n e.g. 1 cm= 10 mm, enter 10 in the console")
+  message("Note that serac uses mm as a default depth unit. \nIf your unit is different, what is the converter to get mm?\n e.g. 1 cm= 10 mm, enter 10 in the console\n Enter 1 if no conversion is needed.")
   multipli <- as.numeric(readline())
 
   # Mean depth
