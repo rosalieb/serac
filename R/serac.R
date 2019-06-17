@@ -72,7 +72,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
                   plot_Pb_inst_deposit=FALSE,plot_CFCS_regression=c(),
                   varves=FALSE, dmin=c(),dmax=c(),sedchange=c(0),
                   min_yr=1880, SML=c(0), stepout=5, mycex=1,
-                  archive_metadata=FALSE)
+                  archive_metadata=FALSE, save_code=TRUE)
   .serac(name, model,Cher,NWT,Hemisphere,FF,inst_deposit,
          ignore,plotpdf,preview,plotphoto,minphoto,maxphoto,
          Pbcol,inst_depositcol,
@@ -83,7 +83,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
          plot_Pb_inst_deposit,plot_CFCS_regression,
          varves, dmin,dmax,sedchange,
          min_yr, SML,stepout, mycex,
-         archive_metadata)
+         archive_metadata,save_code)
 
 .serac <- function(name, model,Cher,NWT,Hemisphere,FF,inst_deposit,
                    ignore,plotpdf,preview,plotphoto,minphoto,maxphoto,
@@ -95,7 +95,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
                    plot_Pb_inst_deposit,plot_CFCS_regression,
                    varves, dmin,dmax,sedchange,
                    min_yr, SML,stepout, mycex,
-                   archive_metadata) {
+                   archive_metadata,save_code) {
 
   # Calculate how long the function took to run
   old_time <- Sys.time() # get start time
@@ -880,35 +880,37 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
     }
   }
 
-  # Add the code that was used
-  # First save the history to folder
-  savehistory(file = "myhistory.Rhistory")
+  if(save_code) {
+    # Save the code that was used
+    # First save the history to folder
+    savehistory(file = "myhistory.Rhistory")
 
-  # The code may extend on several lines (true for RStudio users at least)
-  # This loop find the beginning of the function, serac
-  whichline=NULL
-  for (i in 1:30) {
-    if (length(grep(pattern = "serac", rev(readLines(con = "myhistory.Rhistory"))[i]))>0) whichline <- c(whichline,i)
-  }
-  if(!is.null(whichline))
-  {
-    whichline <- min(whichline, na.rm=T)
-    mycode=NULL
-    for (i in whichline:1) {
-      mycode <- paste(mycode, rev(readLines(con = "myhistory.Rhistory"))[i], sep="")
+    # The code may extend on several lines (true for RStudio users at least)
+    # This loop find the beginning of the function, serac
+    whichline=NULL
+    for (i in 1:30) {
+      if (length(grep(pattern = "serac", rev(readLines(con = "myhistory.Rhistory"))[i]))>0) whichline <- c(whichline,i)
     }
-  } else {
-    mycode <- "serac could not read the code you used to produce your model"
+    if(!is.null(whichline))
+    {
+      whichline <- min(whichline, na.rm=T)
+      mycode=NULL
+      for (i in whichline:1) {
+        mycode <- paste(mycode, rev(readLines(con = "myhistory.Rhistory"))[i], sep="")
+      }
+    } else {
+      mycode <- "serac could not read the code you used to produce your model"
+    }
+
+    out_list$Rcode <- mycode
+
+    # Remove the history
+    if (file.exists("myhistory.Rhistory")) file.remove("myhistory.Rhistory")
+
+    metadata <- rbind(metadata,
+                      c("",""),
+                      c("code",mycode)) # Add line to metadata
   }
-
-  out_list$Rcode <- mycode
-
-  # Remove the history
-  if (file.exists("myhistory.Rhistory")) file.remove("myhistory.Rhistory")
-
-  metadata <- rbind(metadata,
-                    c("",""),
-                    c("code",mycode)) # Add line to metadata
 
   # Write final output
   write.table(x = metadata, file = paste(getwd(),"/Cores/",name,"/",name,"_Metadata_",Sys.Date(),".txt",sep = ""),col.names = F, row.names = F, sep = "\t")
