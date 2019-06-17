@@ -10,8 +10,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<meta name="author" content="Rosalie Bruel, Pierre Sabatier" />
+<meta name="author" content="Rosalie Bruel" />
 
+<meta name="date" content="2019-06-17" />
 
 <title>serac</title>
 
@@ -90,12 +91,21 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore">serac</h1>
-<h4 class="author"><em>Rosalie Bruel, Pierre Sabatier</em></h4>
+<h4 class="author"><em>Rosalie Bruel</em></h4>
+<h4 class="date"><em>2019-06-17</em></h4>
 
 
+<div id="TOC">
+<ul>
+<li><a href="#first-time-user---setting-up-the-folders">First time user - setting up the folders</a></li>
+<li><a href="#run-serac">Run serac</a></li>
+<li><a href="#explore-outputs">Explore outputs</a></li>
+</ul>
+</div>
 
-<div id="first-time-user---setting-up-the-folders" class="section level1">
-<h1>First time user - setting up the folders</h1>
+<p>The present vignette helps you compute your first age-depth model with <em>serac</em>, a R package for ShortlivEd RAdionuclide Chronology of recent sediment cores.</p>
+<div id="first-time-user---setting-up-the-folders" class="section level2">
+<h2>First time user - setting up the folders</h2>
 <p>Which folder are your currently working in?</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">getwd</span>()</code></pre></div>
 <p>If you want to work in another folder, change it with setwd(“”), e.g.:</p>
@@ -112,29 +122,164 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="co"># Including proxy data for this core too</span>
 <span class="kw">write.table</span>(<span class="dt">x =</span> serac_example_ALO09P12_proxy, <span class="dt">file =</span> <span class="kw">paste</span>(<span class="kw">getwd</span>(),<span class="st">'/Cores/serac_example_ALO09P12/serac_example_ALO09P12_proxy.txt'</span>,<span class="dt">sep=</span><span class="st">&quot;&quot;</span>),<span class="dt">col.names =</span> T, <span class="dt">row.names =</span> F,<span class="dt">sep=</span><span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>)</code></pre></div>
 </div>
-<div id="now-run-serac" class="section level1">
-<h1>Now run serac</h1>
+<div id="run-serac" class="section level2">
+<h2>Run serac</h2>
 <p>At the minimum, your function will be need the name of the core and the coring year, e.g.:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">serac</span>(<span class="dt">name=</span><span class="st">&quot;serac_example_ALO09P12&quot;</span>,<span class="dt">coring_yr=</span><span class="dv">2009</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">serac</span>(<span class="dt">name=</span><span class="st">&quot;serac_example_ALO09P12&quot;</span>,<span class="dt">coring_yr=</span><span class="dv">2009</span>)
+
+ Sedimentation <span class="kw">rate</span> (CFCS model)<span class="op">:</span><span class="st"> </span>V=<span class="st"> </span><span class="fl">1.</span>197mm<span class="op">/</span>yr, R2=<span class="st"> </span><span class="fl">0.9597</span>
+                          Error<span class="op">:</span><span class="st">     </span><span class="op">+</span><span class="er">/</span><span class="op">-</span><span class="st"> </span><span class="fl">0.</span>053mm<span class="op">/</span>yr
+ <span class="kw">Inventory</span> (Lead)<span class="op">:</span><span class="st"> </span><span class="fl">11707.91</span> Bq<span class="op">/</span><span class="kw">m2</span> (range<span class="op">:</span><span class="st"> </span><span class="dv">11176</span><span class="op">-</span><span class="dv">12240</span> Bq<span class="op">/</span>m2)
+ <span class="kw">Inventory</span> (Cesium)<span class="op">:</span><span class="st"> </span><span class="fl">21549.328</span> Bq<span class="op">/</span><span class="kw">m2</span> (range<span class="op">:</span><span class="st"> </span><span class="dv">21405</span><span class="op">-</span><span class="dv">21694</span> Bq<span class="op">/</span>m2)
+
+
+ ________________________
+
+ The calculation took <span class="fl">0.5738</span> secs.</code></pre></div>
 <p>Several sedimentation hypotheses were tested, and this is what the author chose as the best model:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">serac</span>(<span class="dt">name=</span><span class="st">&quot;serac_example_ALO09P12&quot;</span>,<span class="dt">coring_yr=</span><span class="dv">2009</span>,<span class="dt">model=</span><span class="kw">c</span>(<span class="st">&quot;CFCS&quot;</span>),<span class="dt">plotphoto=</span><span class="ot">FALSE</span>,<span class="dt">minphoto=</span><span class="kw">c</span>(<span class="dv">0</span>),<span class="dt">maxphoto=</span><span class="kw">c</span>(<span class="dv">210</span>),<span class="dt">plot_Pb=</span>T,<span class="dt">plot_Am=</span>T,<span class="dt">plot_Cs=</span>T,<span class="dt">Cher=</span><span class="kw">c</span>(<span class="dv">30</span>,<span class="dv">40</span>),<span class="dt">Hemisphere=</span><span class="kw">c</span>(<span class="st">&quot;NH&quot;</span>),<span class="dt">NWT=</span><span class="kw">c</span>(<span class="dv">51</span>,<span class="dv">61</span>),<span class="dt">sedchange=</span><span class="kw">c</span>(<span class="fl">75.5</span>),<span class="dt">plot_Pb_inst_deposit=</span>T,<span class="dt">inst_deposit=</span><span class="kw">c</span>(<span class="dv">20</span>,<span class="dv">28</span>,<span class="dv">100</span>,<span class="dv">107</span>,<span class="dv">135</span>,<span class="dv">142</span>,<span class="dv">158</span>,<span class="dv">186</span>),<span class="dt">suppdescriptor=</span><span class="ot">TRUE</span>,<span class="dt">descriptor_lab=</span><span class="kw">c</span>(<span class="st">&quot;Ca/Fe&quot;</span>),<span class="dt">historic_d=</span><span class="kw">c</span>(<span class="dv">20</span>,<span class="dv">28</span>,<span class="dv">100</span>,<span class="dv">107</span>,<span class="dv">135</span>,<span class="dv">142</span>,<span class="dv">158</span>,<span class="dv">186</span>),<span class="dt">historic_a=</span><span class="kw">c</span>(<span class="dv">1994</span>,<span class="dv">1920</span>,<span class="dv">1886</span>,<span class="dv">1868</span>),<span class="dt">historic_n=</span><span class="kw">c</span>(<span class="st">&quot;sept1 994 flood&quot;</span>,<span class="st">&quot;1920 flood&quot;</span>,<span class="st">&quot;1886 flood&quot;</span>,<span class="st">&quot;1868 flood ?&quot;</span>), <span class="dt">min_yr=</span><span class="kw">c</span>(<span class="dv">1750</span>),<span class="dt">dmax=</span><span class="kw">c</span>(<span class="dv">180</span>), <span class="dt">plotpdf=</span><span class="ot">TRUE</span>,<span class="dt">preview=</span>F)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">serac</span>(<span class="dt">name=</span><span class="st">&quot;serac_example_ALO09P12&quot;</span>, <span class="dt">coring_yr=</span><span class="dv">2009</span>, <span class="dt">model=</span><span class="kw">c</span>(<span class="st">&quot;CFCS&quot;</span>),
+      <span class="dt">plotphoto=</span><span class="ot">FALSE</span>, <span class="dt">minphoto=</span><span class="kw">c</span>(<span class="dv">0</span>), <span class="dt">maxphoto=</span><span class="kw">c</span>(<span class="dv">210</span>),
+      <span class="dt">plot_Pb=</span>T, <span class="dt">plot_Am=</span>T, <span class="dt">plot_Cs=</span>T, <span class="dt">Cher=</span><span class="kw">c</span>(<span class="dv">30</span>,<span class="dv">40</span>), <span class="dt">Hemisphere=</span><span class="kw">c</span>(<span class="st">&quot;NH&quot;</span>), <span class="dt">NWT=</span><span class="kw">c</span>(<span class="dv">51</span>,<span class="dv">61</span>),
+      <span class="dt">sedchange=</span><span class="kw">c</span>(<span class="fl">75.5</span>),
+      <span class="dt">plot_Pb_inst_deposit=</span>T, <span class="dt">inst_deposit=</span><span class="kw">c</span>(<span class="dv">20</span>,<span class="dv">28</span>,<span class="dv">100</span>,<span class="dv">107</span>,<span class="dv">135</span>,<span class="dv">142</span>,<span class="dv">158</span>,<span class="dv">186</span>),
+      <span class="dt">suppdescriptor=</span><span class="ot">TRUE</span>, <span class="dt">descriptor_lab=</span><span class="kw">c</span>(<span class="st">&quot;Ca/Fe&quot;</span>),
+      <span class="dt">historic_d=</span><span class="kw">c</span>(<span class="dv">20</span>,<span class="dv">28</span>,<span class="dv">100</span>,<span class="dv">107</span>,<span class="dv">135</span>,<span class="dv">142</span>,<span class="dv">158</span>,<span class="dv">186</span>), <span class="dt">historic_a=</span><span class="kw">c</span>(<span class="dv">1994</span>,<span class="dv">1920</span>,<span class="dv">1886</span>,<span class="dv">1868</span>), <span class="dt">historic_n=</span><span class="kw">c</span>(<span class="st">&quot;sept 1994 flood&quot;</span>,<span class="st">&quot;1920 flood&quot;</span>,<span class="st">&quot;1886 flood&quot;</span>,<span class="st">&quot;1868 flood ?&quot;</span>), 
+      <span class="dt">min_yr=</span><span class="kw">c</span>(<span class="dv">1750</span>),
+      <span class="dt">dmax=</span><span class="kw">c</span>(<span class="dv">180</span>), 
+      <span class="dt">plotpdf=</span><span class="ot">TRUE</span>, <span class="dt">preview=</span>F)
+
+ Sedimentation <span class="kw">rate</span> (CFCS model) <span class="dv">0</span><span class="op">-</span><span class="fl">75.</span>5mm<span class="op">:</span><span class="st"> </span>V=<span class="st"> </span><span class="fl">1.</span>096mm<span class="op">/</span>yr, R2=<span class="st"> </span><span class="fl">0.9451</span>
+                          Error<span class="op">:</span><span class="st">     </span><span class="op">+</span><span class="er">/</span><span class="op">-</span><span class="st"> </span><span class="fl">0.</span>088mm<span class="op">/</span>yr
+
+ Sedimentation <span class="kw">rate</span> (CFCS model) <span class="fl">75.</span>5mm<span class="op">-</span>bottom<span class="op">:</span><span class="st"> </span>V=<span class="st"> </span><span class="fl">0.</span>796mm<span class="op">/</span>yr, R2=<span class="st"> </span><span class="fl">0.9226</span>
+                          Error<span class="op">:</span><span class="st">     </span><span class="op">+</span><span class="er">/</span><span class="op">-</span><span class="st"> </span><span class="fl">0.</span>082mm<span class="op">/</span>yr
+ Approximation of age at <span class="kw">change</span>(s) <span class="cf">in</span> sedimentation rate<span class="op">:</span>
+<span class="st">     </span>Best Age<span class="op">:</span><span class="st"> </span><span class="dv">1947</span> (incertitude<span class="op">:</span><span class="st"> </span><span class="dv">1942</span><span class="op">-</span><span class="dv">1952</span>)
+
+
+ Age approximation of instantaneous <span class="kw">deposit</span>(s) from CFCS model<span class="op">:</span>
+<span class="st">     </span>The instantaneous deposit at <span class="dv">20</span><span class="op">-</span><span class="dv">28</span> mm has an estimated range of<span class="op">:</span><span class="st"> </span><span class="dv">1989</span><span class="op">-</span><span class="dv">1992</span>.
+
+     The instantaneous deposit at <span class="dv">100</span><span class="op">-</span><span class="dv">107</span> mm has an estimated range of<span class="op">:</span><span class="st"> </span><span class="dv">1905</span><span class="op">-</span><span class="dv">1928</span>.
+
+     The instantaneous deposit at <span class="dv">135</span><span class="op">-</span><span class="dv">142</span> mm has an estimated range of<span class="op">:</span><span class="st"> </span><span class="dv">1866</span><span class="op">-</span><span class="dv">1897</span>.
+
+     The instantaneous deposit at <span class="dv">158</span><span class="op">-</span><span class="dv">186</span> mm has an estimated range of<span class="op">:</span><span class="st"> </span><span class="dv">1844</span><span class="op">-</span><span class="dv">1879</span>.
+
+ <span class="kw">Inventory</span> (Lead)<span class="op">:</span><span class="st"> </span><span class="fl">10287.66</span> Bq<span class="op">/</span><span class="kw">m2</span> (range<span class="op">:</span><span class="st"> </span><span class="dv">9828</span><span class="op">-</span><span class="dv">10748</span> Bq<span class="op">/</span>m2)
+ <span class="kw">Inventory</span> (Cesium)<span class="op">:</span><span class="st"> </span><span class="fl">19023.688</span> Bq<span class="op">/</span><span class="kw">m2</span> (range<span class="op">:</span><span class="st"> </span><span class="dv">18895</span><span class="op">-</span><span class="dv">19153</span> Bq<span class="op">/</span>m2)
+
+
+ ________________________
+
+ The calculation took <span class="fl">0.3514</span> secs.</code></pre></div>
 <p>If you want to see the preview, change preview=T in the code. Before that, make sure to extend your window in RStudio (large plot!)</p>
 </div>
-<div id="outputs" class="section level1">
-<h1>Outputs</h1>
+<div id="explore-outputs" class="section level2">
+<h2>Explore outputs</h2>
 <p>Files with age-depth model and metadata are automatically saved in your working folder. If you assign your function to an object, serac will return a list with the parameters.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mymodel1 &lt;-<span class="st"> </span><span class="kw">serac</span>(<span class="dt">name=</span><span class="st">&quot;serac_example_ALO09P12&quot;</span>,<span class="dt">coring_yr=</span><span class="dv">2009</span>)
 
+ Sedimentation <span class="kw">rate</span> (CFCS model)<span class="op">:</span><span class="st"> </span>V=<span class="st"> </span><span class="fl">1.</span>197mm<span class="op">/</span>yr, R2=<span class="st"> </span><span class="fl">0.9597</span>
+                          Error<span class="op">:</span><span class="st">     </span><span class="op">+</span><span class="er">/</span><span class="op">-</span><span class="st"> </span><span class="fl">0.</span>053mm<span class="op">/</span>yr
+ <span class="kw">Inventory</span> (Lead)<span class="op">:</span><span class="st"> </span><span class="fl">11707.91</span> Bq<span class="op">/</span><span class="kw">m2</span> (range<span class="op">:</span><span class="st"> </span><span class="dv">11176</span><span class="op">-</span><span class="dv">12240</span> Bq<span class="op">/</span>m2)
+ <span class="kw">Inventory</span> (Cesium)<span class="op">:</span><span class="st"> </span><span class="fl">21549.328</span> Bq<span class="op">/</span><span class="kw">m2</span> (range<span class="op">:</span><span class="st"> </span><span class="dv">21405</span><span class="op">-</span><span class="dv">21694</span> Bq<span class="op">/</span>m2)
+
+
+ ________________________
+
+ The calculation took <span class="fl">0.1035</span> secs.
+
 <span class="co"># See the objects created</span>
 <span class="kw">names</span>(mymodel1)
+[<span class="dv">1</span>] <span class="st">&quot;data&quot;</span>                              <span class="st">&quot;CFCS sedimentation rate&quot;</span>          
+[<span class="dv">3</span>] <span class="st">&quot;CFCS age-depth model interpolated&quot;</span> <span class="st">&quot;Inventories&quot;</span>                      
+[<span class="dv">5</span>] <span class="st">&quot;Rcode&quot;</span>                             <span class="st">&quot;plot&quot;</span>                             
 
 <span class="co"># Visualize the input data</span>
 mymodel1<span class="op">$</span>data
+   depth_min depth_max density Pb210ex Pb210ex_er  Cs137 Cs137_er Am241 Am241_er  Pbex
+<span class="dv">1</span>          <span class="dv">0</span>         <span class="dv">5</span>    <span class="fl">0.47</span>   <span class="fl">642.0</span>       <span class="fl">11.0</span>  <span class="fl">772.0</span>      <span class="fl">3.0</span>  <span class="fl">1.00</span>     <span class="fl">0.51</span> <span class="fl">642.0</span>
+<span class="dv">2</span>          <span class="dv">5</span>        <span class="dv">14</span>    <span class="fl">0.31</span>   <span class="fl">504.0</span>       <span class="fl">14.0</span>  <span class="fl">535.0</span>      <span class="fl">4.3</span>  <span class="fl">1.30</span>     <span class="fl">0.90</span> <span class="fl">504.0</span>
+<span class="dv">3</span>         <span class="dv">14</span>        <span class="dv">21</span>    <span class="fl">0.38</span>   <span class="fl">371.0</span>        <span class="fl">7.0</span>  <span class="fl">540.0</span>      <span class="fl">2.0</span>  <span class="fl">1.30</span>     <span class="fl">0.40</span> <span class="fl">371.0</span>
+<span class="dv">4</span>         <span class="dv">21</span>        <span class="dv">27</span>    <span class="fl">0.66</span>   <span class="fl">217.0</span>        <span class="fl">6.0</span>  <span class="fl">446.0</span>      <span class="fl">2.0</span>  <span class="fl">1.60</span>     <span class="fl">0.40</span> <span class="fl">217.0</span>
+<span class="dv">5</span>         <span class="dv">27</span>        <span class="dv">34</span>    <span class="fl">0.72</span>   <span class="fl">232.0</span>       <span class="fl">12.0</span>  <span class="fl">790.0</span>      <span class="fl">5.0</span>  <span class="fl">1.90</span>     <span class="fl">0.90</span> <span class="fl">232.0</span>
+<span class="dv">6</span>         <span class="dv">34</span>        <span class="dv">40</span>    <span class="fl">0.48</span>   <span class="fl">305.0</span>       <span class="fl">11.0</span> <span class="fl">1340.0</span>      <span class="fl">5.0</span>  <span class="fl">1.20</span>     <span class="fl">0.90</span> <span class="fl">305.0</span>
+<span class="dv">7</span>         <span class="dv">40</span>        <span class="dv">45</span>    <span class="fl">0.58</span>   <span class="fl">219.0</span>       <span class="fl">10.0</span>  <span class="fl">530.0</span>      <span class="fl">3.0</span>  <span class="fl">1.30</span>     <span class="fl">0.57</span> <span class="fl">219.0</span>
+<span class="dv">8</span>         <span class="dv">45</span>        <span class="dv">51</span>    <span class="fl">0.48</span>   <span class="fl">206.0</span>       <span class="fl">10.0</span>  <span class="fl">416.0</span>      <span class="fl">3.3</span>  <span class="fl">3.20</span>     <span class="fl">0.70</span> <span class="fl">206.0</span>
+<span class="dv">9</span>         <span class="dv">51</span>        <span class="dv">56</span>    <span class="fl">0.60</span>   <span class="fl">168.0</span>       <span class="fl">10.0</span>  <span class="fl">423.0</span>      <span class="fl">3.4</span>  <span class="fl">5.94</span>     <span class="fl">0.80</span> <span class="fl">168.0</span>
+<span class="dv">10</span>        <span class="dv">56</span>        <span class="dv">61</span>    <span class="fl">0.58</span>   <span class="fl">147.0</span>        <span class="fl">8.0</span>  <span class="fl">395.0</span>      <span class="fl">4.0</span>  <span class="fl">5.40</span>     <span class="fl">0.70</span> <span class="fl">147.0</span>
+<span class="dv">11</span>        <span class="dv">61</span>        <span class="dv">67</span>    <span class="fl">0.45</span>   <span class="fl">116.0</span>        <span class="fl">5.0</span>  <span class="fl">209.0</span>      <span class="fl">1.6</span>  <span class="fl">2.30</span>     <span class="fl">0.40</span> <span class="fl">116.0</span>
+<span class="dv">12</span>        <span class="dv">67</span>        <span class="dv">72</span>    <span class="fl">0.59</span>   <span class="fl">122.0</span>        <span class="fl">9.0</span>  <span class="fl">181.0</span>      <span class="fl">2.3</span>  <span class="fl">2.60</span>     <span class="fl">0.70</span> <span class="fl">122.0</span>
+<span class="dv">13</span>        <span class="dv">72</span>        <span class="dv">79</span>    <span class="fl">0.45</span>   <span class="fl">125.0</span>        <span class="fl">8.0</span>  <span class="fl">117.0</span>      <span class="fl">1.8</span>  <span class="fl">1.50</span>     <span class="fl">0.70</span> <span class="fl">125.0</span>
+<span class="dv">14</span>        <span class="dv">79</span>        <span class="dv">83</span>    <span class="fl">0.63</span>   <span class="fl">113.0</span>        <span class="fl">8.0</span>   <span class="fl">62.4</span>      <span class="fl">1.3</span>  <span class="fl">1.35</span>     <span class="fl">0.60</span> <span class="fl">113.0</span>
+<span class="dv">15</span>        <span class="dv">83</span>        <span class="dv">89</span>    <span class="fl">0.42</span>   <span class="fl">122.0</span>        <span class="fl">5.0</span>   <span class="fl">34.7</span>      <span class="fl">0.6</span>  <span class="fl">0.71</span>     <span class="fl">0.40</span> <span class="fl">122.0</span>
+<span class="dv">16</span>        <span class="dv">89</span>        <span class="dv">96</span>    <span class="fl">0.48</span>    <span class="fl">58.8</span>        <span class="fl">3.0</span>   <span class="fl">16.2</span>      <span class="fl">0.3</span>    <span class="ot">NA</span>       <span class="ot">NA</span>  <span class="fl">58.8</span>
+<span class="dv">17</span>        <span class="dv">96</span>       <span class="dv">102</span>    <span class="fl">0.57</span>    <span class="fl">48.4</span>        <span class="fl">2.0</span>    <span class="fl">4.5</span>      <span class="fl">0.1</span>    <span class="ot">NA</span>       <span class="ot">NA</span>  <span class="fl">48.4</span>
+<span class="dv">18</span>       <span class="dv">102</span>       <span class="dv">107</span>    <span class="fl">0.88</span>    <span class="fl">29.6</span>        <span class="fl">4.0</span>    <span class="fl">5.2</span>      <span class="fl">0.3</span>    <span class="ot">NA</span>       <span class="ot">NA</span>  <span class="fl">29.6</span>
+<span class="dv">19</span>       <span class="dv">107</span>       <span class="dv">113</span>    <span class="fl">0.62</span>    <span class="fl">26.8</span>        <span class="fl">3.0</span>    <span class="fl">6.1</span>      <span class="fl">0.2</span>    <span class="ot">NA</span>       <span class="ot">NA</span>  <span class="fl">26.8</span>
+<span class="dv">20</span>       <span class="dv">113</span>       <span class="dv">121</span>    <span class="fl">0.41</span>    <span class="fl">27.4</span>        <span class="fl">3.0</span>    <span class="fl">9.4</span>      <span class="fl">0.2</span>    <span class="ot">NA</span>       <span class="ot">NA</span>  <span class="fl">27.4</span>
+<span class="dv">21</span>       <span class="dv">121</span>       <span class="dv">127</span>    <span class="fl">0.49</span>    <span class="fl">29.0</span>        <span class="fl">4.1</span>   <span class="fl">11.3</span>      <span class="fl">0.5</span>    <span class="ot">NA</span>       <span class="ot">NA</span>  <span class="fl">29.0</span>
+<span class="dv">22</span>       <span class="dv">127</span>       <span class="dv">132</span>    <span class="fl">0.65</span>    <span class="fl">23.0</span>        <span class="fl">3.2</span>   <span class="fl">12.1</span>      <span class="fl">0.3</span>    <span class="ot">NA</span>       <span class="ot">NA</span>  <span class="fl">23.0</span>
+<span class="dv">23</span>       <span class="dv">132</span>       <span class="dv">149</span>    <span class="fl">0.62</span>    <span class="fl">15.4</span>        <span class="fl">3.0</span>    <span class="fl">7.7</span>      <span class="fl">0.3</span>    <span class="ot">NA</span>       <span class="ot">NA</span>  <span class="fl">15.4</span>
+<span class="dv">24</span>       <span class="dv">149</span>       <span class="dv">160</span>    <span class="fl">0.63</span>    <span class="fl">11.0</span>        <span class="fl">2.0</span>    <span class="fl">5.5</span>      <span class="fl">0.2</span>    <span class="ot">NA</span>       <span class="ot">NA</span>  <span class="fl">11.0</span>
+   Pbex_er     Cs Cs_er   Am Am_er depth_top depth_bottom depth_avg thickness depth_avg_<span class="dv">2</span>
+<span class="dv">1</span>     <span class="fl">11.0</span>  <span class="fl">772.0</span>   <span class="fl">3.0</span> <span class="fl">1.00</span>  <span class="fl">0.51</span>         <span class="dv">0</span>            <span class="dv">5</span>       <span class="fl">2.5</span>         <span class="dv">5</span>         <span class="fl">2.5</span>
+<span class="dv">2</span>     <span class="fl">14.0</span>  <span class="fl">535.0</span>   <span class="fl">4.3</span> <span class="fl">1.30</span>  <span class="fl">0.90</span>         <span class="dv">5</span>           <span class="dv">14</span>       <span class="fl">9.5</span>         <span class="dv">9</span>         <span class="fl">9.5</span>
+<span class="dv">3</span>      <span class="fl">7.0</span>  <span class="fl">540.0</span>   <span class="fl">2.0</span> <span class="fl">1.30</span>  <span class="fl">0.40</span>        <span class="dv">14</span>           <span class="dv">21</span>      <span class="fl">17.5</span>         <span class="dv">7</span>        <span class="fl">17.5</span>
+<span class="dv">4</span>      <span class="fl">6.0</span>  <span class="fl">446.0</span>   <span class="fl">2.0</span> <span class="fl">1.60</span>  <span class="fl">0.40</span>        <span class="dv">21</span>           <span class="dv">27</span>      <span class="fl">24.0</span>         <span class="dv">6</span>        <span class="fl">24.0</span>
+<span class="dv">5</span>     <span class="fl">12.0</span>  <span class="fl">790.0</span>   <span class="fl">5.0</span> <span class="fl">1.90</span>  <span class="fl">0.90</span>        <span class="dv">27</span>           <span class="dv">34</span>      <span class="fl">30.5</span>         <span class="dv">7</span>        <span class="fl">30.5</span>
+<span class="dv">6</span>     <span class="fl">11.0</span> <span class="fl">1340.0</span>   <span class="fl">5.0</span> <span class="fl">1.20</span>  <span class="fl">0.90</span>        <span class="dv">34</span>           <span class="dv">40</span>      <span class="fl">37.0</span>         <span class="dv">6</span>        <span class="fl">37.0</span>
+<span class="dv">7</span>     <span class="fl">10.0</span>  <span class="fl">530.0</span>   <span class="fl">3.0</span> <span class="fl">1.30</span>  <span class="fl">0.57</span>        <span class="dv">40</span>           <span class="dv">45</span>      <span class="fl">42.5</span>         <span class="dv">5</span>        <span class="fl">42.5</span>
+<span class="dv">8</span>     <span class="fl">10.0</span>  <span class="fl">416.0</span>   <span class="fl">3.3</span> <span class="fl">3.20</span>  <span class="fl">0.70</span>        <span class="dv">45</span>           <span class="dv">51</span>      <span class="fl">48.0</span>         <span class="dv">6</span>        <span class="fl">48.0</span>
+<span class="dv">9</span>     <span class="fl">10.0</span>  <span class="fl">423.0</span>   <span class="fl">3.4</span> <span class="fl">5.94</span>  <span class="fl">0.80</span>        <span class="dv">51</span>           <span class="dv">56</span>      <span class="fl">53.5</span>         <span class="dv">5</span>        <span class="fl">53.5</span>
+<span class="dv">10</span>     <span class="fl">8.0</span>  <span class="fl">395.0</span>   <span class="fl">4.0</span> <span class="fl">5.40</span>  <span class="fl">0.70</span>        <span class="dv">56</span>           <span class="dv">61</span>      <span class="fl">58.5</span>         <span class="dv">5</span>        <span class="fl">58.5</span>
+<span class="dv">11</span>     <span class="fl">5.0</span>  <span class="fl">209.0</span>   <span class="fl">1.6</span> <span class="fl">2.30</span>  <span class="fl">0.40</span>        <span class="dv">61</span>           <span class="dv">67</span>      <span class="fl">64.0</span>         <span class="dv">6</span>        <span class="fl">64.0</span>
+<span class="dv">12</span>     <span class="fl">9.0</span>  <span class="fl">181.0</span>   <span class="fl">2.3</span> <span class="fl">2.60</span>  <span class="fl">0.70</span>        <span class="dv">67</span>           <span class="dv">72</span>      <span class="fl">69.5</span>         <span class="dv">5</span>        <span class="fl">69.5</span>
+<span class="dv">13</span>     <span class="fl">8.0</span>  <span class="fl">117.0</span>   <span class="fl">1.8</span> <span class="fl">1.50</span>  <span class="fl">0.70</span>        <span class="dv">72</span>           <span class="dv">79</span>      <span class="fl">75.5</span>         <span class="dv">7</span>        <span class="fl">75.5</span>
+<span class="dv">14</span>     <span class="fl">8.0</span>   <span class="fl">62.4</span>   <span class="fl">1.3</span> <span class="fl">1.35</span>  <span class="fl">0.60</span>        <span class="dv">79</span>           <span class="dv">83</span>      <span class="fl">81.0</span>         <span class="dv">4</span>        <span class="fl">81.0</span>
+<span class="dv">15</span>     <span class="fl">5.0</span>   <span class="fl">34.7</span>   <span class="fl">0.6</span> <span class="fl">0.71</span>  <span class="fl">0.40</span>        <span class="dv">83</span>           <span class="dv">89</span>      <span class="fl">86.0</span>         <span class="dv">6</span>        <span class="fl">86.0</span>
+<span class="dv">16</span>     <span class="fl">3.0</span>   <span class="fl">16.2</span>   <span class="fl">0.3</span>   <span class="ot">NA</span>    <span class="ot">NA</span>        <span class="dv">89</span>           <span class="dv">96</span>      <span class="fl">92.5</span>         <span class="dv">7</span>        <span class="fl">92.5</span>
+<span class="dv">17</span>     <span class="fl">2.0</span>    <span class="fl">4.5</span>   <span class="fl">0.1</span>   <span class="ot">NA</span>    <span class="ot">NA</span>        <span class="dv">96</span>          <span class="dv">102</span>      <span class="fl">99.0</span>         <span class="dv">6</span>        <span class="fl">99.0</span>
+<span class="dv">18</span>     <span class="fl">4.0</span>    <span class="fl">5.2</span>   <span class="fl">0.3</span>   <span class="ot">NA</span>    <span class="ot">NA</span>       <span class="dv">102</span>          <span class="dv">107</span>     <span class="fl">104.5</span>         <span class="dv">5</span>       <span class="fl">104.5</span>
+<span class="dv">19</span>     <span class="fl">3.0</span>    <span class="fl">6.1</span>   <span class="fl">0.2</span>   <span class="ot">NA</span>    <span class="ot">NA</span>       <span class="dv">107</span>          <span class="dv">113</span>     <span class="fl">110.0</span>         <span class="dv">6</span>       <span class="fl">110.0</span>
+<span class="dv">20</span>     <span class="fl">3.0</span>    <span class="fl">9.4</span>   <span class="fl">0.2</span>   <span class="ot">NA</span>    <span class="ot">NA</span>       <span class="dv">113</span>          <span class="dv">121</span>     <span class="fl">117.0</span>         <span class="dv">8</span>       <span class="fl">117.0</span>
+<span class="dv">21</span>     <span class="fl">4.1</span>   <span class="fl">11.3</span>   <span class="fl">0.5</span>   <span class="ot">NA</span>    <span class="ot">NA</span>       <span class="dv">121</span>          <span class="dv">127</span>     <span class="fl">124.0</span>         <span class="dv">6</span>       <span class="fl">124.0</span>
+<span class="dv">22</span>     <span class="fl">3.2</span>   <span class="fl">12.1</span>   <span class="fl">0.3</span>   <span class="ot">NA</span>    <span class="ot">NA</span>       <span class="dv">127</span>          <span class="dv">132</span>     <span class="fl">129.5</span>         <span class="dv">5</span>       <span class="fl">129.5</span>
+<span class="dv">23</span>     <span class="fl">3.0</span>    <span class="fl">7.7</span>   <span class="fl">0.3</span>   <span class="ot">NA</span>    <span class="ot">NA</span>       <span class="dv">132</span>          <span class="dv">149</span>     <span class="fl">140.5</span>        <span class="dv">17</span>       <span class="fl">140.5</span>
+<span class="dv">24</span>     <span class="fl">2.0</span>    <span class="fl">5.5</span>   <span class="fl">0.2</span>   <span class="ot">NA</span>    <span class="ot">NA</span>       <span class="dv">149</span>          <span class="dv">160</span>     <span class="fl">154.5</span>        <span class="dv">11</span>       <span class="fl">154.5</span>
+       d
+<span class="dv">1</span>    <span class="fl">2.5</span>
+<span class="dv">2</span>    <span class="fl">9.5</span>
+<span class="dv">3</span>   <span class="fl">17.5</span>
+<span class="dv">4</span>   <span class="fl">24.0</span>
+<span class="dv">5</span>   <span class="fl">30.5</span>
+<span class="dv">6</span>   <span class="fl">37.0</span>
+<span class="dv">7</span>   <span class="fl">42.5</span>
+<span class="dv">8</span>   <span class="fl">48.0</span>
+<span class="dv">9</span>   <span class="fl">53.5</span>
+<span class="dv">10</span>  <span class="fl">58.5</span>
+<span class="dv">11</span>  <span class="fl">64.0</span>
+<span class="dv">12</span>  <span class="fl">69.5</span>
+<span class="dv">13</span>  <span class="fl">75.5</span>
+<span class="dv">14</span>  <span class="fl">81.0</span>
+<span class="dv">15</span>  <span class="fl">86.0</span>
+<span class="dv">16</span>  <span class="fl">92.5</span>
+<span class="dv">17</span>  <span class="fl">99.0</span>
+<span class="dv">18</span> <span class="fl">104.5</span>
+<span class="dv">19</span> <span class="fl">110.0</span>
+<span class="dv">20</span> <span class="fl">117.0</span>
+<span class="dv">21</span> <span class="fl">124.0</span>
+<span class="dv">22</span> <span class="fl">129.5</span>
+<span class="dv">23</span> <span class="fl">140.5</span>
+<span class="dv">24</span> <span class="fl">154.5</span>
 
 <span class="co"># Save the plot with custom parameters, e.g., Courier font and grey scale without editing default colors.</span>
 <span class="kw">pdf</span>(<span class="kw">paste0</span>(<span class="kw">getwd</span>(),<span class="st">&quot;/Cores/serac_example_ALO09P12/serac_example_ALO09P12_custom.pdf&quot;</span>),<span class="dt">width =</span> <span class="dv">10</span>, <span class="dt">height =</span> <span class="dv">5</span>, <span class="dt">family=</span><span class="st">&quot;Courier&quot;</span>, <span class="dt">colormodel =</span> <span class="st">&quot;grey&quot;</span>)
 mymodel1<span class="op">$</span>plot
-<span class="kw">dev.off</span>()</code></pre></div>
+<span class="kw">dev.off</span>()
+pdf 
+  <span class="dv">2</span> </code></pre></div>
 </div>
 
 
