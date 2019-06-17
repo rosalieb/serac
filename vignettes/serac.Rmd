@@ -1,20 +1,39 @@
 ---
 title: "serac"
-author: Rosalie Bruel, Pierre Sabatier
-output: rmarkdown::html_vignette
+author: "Rosalie Bruel, Pierre Sabatier"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: yes
 vignette: >
-  %\VignetteIndexEntry{Put the title of your vignette here}
+  %\VignetteIndexEntry{serac}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
 
 ```{r, include=FALSE}
+stopifnot(require(knitr))
 knitr::opts_chunk$set(collapse = T, comment = "#>")
-options(tibble.print_min = 4L, tibble.print_max = 4L)
+options(tibble.print_min = 4L, tibble.print_max = 4L,width = 90)
+opts_chunk$set(
+  comment = NA,
+  message = FALSE,
+  warning = FALSE,
+  eval = FALSE,
+  dev = "png",
+  dpi = 150,
+  fig.asp = 0.8,
+  fig.width = 5,
+  out.width = "60%",
+  fig.align = "center"
+)
 library(serac)
+
 ```
 
-# First time user - setting up the folders
+The present vignette helps you compute your first age-depth model with _serac_, a R package for ShortlivEd RAdionuclide Chronology of recent sediment cores.
+
+## First time user - setting up the folders
 
 Which folder are your currently working in?
 
@@ -57,7 +76,7 @@ write.table(x = serac_example_ALO09P12_proxy, file = paste(getwd(),'/Cores/serac
 
 
 
-# Now run serac
+## Run serac
 At the minimum, your function will be need the name of the core and the coring year, e.g.:
 
 ```{r eval=FALSE}
@@ -77,7 +96,7 @@ Before that, make sure to extend your window in RStudio (large plot!)
 
 
 
-# Outputs
+## Explore outputs
 Files with age-depth model and metadata are automatically saved in your working folder. If you assign your function to an object, serac will return a list with the parameters.
 
 ```{r eval=FALSE}
