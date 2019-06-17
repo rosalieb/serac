@@ -1,6 +1,6 @@
 ---
 title: "serac"
-author: "Rosalie Bruel, Pierre Sabatier"
+author: "Rosalie Bruel"
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
