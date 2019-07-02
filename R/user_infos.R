@@ -11,21 +11,36 @@
 user_infos <- function()
 {
   message("If you are using serac for the first time, this function will\ncreate a file with some metadata (all are optional!).")
-  message("\nEnter an username. (recommended: first and last name)")
-  username <- readline()
-  message("\nWhat is your affiliation?")
-  affiliation <- readline()
-  message("\nORCID number:")
-  ORCID <- readline()
-  message("\nemail:")
-  email <- readline()
-  message("\nThanks for filling up this file; as long as you don't delete this file\nor run the function again, the information you entered will be added\nto the metadata of your projects.")
-  metadata <- matrix(c("SECTIONS","USER INFORMATIONS",
-                       "username",username,
-                       "affiliation",affiliation,
-                       "ORCID",ORCID,
-                       "email",email),
-                     ncol = 2, byrow = T)
-  write.table(x = metadata, file = paste(getwd(),"/Cores/serac_metadata_",username,".txt",sep = ""),col.names = F, row.names = F)
+
+  answer<-"1"
+
+  # First, check whether a file already exists
+  if(length(list.files(paste0(getwd(),"/Cores/"), pattern="serac_metadata*", full.names=TRUE))==1) {
+    metadata <- read.delim(list.files(paste(getwd(),"/Cores/"), pattern="serac_metadata*", full.names=TRUE), header=T, sep="")
+    message("\nA file with metadata already exists in this folder, with the \ninformation below:\n")
+    metadata
+    message("\nIf you want to replace it, type 1 in the console (then 'Enter'). \nPress any other key (then 'Enter') to exit the function.")
+    answer <- readline()
+  }
+
+  if(answer=="1")  {
+    message("\nEnter an username. (recommended: first and last name)")
+    username <- readline()
+    message("\nWhat is your affiliation?")
+    affiliation <- readline()
+    message("\nORCID number:")
+    ORCID <- readline()
+    message("\nemail:")
+    email <- readline()
+    message("\nThanks for filling up this file; as long as you don't delete this file\nor run the function again, the information you entered will be added\nto the metadata of your projects.")
+    metadata <- matrix(c("SECTIONS","USER INFORMATIONS",
+                         "username",username,
+                         "affiliation",affiliation,
+                         "ORCID",ORCID,
+                         "email",email),
+                       ncol = 2, byrow = T)
+    write.table(x = metadata, file = paste(getwd(),"/Cores/serac_metadata_",username,".txt",sep = ""),col.names = F, row.names = F)
+  }
+
 }
 
