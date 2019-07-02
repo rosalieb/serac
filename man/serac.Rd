@@ -129,6 +129,9 @@ Graphical parameter: a multiplication factor to increase (mycex>1) ou decrease (
   \item{archive_metadata}{
 Logical argument. If TRUE, require fields regarding the measurements on the core. Allows missing information; just press 'ENTER' in your computer (leave an empty field).
 }
+  \item{save_code}{
+Logical argument. If TRUE (default), the code is saved in the output object. If serac is within a Shiny app, history can't be easily extracted, so it's convenient to be able to turn it to FALSE.
+}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
