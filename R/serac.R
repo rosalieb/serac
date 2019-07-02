@@ -417,8 +417,8 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     code_history <- read.delim(list.files(paste(getwd(),"/Cores/",name,"/", sep=""), pattern="serac_model_history*", full.names=TRUE))
     # increment new code
     code_history <- rbind(code_history,
-                          c(Sys.time(),name,coring_yr,paste(model, collapse = ", "),
-                            Cher, NWT, Hemisphere, FF,
+                          c(name,coring_yr,as.character(Sys.time()),paste(model, collapse = ", "),
+                            paste(Cher, collapse = ", "), paste(NWT, collapse = ", "), Hemisphere, paste(FF, collapse = ", "),
                             paste(inst_deposit, collapse = ", "),
                             paste(ignore, collapse = ", "),
                             paste(historic_d, collapse = ", "),
@@ -430,21 +430,26 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
                             paste(sedchange, collapse = ", "),
                             SML))
   } else {
-    code_history <- data.frame("date"=Sys.time(),
-                               "name"=name, "coring_yr"=coring_yr, "model_tested"=paste(model, collapse = ", "),
-                               "Chernobyl"=Cher,"NWT"=NWT,"Hemisphere"=Hemisphere,"FF"=FF,
-                               "inst_deposit"=paste(inst_deposit, collapse = ", "),
-                               "ignore_depths"=ignore,
-                               "historic_depth"= paste(historic_d, collapse = ", "),
-                               "historic_age"  = paste(historic_a, collapse = ", "),
-                               "historic_name" = paste(historic_n, collapse = ", "),
-                               "suppdescriptor"=suppdescriptor,
-                               "descriptor_lab"=paste(descriptor_lab, collapse = ", "),
-                               "varves"=varves,
-                               "sedchange"=paste(sedchange, collapse = ", "),
-                               "SML"=SML)
+    code_history <- as.data.frame(matrix(c(name,coring_yr,as.character(Sys.time()),paste(model, collapse = ", "),
+                                           paste(Cher, collapse = ", "), paste(NWT, collapse = ", "), Hemisphere, paste(FF, collapse = ", "),
+                                           paste(inst_deposit, collapse = ", "),
+                                           paste(ignore, collapse = ", "),
+                                           paste(historic_d, collapse = ", "),
+                                           paste(historic_a, collapse = ", "),
+                                           paste(historic_n, collapse = ", "),
+                                           suppdescriptor,
+                                           paste(descriptor_lab, collapse = ", "),
+                                           varves,
+                                           paste(sedchange, collapse = ", "),
+                                           SML), nrow=1))
   }
-  write.table(x = code_history, file = paste0(getwd(),"/Cores/",name,"/serac_model_history_",name,".txt"),col.names = F, row.names = F)
+  colnames(code_history) <- c("name","coring_yr","date_computation", "model_tested",
+                              "Chernobyl","NWT","Hemisphere","FF",
+                              "inst_deposit","ignore_depths",
+                              "historic_depth","historic_age","historic_name",
+                              "suppdescriptor","descriptor_lab",
+                              "varves","sedchange","SML")
+  write.table(x = code_history, file = paste0(getwd(),"/Cores/",name,"/serac_model_history_",name,".txt"),col.names = T, row.names = F)
 
   #### 2. LEAD 210 MODEL -----
   if(length(grep("Pb",x = colnames(dt)))>1 & length(grep("density",x = colnames(dt)))>=1) {
