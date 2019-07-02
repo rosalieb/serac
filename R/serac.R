@@ -62,7 +62,7 @@
 #' # serac(name="PB06",coring_yr=2006,model=c("CFCS","CRS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(350),plot_Pb=T,plot_Cs=T,Cher=c(50,60),Hemisphere=c("NH"),NWT=c(100,120),suppdescriptor=T,descriptor_lab=c("Si/Al"),SML=30,inst_deposit=c(315,350),historic_d=c(315,350),historic_a=c(1893),historic_n=c("1894storm"),min_yr=1870,dmax=c(350),plotpdf=TRUE)
 #'
 
-serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(),inst_deposit=c(0),
+serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,inst_deposit=c(0),
                   ignore=c(),plotpdf=FALSE,preview=TRUE,plotphoto=FALSE,minphoto=c(),maxphoto=c(),
                   Pbcol=c("black","midnightblue","darkgreen"),inst_depositcol=grey(0.85),
                   modelcol=c("black","red","darkorange"),
@@ -119,7 +119,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
   if(length(sedchange)>2)    stop("\n Warning, serac only support two changes in sedimentation rate. Please check the manual.\n\n", call.=FALSE)
 
   # Chernobyl fallouts are dated at different years depending on the hemisphere
-  if(!is.null(Cher) && (Hemisphere=="NH"|Hemisphere=="SH")==FALSE)  stop("\n Warning, please select the hemisphere where your system is located.\n 'NH' or 'SH' for Northern/Southern Hemisphere.\n\n")
+  if(!is.na(Cher) && (Hemisphere=="NH"|Hemisphere=="SH")==FALSE)  stop("\n Warning, please select the hemisphere where your system is located.\n 'NH' or 'SH' for Northern/Southern Hemisphere.\n\n")
 
   # if the argument plotphoto is true, then a photo with the exact same name and the extension .jpg must be provided in the folder
   # min and max depth must be provided so the image is automatically cropped.
@@ -277,8 +277,8 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
   complete_core_depth_2[!complete_core_depth_2 %in% complete_core_depth_2[whichkeep]] <- NA
 
   # 1.5. Set some parameters ####
-  if(!is.null(NWT) && Hemisphere=="NH") NWT_a <- 1963
-  if(!is.null(NWT) && Hemisphere=="SH") NWT_a <- 1965
+  if(!is.na(NWT) && Hemisphere=="NH") NWT_a <- 1963
+  if(!is.na(NWT) && Hemisphere=="SH") NWT_a <- 1965
   if(is.null(dmin)) dmin <- min(dt$depth_avg,na.rm=T)
   if(!is.null(dmax) && length(inst_deposit)>1 && dmax<max(inst_deposit)) dmax <- max(inst_deposit)
   if(is.null(dmax)) if(exists("historic_d")) dmax <- max(c(dt$depth_avg,historic_d),na.rm=T) else dmax <- max(c(dt$depth_avg),na.rm=T)
@@ -408,6 +408,43 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
   out_list$data <- dt
   if(suppdescriptor) out_list$data_suppdescriptor <- dt_suppdescriptor
   if(varves) out_list$data_varves <- varve
+
+  # 1.9. Save the code to the output file with the code history ####
+  # save the model attempt in a file
+  # First, check whether a file already exists
+  if(length(list.files(paste(getwd(),"/Cores/",name,"/", sep=""), pattern="serac_model_history*", full.names=TRUE))==1) {
+    # read previous file
+    code_history <- read.delim(list.files(paste(getwd(),"/Cores/",name,"/", sep=""), pattern="serac_model_history*", full.names=TRUE))
+    # increment new code
+    code_history <- rbind(code_history,
+                          c(Sys.time(),name,coring_yr,paste(model, collapse = ", "),
+                            Cher, NWT, Hemisphere, FF,
+                            paste(inst_deposit, collapse = ", "),
+                            paste(ignore, collapse = ", "),
+                            paste(historic_d, collapse = ", "),
+                            paste(historic_a, collapse = ", "),
+                            paste(historic_n, collapse = ", "),
+                            suppdescriptor,
+                            paste(descriptor_lab, collapse = ", "),
+                            varves,
+                            paste(sedchange, collapse = ", "),
+                            SML))
+  } else {
+    code_history <- data.frame("date"=Sys.time(),
+                               "name"=name, "coring_yr"=coring_yr, "model_tested"=paste(model, collapse = ", "),
+                               "Chernobyl"=Cher,"NWT"=NWT,"Hemisphere"=Hemisphere,"FF"=FF,
+                               "inst_deposit"=paste(inst_deposit, collapse = ", "),
+                               "ignore_depths"=ignore,
+                               "historic_depth"= paste(historic_d, collapse = ", "),
+                               "historic_age"  = paste(historic_a, collapse = ", "),
+                               "historic_name" = paste(historic_n, collapse = ", "),
+                               "suppdescriptor"=suppdescriptor,
+                               "descriptor_lab"=paste(descriptor_lab, collapse = ", "),
+                               "varves"=varves,
+                               "sedchange"=paste(sedchange, collapse = ", "),
+                               "SML"=SML)
+  }
+  write.table(x = code_history, file = paste0(getwd(),"/Cores/",name,"/serac_model_history_",name,".txt"),col.names = F, row.names = F)
 
   #### 2. LEAD 210 MODEL -----
   if(length(grep("Pb",x = colnames(dt)))>1 & length(grep("density",x = colnames(dt)))>=1) {
@@ -548,7 +585,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
   if(plot_Cs) {
 
     #Chernobyl
-    if (exists("Cher")&&!is.null(Cher)) {
+    if (exists("Cher")&&!is.na(Cher)) {
       peakCher <- -mean(Cher)
       dates <- c(dates,1986)
       dates_depth_avg <- c(dates_depth_avg,peakCher)
@@ -556,7 +593,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
       err_dates_avg <- c(err_dates_avg,NA)
     }
     #NWT
-    if (exists("NWT")&&!is.null(NWT)) {
+    if (exists("NWT")&&!is.na(NWT)) {
       peakNWT <- -mean(NWT)
       dates <- c(dates,NWT_a)
       dates_depth_avg <- c(dates_depth_avg,peakNWT)
@@ -565,7 +602,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
       if (Hemisphere =="SH") err_dates_avg <- c(err_dates_avg,.5)
     }
     #First radionuclides fallout
-    if (exists("FF")&&!is.null(FF)) {
+    if (exists("FF")&&!is.na(FF)) {
       peakFF <- -mean(FF)
       dates <- c(dates,1955)
       dates_depth_avg <- c(dates_depth_avg,peakFF)
@@ -1280,14 +1317,14 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
       # Add text
       par(xpd=TRUE)
       #Chernobyl
-      if (exists("Cher")&&!is.null(Cher)) {
+      if (exists("Cher")&&!is.na(Cher)) {
         lines(rep(max(dt$Cs[dt$depth_avg>min(Cher-10) & dt$depth_avg<max(Cher+10)],na.rm = T)*1.1,2),c(-Cher[1],-Cher[2]), lwd=1.5)
         shadowtext(max(dt$Cs[dt$depth_avg>min(Cher-10) & dt$depth_avg<max(Cher+10)],na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(min(Cher)),
                    labels = c("C 1986"), pos = 3,col="black", bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
         lines(c(max(dt$Cs[dt$depth_avg>min(Cher-10) & dt$depth_avg<max(Cher+10)],na.rm = T)*1.1, max(dt$Cs,na.rm = T)*2),rep(peakCher,2), lty=2)
       }
       #NWT
-      if (exists("NWT")&&!is.null(NWT)) {
+      if (exists("NWT")&&!is.na(NWT)) {
         lines(rep(max(dt$Cs[dt$depth_avg>min(NWT-10) & dt$depth_avg<max(NWT+10)],na.rm = T)*1.1,2),c(-NWT[1],-NWT[2]), lwd=1.5)
         if (Hemisphere == "NH") shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(min(NWT)),
                                            labels = "NWT 1963", pos = 3, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
@@ -1296,7 +1333,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
         lines(c(max(dt$Cs[dt$depth_avg>min(NWT-10) & dt$depth_avg<max(NWT+10)],na.rm = T)*1.1, max(dt$Cs,na.rm = T)*2),rep(peakNWT,2), lty=2)
       }
       #First radionuclides fallout
-      if (exists("FF")&&!is.null(FF)) {
+      if (exists("FF")&&!is.na(FF)) {
         lines(rep(max(dt$Cs[dt$depth_avg>min(FF-10) & dt$depth_avg<max(FF+10)],na.rm = T)*1.1,2),c(-FF[1],-FF[2]), lwd=1.5)
         shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(max(FF)),
                    labels = c("FF 1955"), pos = 1, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
@@ -1331,7 +1368,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
     plot(c(-min_yr,-mround(coring_yr,10)),c(-dmin, -dmax), xlab="",ylab="", axes=F, type="n",ylim=myylim)
 
     # Plot the 'historic_test' argument i.e. know dates we want to add
-    if (!is.null(historic_test)){
+    if (!is.na(historic_test)){
       abline(v = -historic_test, col = adjustcolor("grey", alpha.f = .3), lwd=2)
       shadowtext(-historic_test,rep(-dmin, length(historic_test)),
                  labels = as.character(historic_test), col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1,cex = .9*mycex)
@@ -1426,7 +1463,7 @@ serac <- function(name="", model=c("CFCS"),Cher=c(),NWT=c(),Hemisphere=c(),FF=c(
         if (!is.na(historic_a[i])) {
           lines(x = c(rep(-historic_a[i],2)), y = c(20,-(historic_d_dt[i,1])),lty=3)
           par(xpd=T)
-          if (!is.null(historic_n[i]) && !is.na(historic_n[i])) {
+          if (!is.na(historic_n[i])) {
             shadowtext(-(min_yr+(coring_yr-min_yr)*.15),-mean(historic_d_dt[i,], na.rm=T),
                        labels = as.character(historic_n[i]), col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1,cex = 1*mycex)
           }
