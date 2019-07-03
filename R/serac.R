@@ -129,7 +129,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   }
 
   # depth must be provided by pair (upper and lower depths)
-  if(length(historic_d)>=1) {
+  if(length(historic_d)>=1 && !all(is.na(historic_d))) {
     if (length(historic_a) != length(historic_d)/2) stop("\n Warning, length(historic_a) != length(historic_d)/2 \n Depths for historic events must be given by pair - upper and lower depth.\n Read the help section.\n\n")
   }
 
