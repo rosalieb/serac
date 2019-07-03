@@ -424,15 +424,17 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
                          varves,
                          paste(sedchange, collapse = ", "),
                          SML)
+  this_code_history[this_code_history==""]=NA
   # First, check whether a file already exists
   if(length(list.files(paste(getwd(),"/Cores/",name,"/", sep=""), pattern="serac_model_history*", full.names=TRUE))==1) {
     # read previous file
     code_history <- read.delim(list.files(paste(getwd(),"/Cores/",name,"/", sep=""), pattern="serac_model_history*", full.names=TRUE))
+    code_history[code_history=="<NA>"] = NA
     # increment new code
     code_history <- rbind(code_history,this_code_history)
     #Check whether the code is a duplicate from a previous code (has this combination been tested before)
     if(all(sapply(code_history, function(x) duplicated(x))[nrow(code_history),-3])==TRUE)
-      message(paste0("\n General message: It seems you already tried this code combination. \n A historic of parameters tested can be looked up in the file\n 'serac_model_history_", name,".txt' (in the core directory). \n\n"))
+      cat(paste0("\n General message: It seems you already tried this code combination. \n A historic of parameters tested can be looked up in the file\n 'serac_model_history_", name,".txt' (in the core directory). \n\n"))
   } else {
     code_history <- as.data.frame(matrix(this_code_history, nrow=1))
   }
@@ -442,7 +444,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
                               "historic_depth","historic_age","historic_name",
                               "suppdescriptor","descriptor_lab",
                               "varves","sedchange","SML")
-  write.table(x = code_history, file = paste0(getwd(),"/Cores/",name,"/serac_model_history_",name,".txt"),col.names = T, row.names = F)
+  write.table(x = code_history, file = paste0(getwd(),"/Cores/",name,"/serac_model_history_",name,".txt"),col.names = T, row.names = F, sep = "\t")
 
   #### 2. LEAD 210 MODEL -----
   if(length(grep("Pb",x = colnames(dt)))>1 & length(grep("density",x = colnames(dt)))>=1) {
