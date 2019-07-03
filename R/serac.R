@@ -425,26 +425,29 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
                          paste(sedchange, collapse = ", "),
                          SML)
   this_code_history[this_code_history==""]=NA
+  this_code_history<- as.data.frame(matrix(this_code_history, nrow=1))
+  colnames(this_code_history) <- c("name","coring_yr","date_computation", "model_tested",
+                                   "Chernobyl","NWT","Hemisphere","FF",
+                                   "inst_deposit","ignore_depths",
+                                   "historic_depth","historic_age","historic_name",
+                                   "suppdescriptor","descriptor_lab",
+                                   "varves","sedchange","SML")
   # First, check whether a file already exists
   if(length(list.files(paste(getwd(),"/Cores/",name,"/", sep=""), pattern="serac_model_history*", full.names=TRUE))==1) {
     # read previous file
     code_history <- read.delim(list.files(paste(getwd(),"/Cores/",name,"/", sep=""), pattern="serac_model_history*", full.names=TRUE))
-    code_history[code_history=="<NA>"] = NA
     # increment new code
     code_history <- rbind(code_history,this_code_history)
-    #Check whether the code is a duplicate from a previous code (has this combination been tested before)
-    if(all(sapply(code_history, function(x) duplicated(x))[nrow(code_history),-3])==TRUE)
-      cat(paste0("\n General message: It seems you already tried this code combination. \n A historic of parameters tested can be looked up in the file\n 'serac_model_history_", name,".txt' (in the core directory). \n\n"))
   } else {
-    code_history <- as.data.frame(matrix(this_code_history, nrow=1))
+    code_history <- this_code_history
   }
-  colnames(code_history) <- c("name","coring_yr","date_computation", "model_tested",
-                              "Chernobyl","NWT","Hemisphere","FF",
-                              "inst_deposit","ignore_depths",
-                              "historic_depth","historic_age","historic_name",
-                              "suppdescriptor","descriptor_lab",
-                              "varves","sedchange","SML")
+  colnames(code_history) <- colnames(this_code_history)
   write.table(x = code_history, file = paste0(getwd(),"/Cores/",name,"/serac_model_history_",name,".txt"),col.names = T, row.names = F, sep = "\t")
+  #Check whether the code is a duplicate from a previous code (has this combination been tested before)
+  # First reread the file so all have the same format (some columns are turned in logical argument)
+  code_history <- read.delim(list.files(paste(getwd(),"/Cores/",name,"/", sep=""), pattern="serac_model_history*", full.names=TRUE))
+  if(nrow(code_history)>1 && all(sapply(code_history, function(x) duplicated(x))[nrow(code_history),-3])==TRUE)
+    cat(paste0("\n General message: It seems you already tried this code combination. \n A historic of parameters tested can be looked up in the file\n 'serac_model_history_", name,".txt' (in the core directory).\n ________________________\n \n\n"))
 
   #### 2. LEAD 210 MODEL -----
   if(length(grep("Pb",x = colnames(dt)))>1 & length(grep("density",x = colnames(dt)))>=1) {
@@ -771,7 +774,6 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     myltylegend <- c(myltylegend,NA)
     mycollegend <- c(mycollegend,"black")
   }
-
 
 
   if(exists("Cher") | exists("NWT") | exists("FF")) {
