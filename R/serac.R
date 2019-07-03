@@ -411,37 +411,30 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
   # 1.9. Save the code to the output file with the code history ####
   # save the model attempt in a file
+  # Row with all parameters that will be incremented:
+  this_code_history <- c(name,coring_yr,as.character(Sys.time()),paste(model, collapse = ", "),
+                         paste(Cher, collapse = ", "), paste(NWT, collapse = ", "), Hemisphere, paste(FF, collapse = ", "),
+                         paste(inst_deposit, collapse = ", "),
+                         paste(ignore, collapse = ", "),
+                         paste(historic_d, collapse = ", "),
+                         paste(historic_a, collapse = ", "),
+                         paste(historic_n, collapse = ", "),
+                         suppdescriptor,
+                         paste(descriptor_lab, collapse = ", "),
+                         varves,
+                         paste(sedchange, collapse = ", "),
+                         SML)
   # First, check whether a file already exists
   if(length(list.files(paste(getwd(),"/Cores/",name,"/", sep=""), pattern="serac_model_history*", full.names=TRUE))==1) {
     # read previous file
     code_history <- read.delim(list.files(paste(getwd(),"/Cores/",name,"/", sep=""), pattern="serac_model_history*", full.names=TRUE))
     # increment new code
-    code_history <- rbind(code_history,
-                          c(name,coring_yr,as.character(Sys.time()),paste(model, collapse = ", "),
-                            paste(Cher, collapse = ", "), paste(NWT, collapse = ", "), Hemisphere, paste(FF, collapse = ", "),
-                            paste(inst_deposit, collapse = ", "),
-                            paste(ignore, collapse = ", "),
-                            paste(historic_d, collapse = ", "),
-                            paste(historic_a, collapse = ", "),
-                            paste(historic_n, collapse = ", "),
-                            suppdescriptor,
-                            paste(descriptor_lab, collapse = ", "),
-                            varves,
-                            paste(sedchange, collapse = ", "),
-                            SML))
+    code_history <- rbind(code_history,this_code_history)
+    #Check whether the code is a duplicate from a previous code (has this combination been tested before)
+    if(all(sapply(code_history, function(x) duplicated(x))[nrow(code_history),-3])==TRUE)
+      message(paste0("\n General message: It seems you already tried this code combination. \n A historic of parameters tested can be looked up in the file\n 'serac_model_history_", name,".txt' (in the core directory). \n\n"))
   } else {
-    code_history <- as.data.frame(matrix(c(name,coring_yr,as.character(Sys.time()),paste(model, collapse = ", "),
-                                           paste(Cher, collapse = ", "), paste(NWT, collapse = ", "), Hemisphere, paste(FF, collapse = ", "),
-                                           paste(inst_deposit, collapse = ", "),
-                                           paste(ignore, collapse = ", "),
-                                           paste(historic_d, collapse = ", "),
-                                           paste(historic_a, collapse = ", "),
-                                           paste(historic_n, collapse = ", "),
-                                           suppdescriptor,
-                                           paste(descriptor_lab, collapse = ", "),
-                                           varves,
-                                           paste(sedchange, collapse = ", "),
-                                           SML), nrow=1))
+    code_history <- as.data.frame(matrix(this_code_history, nrow=1))
   }
   colnames(code_history) <- c("name","coring_yr","date_computation", "model_tested",
                               "Chernobyl","NWT","Hemisphere","FF",
