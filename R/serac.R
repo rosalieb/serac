@@ -66,7 +66,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
                   ignore=c(),plotpdf=FALSE,preview=TRUE,plotphoto=FALSE,minphoto=c(),maxphoto=c(),
                   Pbcol=c("black","midnightblue","darkgreen"),inst_depositcol=grey(0.85),
                   modelcol=c("black","red","darkorange"),
-                  historic_d=c(),historic_a=c(),historic_n=c(),historic_test=c(),
+                  historic_d=NA,historic_a=NA,historic_n=NA,historic_test=NA,
                   suppdescriptor=FALSE,descriptor_lab=c(),suppdescriptorcol=c("black","purple"),
                   coring_yr=c(),plot_Am=FALSE,plot_Cs=FALSE,plot_Pb=TRUE,
                   plot_Pb_inst_deposit=FALSE,plot_CFCS_regression=c(),
@@ -333,7 +333,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       } else {dt$depth_avg_2[i] <- dt$depth_avg[i]}
     }
     d <- dt$depth_avg_2[!is.na(dt$depth_avg_2)]
-    if(exists("historic_d")) dmax_corr=max(c(dt$depth_avg,historic_d),na.rm=T) else dmax_corr=max(c(dt$depth_avg),na.rm=T)
+    if(!is.na("historic_d")) dmax_corr=max(c(dt$depth_avg,historic_d),na.rm=T) else dmax_corr=max(c(dt$depth_avg),na.rm=T)
     inst_deposit_corr <- inst_deposit
     complete_core_depth_corr <- complete_core_depth[!is.na(complete_core_depth_2)]
     if(inst_deposit_present) for(i in 1:nrow(inst_deposit))
@@ -662,7 +662,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     colnames(output_agemodel_CFCS) <- c("depth", "BestAD", "MinAD", "MaxAD")
     output_agemodel_CFCS <- output_agemodel_CFCS[!duplicated(output_agemodel_CFCS[,1]),]
     output_agemodel_CFCS_inter <- as.data.frame(seq(0,max(output_agemodel_CFCS$depth,na.rm = T),by=stepout))
-    if (length(historic_d)>=1 && any(is.na(historic_a))) {
+    if (length(historic_d)>=1 && !all(is.na(historic_d)) && any(is.na(historic_a))) {
       whichNA <- which(is.na(historic_a))
       historic_d_dt <- matrix(historic_d, ncol = 2, byrow = T)
       myage_low <- approx(x= output_agemodel_CFCS$depth, output_agemodel_CFCS$MinAD, xout= historic_d_dt[is.na(historic_a),2])$y
@@ -1459,7 +1459,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     }
 
     # 6.5.b Plot historic event on age model ####
-    if(length(historic_d)>=1) {
+    if(length(historic_d)>=1 && !all(is.na(historic_d))) {
       historic_d_dt <- matrix(abs(historic_d), ncol = 2, byrow = T)
       for (i in seq_along(historic_a)) {
         if (!is.na(historic_a[i])) {
