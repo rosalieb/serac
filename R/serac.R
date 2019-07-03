@@ -588,7 +588,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   if(plot_Cs) {
 
     #Chernobyl
-    if (!is.na(Cher)) {
+    if (all(!is.na(Cher))) {
       peakCher <- -mean(Cher)
       dates <- c(dates,1986)
       dates_depth_avg <- c(dates_depth_avg,peakCher)
@@ -596,7 +596,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       err_dates_avg <- c(err_dates_avg,NA)
     }
     #NWT
-    if (!is.na(NWT)) {
+    if (all(!is.na(NWT))) {
       peakNWT <- -mean(NWT)
       dates <- c(dates,NWT_a)
       dates_depth_avg <- c(dates_depth_avg,peakNWT)
@@ -605,7 +605,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       if (Hemisphere =="SH") err_dates_avg <- c(err_dates_avg,.5)
     }
     #First radionuclides fallout
-    if (!is.na(FF)) {
+    if (all(!is.na(FF))) {
       peakFF <- -mean(FF)
       dates <- c(dates,1955)
       dates_depth_avg <- c(dates_depth_avg,peakFF)
