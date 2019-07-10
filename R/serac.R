@@ -6,10 +6,10 @@
 #' @param name Name of the core, given using quotes. Defaults to the core provided with serac. Use preferably the published name of the core for traceability.
 #' @param coring_yr Year of coring.
 #' @param model Select 1 to 3 item between c("CFCS", "CIC", "CRS"). If several models are selected, they will all be plotted together in the last window.
-#' @param Cher If 137Cs measurement were done, where do you detect the Chernobyl peak? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the 1986 Chernobyl event. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty.
-#' @param NWT If 137Cs measurement were done, where do you detect the Nuclear Weapon Test peak? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the 1960s Nuclear Weapon Test event. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty.
+#' @param Cher If 137Cs measurement were done, where do you detect the Chernobyl peak? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the 1986 Chernobyl event. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty. Note that the two depths needs to represent a sample, or more than a sample.
+#' @param NWT If 137Cs measurement were done, where do you detect the Nuclear Weapon Test peak? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the 1960s Nuclear Weapon Test event. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty. Note that the two depths needs to represent a sample, or more than a sample.
 #' @param Hemisphere Chose between North Hemisphere "NH" and South Hemisphere "SH" depending on the location of your system. This argument is required if you chose to plot NWT.
-#' @param FF If 137Cs measurement were done, where do you detect the First Fallout period? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the First Fallout period in 1955. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty.
+#' @param FF If 137Cs measurement were done, where do you detect the First Fallout period? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the First Fallout period in 1955. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty. Note that the two depths needs to represent a sample, or more than a sample.
 #' @param inst_deposit Upper and lower depths (in mm) of sections of abrupt accumulation that inst_deposit c() should be excised, e.g., c(100, 120, 185, 195) for two sections of 10.0-12.0 cm and 18.5-19.5 cm depth
 #' @param ignore The depth (in mm) of any sample that should be ignored from the age-depth model computation, e.g., c(55) will remove the measurement done at 5.5 cm. The data will be ploted by default in grey on the output graph (you can change this with the inst_depositcol argument)
 #' @param plotpdf Logical argument to indicate whether you want the output graph to be saved to your folder.
@@ -232,11 +232,12 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     test1 <- c(test1,dt$depth_top[i]-dt$depth_bottom[i-1])
   }
   if(!is.null(dt$density) && !all(test1==0)) {
-    message("\n Warning, density is not given continuously for the whole core.\n Inventories, CRS model, and mass accumulation rate should be\n interpreted very carefully. Alternatively, enter the density\n for the whole core.\n")
+    message(paste0("\n Warning, density is not given continuously for the whole core.\n Inventories, CRS model, and mass accumulation rate should be\n interpreted very carefully. Alternatively, enter the density\n for the whole core.\n There is(are) ",length(test1[test1!=0])," layer(s) missing at: \n "))
+    message(paste0("     - ",dt$depth_bottom[which(test1>0)],"-",dt$depth_top[which(test1>0)+1]," mm \n"))
   }
 
   # 1.3. Fill in missing data ####
-  # 1.3.1 Complete core vector ####
+  # 1.3 Complete core vector ####
   # Create the vector complete_core_depth when the measurements haven't been done for all the layers.
   # Necessary for inventory for instance.
   complete_core_temporary <- c(0,dt$depth_top, dt$depth_bottom,inst_deposit)
@@ -266,33 +267,6 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   # Generate the complete density (in case the sampling was not continuous).
   # It is just a linear interpolation.
   if(length(grep("density",x = colnames(dt)))>=1) complete_core_density <- approx(x= dt$depth_avg, dt$density, xout= complete_core_depth, rule = 2)$y
-
-  # 1.3.2 Optional - calculate mass depth ####
-  if(mass_depth) {
-    # Step 1: mass thickness (epaisseur massique)
-    dt$mass_depth_top    <- rep(NA, nrow(dt))
-    dt$mass_depth_bottom <- dt$density/10 * (dt$depth_bottom - dt$depth_top)
-    for(i in 2:nrow(dt)) {
-      if(dt$depth_top[i]==dt$depth_bottom[i-1]) {
-        dt$mass_depth_top[i] = dt$mass_depth_bottom[i-1]
-      } else {
-        dt$mass_depth_top[i] = complete_core_density[which(complete_core_depth_bottom==dt$depth_top[i])] *
-          (complete_core_depth_bottom[which(complete_core_depth_bottom==dt$depth_top[i])] - complete_core_depth_top[which(complete_core_depth_bottom==dt$depth_top[i])])
-      }
-    }
-    dt$mass_depth_top[1]=0
-    if(dt$depth_top[1]!=0) message(paste0("\n Warning. Mass depth for your first sample (",dt$depth_top[1],"-",dt$depth_bottom[1], " mm) was set\n to 0 to allow further calculation, but you did not provide\n density for the surface layer (0-",dt$depth_top[1]," mm). Include density for\n the surface layer if you can, or interpret the results with care.\n\n"))
-
-    # Step 3: mass depth
-    for(i in 2:nrow(dt)) {
-      dt$mass_depth_top[i]    <- dt$mass_depth_top[i-1]    + dt$mass_depth_top[i]
-      dt$mass_depth_bottom[i] <- dt$mass_depth_bottom[i-1] + dt$mass_depth_bottom[i]
-    }
-    dt$mass_depth_avg         <- (dt$mass_depth_bottom + dt$mass_depth_top)/2
-
-    # ylim for mass depth plots
-    myylim_md <- c(-round(max(dt$mass_depth_bottom, na.rm=T)),0)
-  }
 
   # 1.4. Which keep ####
   # When calculating the inventories, we don't want to take in account the depth included
@@ -343,7 +317,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   myltylegend <- NULL
   mycollegend <- NULL
 
-  # 1.6.1 Create the composite free depth_avg ####
+  # 1.6 Create the composite free depth_avg ####
   ### Create the composite free depth_avg - step 1
   if(!exists("ignore")) ignore <- NULL
   if(SML>0) ignore <- c(ignore,dt$depth_avg[dt$depth_avg<=SML])
@@ -353,7 +327,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
   dt$depth_avg_2 <- rep(NA,nrow(dt))
   for (i in 1:nrow(dt)) {
-    if(!is.null(ignore)|max(inst_deposit)>0) {
+    if(length(ignore)>0|max(inst_deposit)>0) {
       if(any(ignore==dt$depth_avg[i])) {
         dt$depth_avg_2[i] <- NA
       } else {dt$depth_avg_2[i] <- dt$depth_avg[i]}
@@ -371,11 +345,11 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     for(i in 1:nrow(inst_deposit)) {
       if(length(dt$depth_avg[dt$depth_avg >= min(inst_deposit[i,]) & dt$depth_avg <= max(inst_deposit[i,])])>0) ignore <- c(ignore,dt$depth_avg[dt$depth_avg >= min(inst_deposit[i,]) & dt$depth_avg <= max(inst_deposit[i,])])
     }
-    if(!is.null(ignore)) ignore <- ignore[!duplicated(ignore)]
-    if(!is.null(ignore)) ignore <- ignore[order(ignore)]
+    if(length(ignore)>0) ignore <- ignore[!duplicated(ignore)]
+    if(length(ignore)>0) ignore <- ignore[order(ignore)]
     for (i in 1:nrow(dt)) {
-      if(!is.null(ignore)&&max(ignore, na.rm=T)>0|max(inst_deposit)>0) {
-        if(!is.null(ignore)&&any(ignore==dt$depth_avg[i])) {
+      if(length(ignore)>0&&max(ignore, na.rm=T)>0|max(inst_deposit)>0) {
+        if(length(ignore)>0&&any(ignore==dt$depth_avg[i])) {
           dt$depth_avg_2[i] <- NA
         } else {dt$depth_avg_2[i] <- dt$depth_avg[i]}
       } else {dt$depth_avg_2[i] <- dt$depth_avg[i]}
@@ -405,46 +379,72 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     complete_core_depth_corr <- complete_core_depth[!is.na(complete_core_depth_2)]
   }
 
-  # 1.6.2 Create the composite mass depth corrected for event ####
+  # By the end here, you should have 3 columns for depth_avg: 1 with original depth_avg, 1 with removed events + suspicious data, 1 with event free depth_avg
+
+  # 1.7.1 mass_depth - Create the composite mass depth corrected for event ####
   if(mass_depth) {
-    if(inst_deposit_present) {
-      # Step 1: mass thickness (epaisseur massique)
-      dt$mass_depth_top_corr    <- rep(NA, nrow(dt))
-      dt$mass_depth_bottom_corr <- dt$density/10 * (dt$depth_bottom - dt$depth_top)
-      for(i in 2:nrow(dt)) {
-        if(dt$depth_top[i]==dt$depth_bottom[i-1]) {
-          dt$mass_depth_top_corr[i] = dt$mass_depth_bottom_corr[i-1]
-        } else {
-          dt$mass_depth_top_corr[i] = complete_core_density[which(complete_core_depth_bottom==dt$depth_top[i])] *
-            (complete_core_depth_bottom[which(complete_core_depth_bottom==dt$depth_top[i])] - complete_core_depth_top[which(complete_core_depth_bottom==dt$depth_top[i])])
-        }
+    # Step 1.1: mass thickness (epaisseur massique)
+    dt$mass_depth_top    <- rep(NA, nrow(dt))
+    dt$mass_depth_bottom <- dt$density/10 * (dt$depth_bottom - dt$depth_top)
+    for(i in 2:nrow(dt)) {
+      if(dt$depth_top[i]==dt$depth_bottom[i-1]) {
+        dt$mass_depth_top[i] = dt$mass_depth_bottom[i-1]
+      } else {
+        dt$mass_depth_top[i] = complete_core_density[which(complete_core_depth_bottom==dt$depth_top[i])] *
+          (complete_core_depth_bottom[which(complete_core_depth_bottom==dt$depth_top[i])] - complete_core_depth_top[which(complete_core_depth_bottom==dt$depth_top[i])])
       }
-      dt$mass_depth_top_corr[1]=0
-      if(dt$depth_top[1]!=0) message(paste0("\n Warning. Mass depth for your first sample (",dt$depth_top[1],"-",dt$depth_bottom[1], " mm) was set\n to 0 to allow further calculation, but you did not provide\n density for the surface layer (0-",dt$depth_top[1]," mm). Include density for\n the surface layer if you can, or interpret the results with care.\n\n"))
+    }
+    dt$mass_depth_top[1]=0
+    if(dt$depth_top[1]!=0) message(paste0("\n Warning. Mass depth for your first sample (",dt$depth_top[1],"-",dt$depth_bottom[1], " mm) was set\n to 0 to allow further calculation, but you did not provide\n density for the surface layer (0-",dt$depth_top[1]," mm). Include density for\n the surface layer if you can, or interpret the results with care.\n\n"))
 
-      # Step 2: put NA for the ones with missing values
-      dt$mass_depth_top_corr[is.na(dt$d)]    <- NA
-      dt$mass_depth_bottom_corr[is.na(dt$d)] <- NA
-      dt <- dt[order(dt$mass_depth_bottom_corr),]
+    dt$mass_depth_avg         <- rep(NA, nrow(dt))
 
-      # Step 3: mass depth corrected
-      for(i in 2:length(!is.na(dt$mass_depth_bottom_corr))) {
+    # Step 2 (optional): if inst deposit calculate corrected mass_depth
+    if(inst_deposit_present) { # If inst_deposit, create specific columns
+      # Start from same vectors
+      dt$mass_depth_top_corr    <- dt$mass_depth_top
+      dt$mass_depth_bottom_corr <- dt$mass_depth_bottom
+
+      # Put NA for the ones with missing values
+      dt$mass_depth_top_corr[is.na(dt$depth_avg_2)]    <- NA
+      dt$mass_depth_bottom_corr[is.na(dt$depth_avg_2)] <- NA
+      dt <- dt[c(order(dt$depth_avg)[!is.na(dt$depth_avg_2)],which(is.na(dt$depth_avg_2))),]
+
+      # Finally for the corrected vector, compute the actual mass depth (integral starting from the surface)
+      for(i in 2:nrow(dt[which(!is.na(dt$depth_avg_2)),])) {
         dt$mass_depth_top_corr[i]    <- dt$mass_depth_top_corr[i-1]    + dt$mass_depth_top_corr[i]
         dt$mass_depth_bottom_corr[i] <- dt$mass_depth_bottom_corr[i-1] + dt$mass_depth_bottom_corr[i]
       }
       dt$mass_depth_avg_corr         <- (dt$mass_depth_bottom_corr + dt$mass_depth_top_corr)/2
       dt <- dt[order(dt$depth_avg),]
-    } else {
+
+    }
+
+    # Step 3: calculate actual mass depth, integral starting from the surface
+    for(i in 2:nrow(dt)) {
+      dt$mass_depth_top[i]    <- dt$mass_depth_top[i-1]    + dt$mass_depth_top[i]
+      dt$mass_depth_bottom[i] <- dt$mass_depth_bottom[i-1] + dt$mass_depth_bottom[i]
+    }
+    dt$mass_depth_avg         <- (dt$mass_depth_bottom + dt$mass_depth_top)/2
+
+    # Step 4 (optional, only if step 2 was skipped)
+    # If no inst deposit, we still need these vector for plotting
+    # Since there's no need to correct, create the corrected as the exact same than the normal
+    if(!inst_deposit_present) {
       dt$mass_depth_top_corr    <- dt$mass_depth_top
       dt$mass_depth_bottom_corr <- dt$mass_depth_bottom
       dt$mass_depth_avg_corr    <- dt$mass_depth_avg
     }
+
+    # Lastly, ylim for mass depth plots
+    myylim_md <- c(-round(max(dt$mass_depth_bottom, na.rm=T)),0)
   }
+  # By the end here, you should have 6 columns for mass_depth:
+  #    2 times 3 columns. The 3 columns are top, average, and bottom mass depth
+  #    replicate because there's actual depth (for plot_Pb)
+  #    and depth with inst_deposit (for plot_Pb_inst_deposit)
 
-
-  # By the end here, you should have 3 columns for depth_avg: 1 with original depth_avg, 1 with removed events + suspicious data, 1 with event free depth_avg
-
-  # 1.7. Create an extra column for depth, according to mass_depth==T/F ####
+  # 1.7.2 mass_depth - Create an extra column 'which_scale' for depth, according to mass_depth==T/F ####
   if(!mass_depth) dt$which_scale <- dt$d else dt$which_scale <- dt$mass_depth_avg_corr
 
   # 1.8. Create separate datasets for different sedimentation rates) ####
@@ -459,28 +459,35 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     d_for_CFCS <- c(d_for_CFCS,dt$depth_avg[!is.na(dt$mass_depth_avg)])
     d_for_CFCS <- unique(d_for_CFCS)
   }
+  d_for_CFCS <- c(0,d_for_CFCS,sedchange,dmax)
   d_for_CFCS <- d_for_CFCS[order(d_for_CFCS)]
 
   # Final vector of depths that will be used for linear model (This is the 1/2 vector we're creating in this section)
-  depth_avg_to_date <- c(0,d_for_CFCS,sedchange,dmax)
-  depth_avg_to_date <- depth_avg_to_date[order(depth_avg_to_date)]
+  depth_avg_to_date <- d_for_CFCS[order(d_for_CFCS)]
 
-  # When there is an instantaneous deposit, the bottom depth is used.
-  for (i in 2:length(d_for_CFCS)) {
-    if(max(inst_deposit,na.rm = T)>0) {
-      if(any(d_for_CFCS[i]==inst_deposit[,2])) {d_for_CFCS[i] <- d_for_CFCS[i-1]}  #else {d_for_CFCS[i] <- d_for_CFCS[i-1]+d_temp1[i]-d_temp1[i-1]}
-    } else {d_for_CFCS[i] <- d_for_CFCS[i]}
+  # When there is an instantaneous deposit, the top depth is used.
+  if(max(inst_deposit,na.rm = T)>0) {
+    for(r in 1:nrow(inst_deposit)) {
+      d_for_CFCS[d_for_CFCS > min(inst_deposit[r,]) & d_for_CFCS <= max(inst_deposit[r,])]  <- d_for_CFCS[d_for_CFCS == min(inst_deposit[r,])]
+    }
   }
-  depth_avg_to_date_corr <- c(0,d_for_CFCS,sedchange,dmax)
-  depth_avg_to_date_corr <- depth_avg_to_date_corr[order(depth_avg_to_date_corr)]
 
-  # Create a corrected vector that take in account instantaneous deposits, in the same way that before
+  depth_avg_to_date_corr <- d_for_CFCS[order(d_for_CFCS)]
+
+  # If there are more than 1 change in sedimentation rate,we also need to
+  #   substract the sediment layer to the corrected depth average to date
+  #   vector 'depth_avg_to_date_corr'
+  # Create a corrected table of inst_deposit that take in account instantaneous deposits
   inst_deposit_corr2 <- inst_deposit
-  if(exists("inst_deposit")&&length(inst_deposit) > 1) for(i in 1:nrow(inst_deposit))
-  {
-    depth_avg_to_date_corr[depth_avg_to_date_corr > min(inst_deposit_corr2[i,])]  <- depth_avg_to_date_corr[depth_avg_to_date_corr > min(inst_deposit_corr2[i,])] - (max(inst_deposit_corr2[i,]) - min(inst_deposit_corr2[i,]))
-    if((1+i)<=nrow(inst_deposit)) inst_deposit_corr2[c(1+i):nrow(inst_deposit),] <- inst_deposit_corr2[c(1+i):nrow(inst_deposit),] - (max(inst_deposit_corr[i,])-min(inst_deposit_corr[i,]))
-  }
+  if(exists("inst_deposit")&&length(inst_deposit) > 1)
+    for(i in 1:nrow(inst_deposit)) {
+      if((1+i)<=nrow(inst_deposit))  {
+        depth_avg_to_date_corr[depth_avg_to_date_corr>min(inst_deposit_corr2[i,])] <-
+          depth_avg_to_date_corr[depth_avg_to_date_corr>min(inst_deposit_corr2[i,])] - (max(inst_deposit_corr2[i,])-min(inst_deposit_corr2[i,]))
+        inst_deposit_corr2[c(1+i):nrow(inst_deposit),] <-
+          inst_deposit_corr2[c(1+i):nrow(inst_deposit),] - (max(inst_deposit_corr[i,])-min(inst_deposit_corr[i,]))
+      }
+    }
   rm(inst_deposit_corr2)
 
   # Create sub-dataset if different sedimentation rates
@@ -585,7 +592,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
           cat(paste("\n Sedimentation rate (CFCS model): V= ",abs(round(sr_sed1,3))," mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
           cat(paste("                          Error:     +/- ",abs(round(sr_sed1_err,3))," mm/yr\n", sep=""))
         } else {
-          cat(paste("\n Mass accumulation rate (CFCS model): V= ",abs(round(sr_sed1,3))," g/mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
+          cat(paste("\n Mass accumulation rate (CFCS model): MAR= ",abs(round(sr_sed1,3))," g/mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
           cat(paste("                              Error:     +/- ",abs(round(sr_sed1_err,3))," g/mm/yr\n", sep=""))
         }
       }
@@ -604,9 +611,9 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
             cat(paste("\n Sedimentation rate (CFCS model) ", sedchange[1],"mm-bottom",": V= ",abs(round(sr_sed2,3))," mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4),"\n", sep=""))
             cat(paste("                          Error:     +/- ",abs(round(sr_sed2_err,3))," mm/yr\n", sep=""))
           } else {
-            cat(paste("\n Mass accumulation rate (CFCS model) ", SML,"-",sedchange[1],"mm: V= ",abs(round(sr_sed1,3))," g/mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
+            cat(paste("\n Mass accumulation rate (CFCS model) ", SML,"-",sedchange[1],"mm: MAR= ",abs(round(sr_sed1,3))," g/mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
             cat(paste("                              Error:     +/- ",abs(round(sr_sed1_err,3))," g/mm/yr\n", sep=""))
-            cat(paste("\n Mass accumulation rate (CFCS model) ", sedchange[1],"mm-bottom",": V= ",abs(round(sr_sed2,3))," g/mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4),"\n", sep=""))
+            cat(paste("\n Mass accumulation rate (CFCS model) ", sedchange[1],"mm-bottom",": MAR= ",abs(round(sr_sed2,3))," g/mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4),"\n", sep=""))
             cat(paste("                              Error:     +/- ",abs(round(sr_sed2_err,3))," g/mm/yr\n", sep=""))
           }
 
@@ -643,11 +650,11 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
             cat(paste("\n Sedimentation rate (CFCS model) ", sedchange[2],"mm-bottom",": V= ",abs(round(sr_sed3,3))," mm/yr, R2= ", round(summary(lm_sed3)$r.squared,4),"\n", sep=""))
             cat(paste("                          Error:     +/- ",abs(round(sr_sed3_err,3))," mm/yr\n", sep=""))
           } else {
-            cat(paste("\n Mass accumulation rate (CFCS model) ", SML,"-",sedchange[1],"mm: V= ",abs(round(sr_sed1,3))," g/mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
+            cat(paste("\n Mass accumulation rate (CFCS model) ", SML,"-",sedchange[1],"mm: MAR= ",abs(round(sr_sed1,3))," g/mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
             cat(paste("                              Error:     +/- ",abs(round(sr_sed1_err,3))," g/mm/yr\n", sep=""))
-            cat(paste("\n Mass accumulation rate (CFCS model) ", sedchange[1],"-",sedchange[2],"mm: V= ",abs(round(sr_sed2,3))," g/mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4),"\n", sep=""))
+            cat(paste("\n Mass accumulation rate (CFCS model) ", sedchange[1],"-",sedchange[2],"mm: MAR= ",abs(round(sr_sed2,3))," g/mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4),"\n", sep=""))
             cat(paste("                              Error:     +/- ",abs(round(sr_sed2_err,3))," g/mm/yr\n", sep=""))
-            cat(paste("\n Mass accumulation rate (CFCS model) ", sedchange[2],"mm-bottom",": V= ",abs(round(sr_sed3,3))," g/mm/yr, R2= ", round(summary(lm_sed3)$r.squared,4),"\n", sep=""))
+            cat(paste("\n Mass accumulation rate (CFCS model) ", sedchange[2],"mm-bottom",": MAR= ",abs(round(sr_sed3,3))," g/mm/yr, R2= ", round(summary(lm_sed3)$r.squared,4),"\n", sep=""))
             cat(paste("                              Error:     +/- ",abs(round(sr_sed3_err,3))," g/mm/yr\n", sep=""))
           }
 
@@ -761,8 +768,10 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     for(i in seq_along(FF)) FF_allscales <- c(FF_allscales,dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - FF[i]))])
     depth_avg_to_date_allscales <- NULL
     for(i in seq_along(depth_avg_to_date)) c(depth_avg_to_date_allscales,depth_avg_to_date_allscales <- c(depth_avg_to_date_allscales,dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - depth_avg_to_date[i]))]))
+    depth_avg_to_date_allscales[1] <- 0
     depth_avg_to_date_corr_allscales <- NULL
     for(i in seq_along(depth_avg_to_date_corr)) depth_avg_to_date_corr_allscales <- c(depth_avg_to_date_corr_allscales,dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - depth_avg_to_date_corr[i]))])
+    depth_avg_to_date_corr_allscales[1] <- 0
     if (all(!is.na(Cher))) {
       peakCher_allscales <- NULL
       for(i in seq_along(peakCher)) peakCher_allscales <- c(peakCher_allscales,-dt$mass_depth_bottom[which.min(abs(dt$depth_bottom + peakCher[i]))])
@@ -813,15 +822,17 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     }
 
     # Delete any age in an inst_deposit
-    which_keep2 <- NULL
-    for(i in 1:nrow(inst_deposit)) {
-      which_keep2 <- c(which_keep2,which(depth_avg_to_date_allscales>inst_deposit[i,1]&depth_avg_to_date_allscales<inst_deposit[i,2]))
+    if(inst_deposit_present) {
+      which_keep2 <- NULL
+      for(i in 1:nrow(inst_deposit)) {
+        which_keep2 <- c(which_keep2,which(depth_avg_to_date>inst_deposit[i,1]&depth_avg_to_date<inst_deposit[i,2]))
+      }
+      if(length(which_keep2)>0) {
+        depth_avg_to_date_allscales <- depth_avg_to_date_allscales[-which_keep2]
+        depth_avg_to_date_corr_allscales <- depth_avg_to_date_corr_allscales[-which_keep2]
+      }
+      rm(which_keep2)
     }
-    if(length(which_keep2)>0) {
-      depth_avg_to_date_allscales <- depth_avg_to_date_allscales[-which_keep2]
-      depth_avg_to_date_corr_allscales <- depth_avg_to_date_corr_allscales[-which_keep2]
-    }
-    rm(which_keep2)
 
     output_agemodel_CFCS <- matrix(rep(NA,length(depth_avg_to_date_allscales)*4), ncol=4)
     for(i in seq_along(depth_avg_to_date_allscales)){
@@ -861,7 +872,10 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     if(exists("inst_deposit")&&length(inst_deposit)>1) {
       cat(paste("\n Age approximation of instantaneous deposit(s) from CFCS model:\n"))
       for (i in 1:nrow(inst_deposit)) {
-        cat(paste("     The instantaneous deposit at ",inst_deposit[i,1],"-", inst_deposit[i,2]," mm has an estimated range of: ", round(output_agemodel_CFCS[which(output_agemodel_CFCS[,1]==inst_deposit[i,1]),3]),"-",round(output_agemodel_CFCS[which(output_agemodel_CFCS[,1]==inst_deposit[i,1]),4]),".\n\n",sep=""))
+        if(length(round(output_agemodel_CFCS[which(output_agemodel_CFCS[,1]==inst_deposit[i,1]),3]))>0)
+          cat(paste0("     The instantaneous deposit at ",inst_deposit[i,1],"-", inst_deposit[i,2]," mm has an estimated range of: ", round(output_agemodel_CFCS[which(output_agemodel_CFCS[,1]==inst_deposit[i,1]),3]),"-",round(output_agemodel_CFCS[which(output_agemodel_CFCS[,1]==inst_deposit[i,1]),4]),".\n")) else
+            cat(paste0("    /!\\  Instantaneous deposit at ",inst_deposit[i,1],"-", inst_deposit[i,2]," mm: not enough data to calculate an age-range.  "))
+        if(i==nrow(inst_deposit)) cat("\n")
       }
     }
 
@@ -1327,7 +1341,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
         if(inst_deposit_present)  for (i in 1:nrow(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),])) rect(xleft = log(.1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
         if(SML>0) rect(xleft = log(.1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - SML))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = 0, col=grey(0.97), border=NA)
         par(xpd=T)
-        if(inst_deposit_present)  for (i in 1:nrow(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),])) rect(xleft = log(15000), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+        if(inst_deposit_present)  for (i in 1:nrow(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),])) rect(xleft = log(1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
         if(SML>0) rect(xleft = log(15000), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - SML))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = 0, col=grey(0.97), border=NA)
         par(xpd=F)
 
@@ -1478,7 +1492,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
             par(mar=c(4.1,4.1,4.1,1.1))
             with (
               data=dt_sed1
-              , expr = errbar(log(Pbex),-mass_depth_avg,-mass_depth_bottom,-mass_depth_top, pch=16, cap=.01, xlab="",ylab="", axes=F,xlim=c(log(1),log(mround(max(dt$Pbex,na.rm=T),1000))),ylim=myylim_md, col=Pbcol[1], errbar.col = Pbcol[1], cex=.8)
+              , expr = errbar(log(Pbex),-mass_depth_avg_corr,-mass_depth_bottom_corr,-mass_depth_top_corr, pch=16, cap=.01, xlab="",ylab="", axes=F,xlim=c(log(1),log(mround(max(dt$Pbex,na.rm=T),1000))),ylim=myylim_md, col=Pbcol[1], errbar.col = Pbcol[1], cex=.8)
             )
 
             if(inst_deposit_present) {
@@ -1498,15 +1512,15 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
               }
               for (i in 1:nrow(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),])) rect(xleft = log(max(dt$Pbex,na.rm=T))+log(2)-log(.5), -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(18000), ytop = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
               par(xpd=F)
-              points(log(dt_sed1$Pbex),-dt_sed1$d, pch=16, cex=.8)
+              points(log(dt_sed1$Pbex),-dt_sed1$mass_depth_avg_corr, pch=16, cex=.8)
             }
 
           }
         }
 
         if(!mass_depth) which_scale = dt_sed1$d else which_scale = dt_sed1$mass_depth_avg_corr
-        for (i in 1:length(which(dt_sed1$d>0))) {
-          lines(c(log(dt_sed1$Pbex[which(dt_sed1$d>0)][i]+dt_sed1$Pbex_er[which(dt_sed1$d>0)][i]),log(dt_sed1$Pbex[which(dt_sed1$d>0)][i]-dt_sed1$Pbex_er[which(dt_sed1$d>0)][i])),
+        for (i in which(dt_sed1$d>0)) {
+          lines(c(log(dt_sed1$Pbex[i]+dt_sed1$Pbex_er[i]),log(dt_sed1$Pbex[i]-dt_sed1$Pbex_er[i])),
                 rep(-which_scale[i],2), type="o", pch="|", cex=.5, col=Pbcol[1])
         }
 
@@ -1564,10 +1578,10 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
         mtext(text = bquote(~""^210*Pb[ex]*" (mBq/g)"), side = 3, line=2.2, cex=cex_1)
 
         #Add depth label if last plot
-        if(!plot_Cs) {
+        if(!plot_Cs&mass_depth) {
           #par(xpd=T)
-          axis(4, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 20),n=40), labels = NA, cex.axis=cex_2, lwd=.5)
-          axis(4, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 5)), labels=-(pretty(seq(myylim_md[1], myylim_md[2], length.out = 5))), cex.axis=cex_2)
+          axis(4, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 20),n=40), labels = NA, cex.axis=cex_2, lwd=.5,line=1.1)
+          axis(4, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 5)), labels=-(pretty(seq(myylim_md[1], myylim_md[2], length.out = 5))), cex.axis=cex_2,line=1.1)
           mtext(text = bquote("Mass depth (g.cm"*~""^-2*")"), side = 4, line=3.2, cex=cex_1)
           #par(xpd=F)
         }
@@ -1591,11 +1605,11 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
         # When plotting the linear model, we'll use either of these two following lines (after toplm definition)
         # One other special case regarding the next lines (before if()): when the surface samples are ignored, the regression line must not extend to the surface
         # We then define the value 'top linear model' to decrease the number of conditons in the code...
-        if (!is.null(ignore)) toplm <- max(c(SML,min(dt$depth_avg[!dt$depth_avg %in% ignore], na.rm = T)), na.rm = T) else toplm <- SML
-        if(mass_depth) toplm <- dt$mass_depth_bottom_corr[which.min(abs(dt$depth_bottom_corr - toplm))]
+        if (length(ignore)>0) toplm <- max(c(SML,min(dt$depth_avg[!dt$depth_avg %in% ignore], na.rm = T)), na.rm = T) else toplm <- SML
+        if(mass_depth) toplm <- dt$mass_depth_bottom_corr[which.min(abs(dt$depth_bottom - toplm))]
 
         if (is.null(ignore) || !is.null(is.null(ignore)) && sedchange_corr[1] > max(ignore,na.rm=T)) lines(c(-toplm,-sedchange_corr_allscales[1])~ c(lm_sed1$coefficients[1]+toplm*lm_sed1$coefficients[2],lm_sed1$coefficients[1]+sedchange_corr_allscales[1]*lm_sed1$coefficients[2]), col=Pbcol[1], lwd=2)
-        if (!is.null(ignore) && sedchange_corr[1] <= max(ignore, na.rm=T)) {
+        if (length(ignore)>0 && sedchange_corr[1] <= max(ignore, na.rm=T)) {
           if(!mass_depth) lines(c(-toplm,-max(dt$d[!dt$depth_avg %in% ignore & dt$d<sedchange_corr[1]],na.rm=T))~ c(lm_sed1$coefficients[1]+toplm*lm_sed1$coefficients[2],lm_sed1$coefficients[1]+max(dt$d[!dt$depth_avg %in% ignore & dt$d<sedchange_corr[1]],na.rm=T)*lm_sed1$coefficients[2]), col=Pbcol[1], lwd=2)
           if(mass_depth)  lines(c(-toplm,-max(dt$mass_depth_avg_corr[!dt$depth_avg %in% ignore & dt$d<sedchange_corr[1]],na.rm=T))~ c(lm_sed1$coefficients[1]+toplm*lm_sed1$coefficients[2],lm_sed1$coefficients[1]+max(dt$mass_depth_avg_corr[!dt$depth_avg %in% ignore & dt$d<sedchange_corr[1]],na.rm=T)*lm_sed1$coefficients[2]), col=Pbcol[1], lwd=2)
         }
@@ -1606,7 +1620,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
           shadowtext(x = 0,y = -d_legend,labels = bquote(V ~ "=" ~ .(abs(round(sr_sed1,3))) ~ mm.yr^-1), pos = 4, col=Pbcol[1], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
         } else {
           d_legend <- mean(c(min(dt_sed1$mass_depth_avg_corr,na.rm = T),max(dt_sed1$mass_depth_avg_corr,na.rm = T)))*.8
-          shadowtext(x = 0,y = -d_legend-.06*dt_sed1$mass_depth_bottom_corr[which.max(abs(dt_sed1$depth_bottom))],labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed1)$r.squared,4))), pos = 4, col=Pbcol[1], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
+          shadowtext(x = 0,y = -d_legend-.095*dt$mass_depth_bottom_corr[max(abs(dt$mass_depth_bottom), na.rm=T)],labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed1)$r.squared,4))), pos = 4, col=Pbcol[1], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
           shadowtext(x = 0,y = -d_legend,labels = bquote(MAR ~ "=" ~ .(abs(round(sr_sed1,3))) ~ g.mm^-1~.yr^-1), pos = 4, col=Pbcol[1], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
         }
 
@@ -1614,15 +1628,15 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
           if(length(sedchange)==1) {
             if(!mass_depth) {
               if (is.null(ignore) || !is.null(is.null(ignore)) && max(dt_sed2$depth_avg, na.rm = T) > max(ignore, na.rm=T)) lines(c(-sedchange_corr[1],-max(dt_sed2$d, na.rm = T))~ c(lm_sed2$coefficients[1]+sedchange_corr[1]*lm_sed2$coefficients[2],lm_sed2$coefficients[1]+max(dt_sed2$d, na.rm = T)*lm_sed2$coefficients[2]), lwd=2, col=Pbcol[2])
-              if (!is.null(ignore) && max(dt_sed2$depth_avg, na.rm = T) <= max(ignore, na.rm=T)) lines(c(-sedchange_corr[1],-max(dt$d[!dt$depth_avg %in% ignore],na.rm=T))~ c(lm_sed2$coefficients[1]+sedchange_corr[1]*lm_sed2$coefficients[2],lm_sed2$coefficients[1]+max(dt$d[!dt$depth_avg %in% ignore],na.rm=T)*lm_sed2$coefficients[2]), lwd=2, col=Pbcol[2])
+              if (length(ignore)>0 && max(dt_sed2$depth_avg, na.rm = T) <= max(ignore, na.rm=T)) lines(c(-sedchange_corr[1],-max(dt$d[!dt$depth_avg %in% ignore],na.rm=T))~ c(lm_sed2$coefficients[1]+sedchange_corr[1]*lm_sed2$coefficients[2],lm_sed2$coefficients[1]+max(dt$d[!dt$depth_avg %in% ignore],na.rm=T)*lm_sed2$coefficients[2]), lwd=2, col=Pbcol[2])
               d_legend <- mean(c(min(dt_sed2$d,na.rm = T),max(dt_sed2$d,na.rm = T)))*.8
               shadowtext(x = 0,y = -d_legend-.06*dmax,labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed2)$r.squared,4))), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
               shadowtext(x = 0,y = -d_legend,labels = bquote(V ~ "=" ~ .(abs(round(sr_sed2,3))) ~ mm.yr^-1), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
             } else {
               if (is.null(ignore) || !is.null(is.null(ignore)) && max(dt_sed2$depth_avg, na.rm = T) > max(ignore, na.rm=T)) lines(c(-sedchange_corr_allscales[1],-max(dt_sed2$mass_depth_avg_corr, na.rm = T))~ c(lm_sed2$coefficients[1]+sedchange_corr_allscales[1]*lm_sed2$coefficients[2],lm_sed2$coefficients[1]+max(dt_sed2$mass_depth_avg_corr, na.rm = T)*lm_sed2$coefficients[2]), lwd=2, col=Pbcol[2])
-              if (!is.null(ignore) && max(dt_sed2$mass_depth_avg_corr, na.rm = T) <= max(ignore, na.rm=T)) lines(c(-sedchange_corr_allscales[1],-max(dt$mass_depth_avg_corr[!dt$depth_avg %in% ignore],na.rm=T))~ c(lm_sed2$coefficients[1]+sedchange_corr_allscales[1]*lm_sed2$coefficients[2],lm_sed2$coefficients[1]+max(dt$mass_depth_avg_corr[!dt$depth_avg %in% ignore],na.rm=T)*lm_sed2$coefficients[2]), lwd=2, col=Pbcol[2])
+              if (length(ignore)>0 && max(dt_sed2$mass_depth_avg_corr, na.rm = T) <= max(ignore, na.rm=T)) lines(c(-sedchange_corr_allscales[1],-max(dt$mass_depth_avg_corr[!dt$depth_avg %in% ignore],na.rm=T))~ c(lm_sed2$coefficients[1]+sedchange_corr_allscales[1]*lm_sed2$coefficients[2],lm_sed2$coefficients[1]+max(dt$mass_depth_avg_corr[!dt$depth_avg %in% ignore],na.rm=T)*lm_sed2$coefficients[2]), lwd=2, col=Pbcol[2])
               d_legend <- mean(c(min(dt_sed2$mass_depth_avg_corr,na.rm = T),max(dt_sed2$mass_depth_avg_corr,na.rm = T)))*.8
-              shadowtext(x = 0,y = -d_legend-.06*dt_sed2$mass_depth_bottom[which.max(abs(dt_sed2$depth_bottom))],labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed2)$r.squared,4))), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
+              shadowtext(x = 0,y = -d_legend-.095*dt$mass_depth_bottom[max(abs(dt$mass_depth_bottom), na.rm=T)],labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed2)$r.squared,4))), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
               shadowtext(x = 0,y = -d_legend,labels = bquote(MAR ~ "=" ~ .(abs(round(sr_sed2,3))) ~ g.mm^-1~.yr^-1), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
             }
           }
@@ -1634,20 +1648,20 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
               shadowtext(x = 0,y = -d_legend,labels = bquote(V ~ "=" ~ .(abs(round(sr_sed2,3))) ~ mm.yr^-1), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1)
 
               if (is.null(ignore) || !is.null(is.null(ignore)) && max(dt_sed3$depth_avg, na.rm = T) > max(ignore, na.rm=T))  lines(c(-sedchange_corr[2],-max(dt_sed3$d, na.rm = T))~ c(lm_sed3$coefficients[1]+sedchange_corr[2]*lm_sed3$coefficients[2],lm_sed3$coefficients[1]+max(dt_sed3$d, na.rm = T)*lm_sed3$coefficients[2]), lwd=2, col=Pbcol[3])
-              if (!is.null(ignore) && max(dt_sed3$depth_avg, na.rm = T) <= max(ignore, na.rm=T)) lines(c(-sedchange_corr[2],-max(dt$d[!dt$depth_avg %in% ignore],na.rm=T))~ c(lm_sed3$coefficients[1]+sedchange_corr[2]*lm_sed3$coefficients[2],lm_sed3$coefficients[1]+max(dt$d[!dt$depth_avg %in% ignore],na.rm=T)*lm_sed3$coefficients[2]), lwd=2, col=Pbcol[2])
+              if (length(ignore)>0 && max(dt_sed3$depth_avg, na.rm = T) <= max(ignore, na.rm=T)) lines(c(-sedchange_corr[2],-max(dt$d[!dt$depth_avg %in% ignore],na.rm=T))~ c(lm_sed3$coefficients[1]+sedchange_corr[2]*lm_sed3$coefficients[2],lm_sed3$coefficients[1]+max(dt$d[!dt$depth_avg %in% ignore],na.rm=T)*lm_sed3$coefficients[2]), lwd=2, col=Pbcol[2])
               d_legend <- mean(c(min(dt_sed3$d,na.rm = T),max(dt_sed3$d,na.rm = T)))*.8
               shadowtext(x = 0,y = -d_legend-.06*dmax,labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed3)$r.squared,4))), pos = 4, col=Pbcol[3], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1)
               shadowtext(x = 0,y = -d_legend,labels = bquote(V ~ "=" ~ .(abs(round(sr_sed3,3))) ~ mm.yr^-1), pos = 4, col=Pbcol[3], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1)
             } else {
               lines(c(-sedchange_corr_allscales[1],-max(dt_sed2$mass_depth_avg_corr, na.rm = T))~ c(lm_sed2$coefficients[1]+sedchange_corr_allscales[1]*lm_sed2$coefficients[2],lm_sed2$coefficients[1]+max(dt_sed2$mass_depth_avg_corr, na.rm = T)*lm_sed2$coefficients[2]), lwd=2, col=Pbcol[2])
               d_legend <- mean(c(min(dt_sed2$mass_depth_avg_corr,na.rm = T),max(dt_sed2$mass_depth_avg_corr,na.rm = T)))*.8
-              shadowtext(x = 0,y = -d_legend-.06*dt_sed2$mass_depth_bottom[which.max(abs(dt_sed2$depth_bottom))],labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed2)$r.squared,4))), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
+              shadowtext(x = 0,y = -d_legend-.095*dt$mass_depth_bottom[max(abs(dt$mass_depth_bottom), na.rm=T)],labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed2)$r.squared,4))), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
               shadowtext(x = 0,y = -d_legend,labels = bquote(MAR ~ "=" ~ .(abs(round(sr_sed2,3))) ~ g.mm^-1~.yr^-1), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1)
 
               if (is.null(ignore) || !is.null(is.null(ignore)) && max(dt_sed3$depth_avg, na.rm = T) > max(ignore, na.rm=T))  lines(c(-sedchange_corr_allscales[2],-max(dt_sed3$mass_depth_avg_corr, na.rm = T))~ c(lm_sed3$coefficients[1]+sedchange_corr[2]*lm_sed3$coefficients[2],lm_sed3$coefficients[1]+max(dt_sed3$mass_depth_avg_corr, na.rm = T)*lm_sed3$coefficients[2]), lwd=2, col=Pbcol[3])
-              if (!is.null(ignore) && max(dt_sed3$depth_avg, na.rm = T) <= max(ignore, na.rm=T)) lines(c(-sedchange_corr_allscales[2],-max(dt$mass_depth_avg_corr[!dt$depth_avg %in% ignore],na.rm=T))~ c(lm_sed3$coefficients[1]+sedchange_corr_allscales[2]*lm_sed3$coefficients[2],lm_sed3$coefficients[1]+max(dt$mass_depth_avg_corr[!dt$depth_avg %in% ignore],na.rm=T)*lm_sed3$coefficients[2]), lwd=2, col=Pbcol[2])
+              if (length(ignore)>0 && max(dt_sed3$depth_avg, na.rm = T) <= max(ignore, na.rm=T)) lines(c(-sedchange_corr_allscales[2],-max(dt$mass_depth_avg_corr[!dt$depth_avg %in% ignore],na.rm=T))~ c(lm_sed3$coefficients[1]+sedchange_corr_allscales[2]*lm_sed3$coefficients[2],lm_sed3$coefficients[1]+max(dt$mass_depth_avg_corr[!dt$depth_avg %in% ignore],na.rm=T)*lm_sed3$coefficients[2]), lwd=2, col=Pbcol[2])
               d_legend <- mean(c(min(dt_sed3$mass_depth_avg_corr,na.rm = T),max(dt_sed3$mass_depth_avg_corr,na.rm = T)))*.8
-              shadowtext(x = 0,y = -d_legend-.06*dt_sed3$mass_depth_bottom_corr[which.max(abs(dt_sed3$depth_bottom))],labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed3)$r.squared,4))), pos = 4, col=Pbcol[3], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1)
+              shadowtext(x = 0,y = -d_legend-.095*dt$mass_depth_bottom_corr[max(abs(dt$mass_depth_bottom), na.rm=T)],labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed3)$r.squared,4))), pos = 4, col=Pbcol[3], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1)
               shadowtext(x = 0,y = -d_legend,labels = bquote(MAR ~ "=" ~ .(abs(round(sr_sed3,3))) ~ g.mm^-1~.yr^-1), pos = 4, col=Pbcol[3], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1)
             }
           }
@@ -1727,8 +1741,8 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       #Add depth label if last plot
       if(mass_depth) {
         #par(xpd=T)
-        axis(4, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 20),n=40), labels = NA, cex.axis=cex_2, lwd=.5)
-        axis(4, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 5)), labels=-(pretty(seq(myylim_md[1], myylim_md[2], length.out = 5))), cex.axis=cex_2)
+        axis(4, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 20),n=40), labels = NA, cex.axis=cex_2, lwd=.5,line=1.1)
+        axis(4, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 5)), labels=-(pretty(seq(myylim_md[1], myylim_md[2], length.out = 5))), cex.axis=cex_2, line=1.1)
         mtext(text = bquote("Mass depth (g.cm"*~""^-2*")"), side = 4, line=3.2, cex=cex_1)
         #par(xpd=F)
       }
@@ -1843,11 +1857,12 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
         polygon(x=pol_x, y = pol_y, col=adjustcolor(modelcol[3], alpha.f=0.2), border=NA)
         lines(-new_x_CRS[new_y_CRS>=SML&new_y_CRS<=max(dt$depth_avg)],-new_y_CRS[new_y_CRS>=SML&new_y_CRS<=max(dt$depth_avg)], col=modelcol[3])
       } else {
-        lines(-m_CRS,-complete_core_depth[whichkeep], col=modelcol[3],lty=2,lwd=.5)
+        depth_CRS_plot = -complete_core_depth[whichkeep]
+        lines(-m_CRS,depth_CRS_plot, col=modelcol[3],lty=2,lwd=.5)
         pol_x <- c(-m_CRS_low, rev(-m_CRS_high))
-        pol_y <- c(-complete_core_depth[whichkeep], rev(-complete_core_depth[whichkeep]))
+        pol_y <- c(depth_CRS_plot, rev(depth_CRS_plot))
         polygon(x=pol_x, y = pol_y, col=adjustcolor(modelcol[3], alpha.f=0.2), border=NA)
-        lines(-m_CRS[complete_core_depth[whichkeep]>=SML&complete_core_depth[whichkeep]<=max(dt$depth_avg)],-complete_core_depth[whichkeep][complete_core_depth[whichkeep]>=SML&complete_core_depth[whichkeep]<=max(dt$depth_avg)], col=modelcol[3])
+        lines(-m_CRS[-depth_CRS_plot>=SML&-depth_CRS_plot<=max(dt$depth_avg)],depth_CRS_plot[-depth_CRS_plot>=SML&-depth_CRS_plot<=max(dt$depth_avg)], col=modelcol[3])
       }
 
     }
