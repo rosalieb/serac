@@ -312,6 +312,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   dates_depth_avg <- NULL
   err_dated_depth_avg <- matrix(nrow=2)
   err_dates_avg <- NULL
+  mtext_Cs <- NULL # text legend in case mass_depth=T and there are some peaks detected
   mylegend <- NULL
   mypchlegend <- NULL
   myltylegend <- NULL
@@ -731,6 +732,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       dates_depth_avg <- c(dates_depth_avg,peakCher)
       err_dated_depth_avg <- cbind(err_dated_depth_avg,Cher)
       err_dates_avg <- c(err_dates_avg,NA)
+      if(mass_depth) mtext_Cs <- ("Cher")
     }
     #NWT
     if (all(!is.na(NWT))) {
@@ -740,6 +742,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       err_dated_depth_avg <- cbind(err_dated_depth_avg,NWT)
       if (Hemisphere =="NH") err_dates_avg <- c(err_dates_avg,NA)
       if (Hemisphere =="SH") err_dates_avg <- c(err_dates_avg,.5)
+      if(mass_depth)         mtext_Cs <- c(mtext_Cs, "NWT")
     }
     #First radionuclides fallout
     if (all(!is.na(FF))) {
@@ -748,6 +751,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       dates_depth_avg <- c(dates_depth_avg,peakFF)
       err_dated_depth_avg <- cbind(err_dated_depth_avg,FF)
       err_dates_avg <- c(err_dates_avg,NA)
+      if(mass_depth) mtext_Cs <- c(mtext_Cs, "FF")
     }
 
 
@@ -1754,25 +1758,42 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       #Chernobyl
       if (exists("Cher")&&!is.na(Cher)) {
         lines(rep(max(dt$Cs[which_scale>min(Cher_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(Cher_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)*1.1,2),c(-Cher_allscales[1],-Cher_allscales[2]), lwd=1.5)
-        shadowtext(max(dt$Cs[which_scale>min(Cher_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(Cher_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(min(Cher_allscales)),
-                   labels = c("C 1986"), pos = 3,col="black", bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
-        lines(c(max(dt$Cs[which_scale>min(Cher_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(Cher_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)*1.1, max(dt$Cs,na.rm = T)*2),rep(peakCher_allscales,2), lty=2)
+        if(!mass_depth) {
+          shadowtext(max(dt$Cs[which_scale>min(Cher_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(Cher_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(min(Cher_allscales)),
+                     labels = c("C 1986"), pos = 3,col="black", bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
+          lines(c(max(dt$Cs[which_scale>min(Cher_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(Cher_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)*1.1, max(dt$Cs,na.rm = T)*2),rep(peakCher_allscales,2), lty=2)
+        } else {
+          shadowtext(max(dt$Cs[which_scale>min(Cher_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(Cher_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(peakCher_allscales),
+                     labels = c("C 1986"), pos = 4,col="black", bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
+        }
       }
       #NWT
       if (exists("NWT")&&!is.na(NWT)) {
         lines(rep(max(dt$Cs[which_scale>min(NWT_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(NWT_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)*1.1,2),c(-NWT_allscales[1],-NWT_allscales[2]), lwd=1.5)
-        if (Hemisphere == "NH") shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(min(NWT_allscales)),
-                                           labels = "NWT 1963", pos = 3, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
-        if (Hemisphere == "SH") shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(min(NWT_allscales)),
-                                           labels = "NWT 1964/1965", pos = 3, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
-        lines(c(max(dt$Cs[which_scale>min(NWT_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(NWT_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)*1.1, max(dt$Cs,na.rm = T)*2),rep(peakNWT_allscales,2), lty=2)
+        if(!mass_depth) {
+          if (Hemisphere == "NH") shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(min(NWT_allscales)),
+                                             labels = "NWT 1963", pos = 3, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
+          if (Hemisphere == "SH") shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(min(NWT_allscales)),
+                                             labels = "NWT 1964/1965", pos = 3, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
+          lines(c(max(dt$Cs[which_scale>min(NWT_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(NWT_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)*1.1, max(dt$Cs,na.rm = T)*2),rep(peakNWT_allscales,2), lty=2)
+        } else {
+          if (Hemisphere == "NH") shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(peakNWT_allscales),
+                                             labels = "NWT 1963", pos = 3, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
+          if (Hemisphere == "SH") shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(peakNWT_allscales),
+                                             labels = "NWT 1964/1965", pos = 3, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
+        }
       }
       #First radionuclides fallout
       if (exists("FF")&&!is.na(FF)) {
         lines(rep(max(dt$Cs[which_scale>min(FF_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(FF_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)*1.1,2),c(-FF_allscales[1],-FF_allscales[2]), lwd=1.5)
-        shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(max(FF_allscales)),
-                   labels = c("FF 1955"), pos = 1, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
-        lines(c(max(dt$Cs[which_scale>min(FF_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(FF_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)*1.1, max(dt$Cs,na.rm = T)*2),rep(peakFF_allscales,2), lty=2)
+        if(!mass_depth) {
+          shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(max(FF_allscales)),
+                     labels = c("FF 1955"), pos = 1, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
+          lines(c(max(dt$Cs[which_scale>min(FF_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(FF_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)*1.1, max(dt$Cs,na.rm = T)*2),rep(peakFF_allscales,2), lty=2)
+        } else {
+          shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(peakNWT_allscales),
+                     labels = c("FF 1955"), pos = 1, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
+        }
       }
       par(xpd=FALSE)
 
@@ -1871,16 +1892,11 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       points(-varve$Age,-varve$depth_avg, pch=4)
     }
 
-    if(length(model)>1|varves) {
-      legend("bottomleft", legend = mylegend, pch = mypchlegend,lty = myltylegend, col = mycollegend, bty='n', cex=mycex)
-    }
-
-
     if(exists("Cher") | exists("NWT") | exists("FF")) {
       err_dated_depth_avg <- matrix(err_dated_depth_avg[!is.na(err_dated_depth_avg)],nrow=2,byrow = F)
       err_dated_depth_avg <- -abs(err_dated_depth_avg)
 
-      ##
+      ## plot the age and depth error
       if(!is.null(dates)) {
         for (i in 1:length(dates)) {
           lines(rep(-dates[i],2), c(err_dated_depth_avg[1,i], err_dated_depth_avg[2,i]), type="o", pch="_", col="black")
@@ -1891,12 +1907,26 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
         }
         points(-dates,dates_depth_avg, pch=16, cex=.8)
 
-        par(xpd=T)
-        for (i in 1:length(dates)) {
-          lines(c(-2100,-dates[i]), rep(dates_depth_avg[i],2), lty=2)
+        if(!mass_depth) {
+          par(xpd=T)
+          for (i in 1:length(dates)) {
+            lines(c(-2100,-dates[i]), rep(dates_depth_avg[i],2), lty=2)
+          }
+          par(xpd=F)
+        } else {
+          text(-dates,dates_depth_avg,labels = seq_along(mtext_Cs), pch=16, cex=.8, offset = .3,pos = 4)
+          mylegend <- c(paste(seq_along(mtext_Cs),mtext_Cs,sep=": ", collapse = "; "),
+                        mylegend)
+          mypchlegend <- c(16, mypchlegend)
+          myltylegend <- c(NA, myltylegend)
+          mycollegend <- c( 1, mycollegend)
         }
-        par(xpd=F)
       }
+    }
+
+    # Plot legend
+    if(length(model)>1|varves|(mass_depth&any(!is.na(Cher),!is.na(NWT),!is.na(FF)))) {
+      legend("bottomleft", legend = mylegend, pch = mypchlegend,lty = myltylegend, col = mycollegend, bty='n', cex=mycex)
     }
 
     # 6.5.b Plot historic event on age model ####
