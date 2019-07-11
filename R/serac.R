@@ -1342,10 +1342,10 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
         myxlim_min=min(log(dt$Pbex),na.rm=T)-.5*(max(log(dt$Pbex),na.rm=T)-min(log(dt$Pbex),na.rm=T))
         myxlim_max=max(log(dt$Pbex),na.rm=T)+.5*(max(log(dt$Pbex),na.rm=T)-min(log(dt$Pbex),na.rm=T))
 
-        if(inst_deposit_present)  for (i in 1:nrow(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),])) rect(xleft = log(.1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+        if(inst_deposit_present)  for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = log(.1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
         if(SML>0) rect(xleft = log(.1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - SML))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = 0, col=grey(0.97), border=NA)
         par(xpd=T)
-        if(inst_deposit_present)  for (i in 1:nrow(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),])) rect(xleft = log(1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+        if(inst_deposit_present)  for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = log(1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
         if(SML>0) rect(xleft = log(15000), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - SML))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = 0, col=grey(0.97), border=NA)
         par(xpd=F)
 
@@ -1470,8 +1470,8 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
             par(xpd=T)
             if(SML>0) rect(xleft = log(.1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - SML))] , xright = log(18000), ytop = 0, col=grey(0.97), border=NA)
             if(inst_deposit_present) {
-              for (i in 1:nrow(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),])) rect(xleft = log(.1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(.8), ytop = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
-              for (i in 1:nrow(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),])) {
+              for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = log(.1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(.8), ytop = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+              for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) {
                 pol_x <- c(log(.8),log(2),log(max(dt$Pbex,na.rm=T)),log(max(dt$Pbex,na.rm=T))+log(2)-log(.8),log(max(dt$Pbex,na.rm=T))+log(2)-log(.8),log(max(dt$Pbex,na.rm=T)),log(2),log(.8))
                 pol_y <- c(-dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],
                            -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit_corr[i,1]))],
@@ -1502,7 +1502,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
             if(inst_deposit_present) {
               if(SML>0) rect(xleft = log(.1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - SML))] , xright = log(18000), ytop = 0, col=grey(0.97), border=NA)
               par(xpd=T)
-              for (i in 1:nrow(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),])) {
+              for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) {
                 pol_x <- c(log(.5),log(2),log(max(dt$Pbex,na.rm=T)),log(max(dt$Pbex,na.rm=T))+log(2)-log(.5),log(max(dt$Pbex,na.rm=T))+log(2)-log(.5),log(max(dt$Pbex,na.rm=T)),log(2),log(.5))
                 pol_y <- c(-dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],
                            -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit_corr[i,1]))],
@@ -1514,7 +1514,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
                            -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))])
                 polygon(x=pol_x, y = pol_y, col=inst_depositcol, border=NA)
               }
-              for (i in 1:nrow(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),])) rect(xleft = log(max(dt$Pbex,na.rm=T))+log(2)-log(.5), -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(18000), ytop = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+              for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = log(max(dt$Pbex,na.rm=T))+log(2)-log(.5), -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(18000), ytop = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
               par(xpd=F)
               points(log(dt_sed1$Pbex),-dt_sed1$mass_depth_avg_corr, pch=16, cex=.8)
             }
@@ -1696,7 +1696,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
           , expr = errbar(Cs,-mass_depth_avg,-mass_depth_top,-mass_depth_bottom, pch=16, cap=.01, xlab="",ylab="", axes=F,ylim=myylim_md, xlim=c(myxlim_min,myxlim_max),col=grey(.65), errbar.col = grey(.65), cex=.8)
         )
         par(xpd=TRUE)
-        if(inst_deposit_present) for (i in 1:nrow(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),])) rect(xleft = -2000, ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = max(dt$Cs,na.rm=T)*1.5+2000, ytop = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+        if(inst_deposit_present) for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = -2000, ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = max(dt$Cs,na.rm=T)*1.5+2000, ytop = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
         if(SML>0) rect(xleft = -2000, ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - SML))], xright = max(dt$Cs,na.rm=T)*1.5, ytop = 0, col=grey(0.97), border=NA)
         par(xpd=FALSE)
       }
