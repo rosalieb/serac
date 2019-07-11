@@ -143,8 +143,10 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     if(SML>0)                                       stop("\n Warning, CIC model should not be run if you assume the presence of a surface mixed layer. \n\n")
   }
 
+  # todelete to delete 2 next lines ####
   # if mass_depth=TRUE, then plot photo and plot supp descriptor are turned to FALSE
-  if(mass_depth) {plotphoto=F;suppdescriptor=F;text_CFCS = c("Mass accumulation rate (CFCS model)","g/mm/yr")} else text_CFCS= c("Sedimentation rate (CFCS model)","mm/yr")
+  # if(mass_depth) {plotphoto=F;suppdescriptor=F;text_CFCS = c("Mass accumulation rate (CFCS model)","g/mm/yr")} else text_CFCS= c("Sedimentation rate (CFCS model)","mm/yr")
+  # stop delete
 
   #### 1. READ DATA ----
   dt <- read.delim(file = paste(getwd(),"/Cores/",name,"/",name,".txt", sep=""))
@@ -1174,12 +1176,32 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
     # Set plot panels
     mylayout <- NULL # mylayout vector will set the width of the different windows within the plot
-    if(plotphoto) mylayout <- c(mylayout,.2)
-    if(suppdescriptor) mylayout <- c(mylayout,1)
-    if(plot_Pb) mylayout <- c(mylayout,1)
-    if(plot_Pb_inst_deposit) mylayout <- c(mylayout,1.3)
-    if(plot_Cs) mylayout <- c(mylayout,1.3)
-    if(!mass_depth) mylayout <- c(mylayout,1.6) else mylayout <- c(mylayout,2) #Add more space if mass depth, to have double scale
+    # todelete to delete next 6 lines if we keep the core photo for mass depth ####
+    # if(plotphoto) mylayout <- c(mylayout,.2)
+    # if(suppdescriptor) mylayout <- c(mylayout,1)
+    # if(plot_Pb) mylayout <- c(mylayout,1)
+    # if(plot_Pb_inst_deposit) mylayout <- c(mylayout,1.3)
+    # if(plot_Cs) mylayout <- c(mylayout,1.3)
+    # if(!mass_depth) mylayout <- c(mylayout,1.6) else mylayout <- c(mylayout,2) #Add more space if mass depth, to have double scale
+    # stop delete
+
+
+    if(!mass_depth) { # Layout if depth in mm is used
+      if(plotphoto) mylayout <- c(mylayout,.2)
+      if(suppdescriptor) mylayout <- c(mylayout,1)
+      if(plot_Pb) mylayout <- c(mylayout,1)
+      if(plot_Pb_inst_deposit) mylayout <- c(mylayout,1.3)
+      if(plot_Cs) mylayout <- c(mylayout,1.3)
+      mylayout <- c(mylayout,1.6)
+    } else {          # Layout if mass_depth is used
+      if(plot_Pb) mylayout <- c(mylayout,1)
+      if(plot_Pb_inst_deposit) mylayout <- c(mylayout,1.3)
+      if(plot_Cs) mylayout <- c(mylayout,1.3)
+      if(plotphoto) mylayout <- c(mylayout,.6,.6) # more space than for the mm situation because we need place here for the second scale in g.cm2
+      if(suppdescriptor&plotphoto) mylayout <- c(mylayout,.9)
+      if(suppdescriptor&!plotphoto) mylayout <- c(mylayout,1.8)
+      mylayout <- c(mylayout,2.3)
+    }
 
     mylayout[1] <- mylayout[1]+.3 #Add margin to the right windows to include the depth_avg scale
     nwindows <- length(mylayout)
@@ -1191,7 +1213,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     # Layout
     layout(matrix(c(1:nwindows),1,nwindows), widths = mylayout)
     # 6.1. Add core photo ####
-    if(plotphoto) {
+    if(plotphoto & !mass_depth) {
       par(mar=c(4.1,3.3,4.1,0))
       plot(c(0,1),myylim, xlab="",ylab="", axes=F, type="n",ylim=myylim)
       axis(2, at = seq(min(myylim),0,by=10), NA, cex.axis=cex_2, lwd=.3)
@@ -1208,7 +1230,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     }
 
     # 6.2 Descriptor ####
-    if(suppdescriptor) {
+    if(suppdescriptor & !mass_depth) {
       if(!exists("suppdescriptorcol")) suppdescriptorcol=c("black","purple")
       dt_suppdescriptor <- dt_suppdescriptor[dt_suppdescriptor$Depth<=max(abs(myylim)),]
       if(plotphoto) {
@@ -1342,10 +1364,10 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
         myxlim_min=min(log(dt$Pbex),na.rm=T)-.5*(max(log(dt$Pbex),na.rm=T)-min(log(dt$Pbex),na.rm=T))
         myxlim_max=max(log(dt$Pbex),na.rm=T)+.5*(max(log(dt$Pbex),na.rm=T)-min(log(dt$Pbex),na.rm=T))
 
-        if(inst_deposit_present)  for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = log(.1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+        if(inst_deposit_present)  for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = log(.1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
         if(SML>0) rect(xleft = log(.1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - SML))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = 0, col=grey(0.97), border=NA)
         par(xpd=T)
-        if(inst_deposit_present)  for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = log(1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+        if(inst_deposit_present)  for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = log(15000), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
         if(SML>0) rect(xleft = log(15000), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - SML))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = 0, col=grey(0.97), border=NA)
         par(xpd=F)
 
@@ -1470,23 +1492,24 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
             par(xpd=T)
             if(SML>0) rect(xleft = log(.1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - SML))] , xright = log(18000), ytop = 0, col=grey(0.97), border=NA)
             if(inst_deposit_present) {
-              for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = log(.1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(.8), ytop = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+              for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = log(.1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(.8), ytop = -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
               for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) {
-                pol_x <- c(log(.8),log(2),log(max(dt$Pbex,na.rm=T)),log(max(dt$Pbex,na.rm=T))+log(2)-log(.8),log(max(dt$Pbex,na.rm=T))+log(2)-log(.8),log(max(dt$Pbex,na.rm=T)),log(2),log(.8))
-                pol_y <- c(-dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],
-                           -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit_corr[i,1]))],
-                           -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit_corr[i,1]))],
-                           -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],
+                pol_x <- c(log(.8),log(2),log(max(dt$Pbex,na.rm=T)),log(max(dt$Pbex,na.rm=T))+log(2)-log(.8),
+                           log(max(dt$Pbex,na.rm=T))+log(2)-log(.8),log(max(dt$Pbex,na.rm=T)),log(2),log(.8))
+                pol_y <- c(-dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit[i,1]))],
+                           -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit_corr[i,1]))],
+                           -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit_corr[i,1]))],
+                           -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit[i,1]))],
                            -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))],
-                           -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit_corr[i,1]))],
-                           -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit_corr[i,1]))],
+                           -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit_corr[i,1]))],
+                           -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit_corr[i,1]))],
                            -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))])
                 polygon(x=pol_x, y = pol_y, col=inst_depositcol, border=NA)
                 lines(c(log(2),log(max(dt$Pbex,na.rm=T))), c(-dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit_corr[i,1]))],-dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit_corr[i,1]))]),col=inst_depositcol, lwd=.5)
               }
               for (i in 1:nrow(inst_deposit)) rect(xleft = log(max(dt$Pbex,na.rm=T))+log(2)-log(.8),
                                                    ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(18000),
-                                                   ytop = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+                                                   ytop = -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
               points(log(dt_sed1$Pbex),-dt_sed1$mass_depth_avg, pch=16, cex=.8)
             }
             par(xpd=F)
@@ -1504,20 +1527,24 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
               par(xpd=T)
               for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) {
                 pol_x <- c(log(.5),log(2),log(max(dt$Pbex,na.rm=T)),log(max(dt$Pbex,na.rm=T))+log(2)-log(.5),log(max(dt$Pbex,na.rm=T))+log(2)-log(.5),log(max(dt$Pbex,na.rm=T)),log(2),log(.5))
-                pol_y <- c(-dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],
-                           -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit_corr[i,1]))],
+                pol_y <- c(-dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit[i,1]))],
+                           -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit_corr[i,1]))],
                            -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit_corr[i,1]))],
                            -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],
-                           -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))],
-                           -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit_corr[i,1]))],
+                           -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit[i,2]))],
+                           -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit_corr[i,1]))],
                            -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit_corr[i,1]))],
                            -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))])
                 polygon(x=pol_x, y = pol_y, col=inst_depositcol, border=NA)
               }
-              for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = log(max(dt$Pbex,na.rm=T))+log(2)-log(.5), -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(18000), ytop = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+              for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = log(max(dt$Pbex,na.rm=T))+log(2)-log(.5), -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(18000), ytop = -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
               par(xpd=F)
               points(log(dt_sed1$Pbex),-dt_sed1$mass_depth_avg_corr, pch=16, cex=.8)
             }
+
+            axis(2, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 20),n=40), labels = NA, cex.axis=cex_2, lwd=.5)
+            axis(2, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 5)), labels=-(pretty(seq(myylim_md[1], myylim_md[2], length.out = 5))), cex.axis=cex_2)
+            mtext(text = bquote("Mass depth (g.cm"*~""^-2*")"), side = 2, line=2.2, cex=cex_1)
 
           }
         }
@@ -1624,7 +1651,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
           shadowtext(x = 0,y = -d_legend,labels = bquote(V ~ "=" ~ .(abs(round(sr_sed1,3))) ~ mm.yr^-1), pos = 4, col=Pbcol[1], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
         } else {
           d_legend <- mean(c(min(dt_sed1$mass_depth_avg_corr,na.rm = T),max(dt_sed1$mass_depth_avg_corr,na.rm = T)))*.8
-          shadowtext(x = 0,y = -d_legend-.095*dt$mass_depth_bottom_corr[max(abs(dt$mass_depth_bottom), na.rm=T)],labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed1)$r.squared,4))), pos = 4, col=Pbcol[1], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
+          shadowtext(x = 0,y = -d_legend-.4*dt$mass_depth_bottom_corr[max(abs(dt$mass_depth_bottom), na.rm=T)],labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed1)$r.squared,4))), pos = 4, col=Pbcol[1], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
           shadowtext(x = 0,y = -d_legend,labels = bquote(MAR ~ "=" ~ .(abs(round(sr_sed1,3))) ~ g.mm^-1~.yr^-1), pos = 4, col=Pbcol[1], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
         }
 
@@ -1640,7 +1667,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
               if (is.null(ignore) || !is.null(is.null(ignore)) && max(dt_sed2$depth_avg, na.rm = T) > max(ignore, na.rm=T)) lines(c(-sedchange_corr_allscales[1],-max(dt_sed2$mass_depth_avg_corr, na.rm = T))~ c(lm_sed2$coefficients[1]+sedchange_corr_allscales[1]*lm_sed2$coefficients[2],lm_sed2$coefficients[1]+max(dt_sed2$mass_depth_avg_corr, na.rm = T)*lm_sed2$coefficients[2]), lwd=2, col=Pbcol[2])
               if (length(ignore)>0 && max(dt_sed2$mass_depth_avg_corr, na.rm = T) <= max(ignore, na.rm=T)) lines(c(-sedchange_corr_allscales[1],-max(dt$mass_depth_avg_corr[!dt$depth_avg %in% ignore],na.rm=T))~ c(lm_sed2$coefficients[1]+sedchange_corr_allscales[1]*lm_sed2$coefficients[2],lm_sed2$coefficients[1]+max(dt$mass_depth_avg_corr[!dt$depth_avg %in% ignore],na.rm=T)*lm_sed2$coefficients[2]), lwd=2, col=Pbcol[2])
               d_legend <- mean(c(min(dt_sed2$mass_depth_avg_corr,na.rm = T),max(dt_sed2$mass_depth_avg_corr,na.rm = T)))*.8
-              shadowtext(x = 0,y = -d_legend-.095*dt$mass_depth_bottom[max(abs(dt$mass_depth_bottom), na.rm=T)],labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed2)$r.squared,4))), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
+              shadowtext(x = 0,y = -d_legend-.4*dt$mass_depth_bottom[max(abs(dt$mass_depth_bottom), na.rm=T)],labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed2)$r.squared,4))), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
               shadowtext(x = 0,y = -d_legend,labels = bquote(MAR ~ "=" ~ .(abs(round(sr_sed2,3))) ~ g.mm^-1~.yr^-1), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
             }
           }
@@ -1659,13 +1686,13 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
             } else {
               lines(c(-sedchange_corr_allscales[1],-max(dt_sed2$mass_depth_avg_corr, na.rm = T))~ c(lm_sed2$coefficients[1]+sedchange_corr_allscales[1]*lm_sed2$coefficients[2],lm_sed2$coefficients[1]+max(dt_sed2$mass_depth_avg_corr, na.rm = T)*lm_sed2$coefficients[2]), lwd=2, col=Pbcol[2])
               d_legend <- mean(c(min(dt_sed2$mass_depth_avg_corr,na.rm = T),max(dt_sed2$mass_depth_avg_corr,na.rm = T)))*.8
-              shadowtext(x = 0,y = -d_legend-.095*dt$mass_depth_bottom[max(abs(dt$mass_depth_bottom), na.rm=T)],labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed2)$r.squared,4))), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
+              shadowtext(x = 0,y = -d_legend-.4*dt$mass_depth_bottom[max(abs(dt$mass_depth_bottom), na.rm=T)],labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed2)$r.squared,4))), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
               shadowtext(x = 0,y = -d_legend,labels = bquote(MAR ~ "=" ~ .(abs(round(sr_sed2,3))) ~ g.mm^-1~.yr^-1), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1)
 
               if (is.null(ignore) || !is.null(is.null(ignore)) && max(dt_sed3$depth_avg, na.rm = T) > max(ignore, na.rm=T))  lines(c(-sedchange_corr_allscales[2],-max(dt_sed3$mass_depth_avg_corr, na.rm = T))~ c(lm_sed3$coefficients[1]+sedchange_corr[2]*lm_sed3$coefficients[2],lm_sed3$coefficients[1]+max(dt_sed3$mass_depth_avg_corr, na.rm = T)*lm_sed3$coefficients[2]), lwd=2, col=Pbcol[3])
               if (length(ignore)>0 && max(dt_sed3$depth_avg, na.rm = T) <= max(ignore, na.rm=T)) lines(c(-sedchange_corr_allscales[2],-max(dt$mass_depth_avg_corr[!dt$depth_avg %in% ignore],na.rm=T))~ c(lm_sed3$coefficients[1]+sedchange_corr_allscales[2]*lm_sed3$coefficients[2],lm_sed3$coefficients[1]+max(dt$mass_depth_avg_corr[!dt$depth_avg %in% ignore],na.rm=T)*lm_sed3$coefficients[2]), lwd=2, col=Pbcol[2])
               d_legend <- mean(c(min(dt_sed3$mass_depth_avg_corr,na.rm = T),max(dt_sed3$mass_depth_avg_corr,na.rm = T)))*.8
-              shadowtext(x = 0,y = -d_legend-.095*dt$mass_depth_bottom_corr[max(abs(dt$mass_depth_bottom), na.rm=T)],labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed3)$r.squared,4))), pos = 4, col=Pbcol[3], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1)
+              shadowtext(x = 0,y = -d_legend-.4*dt$mass_depth_bottom_corr[max(abs(dt$mass_depth_bottom), na.rm=T)],labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed3)$r.squared,4))), pos = 4, col=Pbcol[3], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1)
               shadowtext(x = 0,y = -d_legend,labels = bquote(MAR ~ "=" ~ .(abs(round(sr_sed3,3))) ~ g.mm^-1~.yr^-1), pos = 4, col=Pbcol[3], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1)
             }
           }
@@ -1696,7 +1723,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
           , expr = errbar(Cs,-mass_depth_avg,-mass_depth_top,-mass_depth_bottom, pch=16, cap=.01, xlab="",ylab="", axes=F,ylim=myylim_md, xlim=c(myxlim_min,myxlim_max),col=grey(.65), errbar.col = grey(.65), cex=.8)
         )
         par(xpd=TRUE)
-        if(inst_deposit_present) for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = -2000, ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = max(dt$Cs,na.rm=T)*1.5+2000, ytop = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+        if(inst_deposit_present) for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = -2000, ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = max(dt$Cs,na.rm=T)*1.5+2000, ytop = -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
         if(SML>0) rect(xleft = -2000, ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - SML))], xright = max(dt$Cs,na.rm=T)*1.5, ytop = 0, col=grey(0.97), border=NA)
         par(xpd=FALSE)
       }
@@ -1763,7 +1790,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
                      labels = c("C 1986"), pos = 3,col="black", bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
           lines(c(max(dt$Cs[which_scale>min(Cher_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(Cher_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)*1.1, max(dt$Cs,na.rm = T)*2),rep(peakCher_allscales,2), lty=2)
         } else {
-          shadowtext(max(dt$Cs[which_scale>min(Cher_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(Cher_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(peakCher_allscales),
+          shadowtext(max(dt$Cs[which_scale>min(Cher_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(Cher_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)+0.1*max(dt$Cs,na.rm=T),peakCher_allscales,
                      labels = c("C 1986"), pos = 4,col="black", bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
         }
       }
@@ -1777,9 +1804,9 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
                                              labels = "NWT 1964/1965", pos = 3, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
           lines(c(max(dt$Cs[which_scale>min(NWT_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(NWT_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)*1.1, max(dt$Cs,na.rm = T)*2),rep(peakNWT_allscales,2), lty=2)
         } else {
-          if (Hemisphere == "NH") shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(peakNWT_allscales),
+          if (Hemisphere == "NH") shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),peakNWT_allscales,
                                              labels = "NWT 1963", pos = 3, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
-          if (Hemisphere == "SH") shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(peakNWT_allscales),
+          if (Hemisphere == "SH") shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),peakNWT_allscales,
                                              labels = "NWT 1964/1965", pos = 3, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
         }
       }
@@ -1791,7 +1818,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
                      labels = c("FF 1955"), pos = 1, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
           lines(c(max(dt$Cs[which_scale>min(FF_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(FF_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)*1.1, max(dt$Cs,na.rm = T)*2),rep(peakFF_allscales,2), lty=2)
         } else {
-          shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(peakNWT_allscales),
+          shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),peakFF_allscales,
                      labels = c("FF 1955"), pos = 1, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
         }
       }
@@ -1826,8 +1853,83 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       }
     }
 
-    # 6.5.a plot Age Model ####
-    if(!mass_depth) par(mar=c(4.1,1.1,4.1,4.1)) else par(mar=c(4.1,4.1,4.1,4.1))
+
+    # 6.6. if(mass_depth) Add core photo ####
+    if(plotphoto & mass_depth) {
+      par(mar=c(4.1,1,4.1,1))
+      plot(c(0,1),myylim, xlab="",ylab="", axes=F, type="n",ylim=myylim)
+      par(mar=c(4.1,2.1,4.1,0))
+      plot(c(0,1),myylim, xlab="",ylab="", axes=F, type="n",ylim=myylim)
+      axis(2, at = seq(min(myylim),0,by=10), NA, cex.axis=cex_2, lwd=.3)
+      axis(2, at = -(pretty(seq(dmin,dmax,5))), labels=pretty(seq(dmin,dmax,5)), cex.axis=cex_2)
+      mtext(text = "Depth (mm)", side = 2, line=2.2, cex=cex_1)
+
+      par(xpd=TRUE)
+      if(inst_deposit_present) for (i in 1:nrow(inst_deposit)) rect(xleft = .5, ybottom = -inst_deposit[i,2], xright = 3, ytop = -inst_deposit[i,1],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+      if(inst_deposit_present) rect(xleft = -2,ybottom = -dmax*1.2,xright = 3,ytop = -dmax,col = "white",border = "white", density = 1)
+      if(SML>0) rect(xleft = .5, ybottom = -SML, xright = 3, ytop = 0, col=grey(0.97), border=NA)
+      par(xpd=FALSE)
+
+      rasterImage(photo,xleft = 0,xright = 1,ytop = -minphoto, ybottom = -maxphoto)
+    }
+
+    # 6.7 if(mass_depth) Descriptor ####
+    if(suppdescriptor & mass_depth) {
+      if(!exists("suppdescriptorcol")) suppdescriptorcol=c("black","purple")
+      dt_suppdescriptor <- dt_suppdescriptor[dt_suppdescriptor$Depth<=max(abs(myylim)),]
+      if(plotphoto) {
+        par(mar=c(4.1,0.3,4.1,0.3))
+        plot(dt_suppdescriptor[,2],-dt_suppdescriptor[,1], xlab="",ylab="", axes=F, type="n",ylim=myylim)
+        myxlim_min=min(dt_suppdescriptor[,2],na.rm=T)-2*(max(dt_suppdescriptor[,2],na.rm=T)-min(dt_suppdescriptor[,2],na.rm=T))
+        myxlim_max=max(dt_suppdescriptor[,2],na.rm=T)+2*(max(dt_suppdescriptor[,2],na.rm=T)-min(dt_suppdescriptor[,2],na.rm=T))
+
+        par(xpd=TRUE)
+        if(inst_deposit_present) for (i in 1:nrow(inst_deposit)) rect(xleft = myxlim_min, ybottom = -inst_deposit[i,2], xright = myxlim_max, ytop = -inst_deposit[i,1],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+        if(SML>0) rect(xleft = myxlim_min, ybottom = -SML, xright = myxlim_max, ytop = 0, col=grey(0.97), border=NA)
+        par(xpd=FALSE)
+
+        points(dt_suppdescriptor[,2],-dt_suppdescriptor[,1], pch=16, cex=.8, col=suppdescriptorcol[1])
+        lines(dt_suppdescriptor[,2],-dt_suppdescriptor[,1], col=suppdescriptorcol[1])
+      } else {
+        par(mar=c(4.1,8.1,4.1,0.3))
+        plot(dt_suppdescriptor[,2],-dt_suppdescriptor[,1], xlab="",ylab="", axes=F, type="n",ylim=myylim)
+        myxlim_min=min(dt_suppdescriptor[,2],na.rm=T)-.5*(max(dt_suppdescriptor[,2],na.rm=T)-min(dt_suppdescriptor[,2],na.rm=T))
+        myxlim_max=max(dt_suppdescriptor[,2],na.rm=T)+.5*(max(dt_suppdescriptor[,2],na.rm=T)-min(dt_suppdescriptor[,2],na.rm=T))
+
+        if(inst_deposit_present) for (i in 1:nrow(inst_deposit)) rect(xleft = myxlim_min, ybottom = -inst_deposit[i,2], xright = max(dt_suppdescriptor[,2],na.rm=T), ytop = -inst_deposit[i,1],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+        if(SML>0) {
+          rect(xleft = myxlim_min, ybottom = -SML, xright = max(dt_suppdescriptor[,2],na.rm=T), ytop = 0, col=grey(0.97), border=NA)
+          abline(h=-SML, lwd=.6, col="darkgrey")
+        }
+        par(xpd=TRUE)
+        if(inst_deposit_present) for (i in 1:nrow(inst_deposit)) rect(xleft = max(dt_suppdescriptor[,2],na.rm=T), ybottom = -inst_deposit[i,2], xright = myxlim_max, ytop = -inst_deposit[i,1],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+        if(SML>0) rect(xleft = myxlim_min, ybottom = -SML, xright = myxlim_max, ytop = 0, col=grey(0.97), border=NA)
+        par(xpd=FALSE)
+
+        points(dt_suppdescriptor[,2],-dt_suppdescriptor[,1], pch=16, cex=.8, col=suppdescriptorcol[1])
+        lines(dt_suppdescriptor[,2],-dt_suppdescriptor[,1], col=suppdescriptorcol[1])
+        #add y axis if first window to be plotted
+        axis(2, at = seq(min(myylim),0,by=10), NA, cex.axis=cex_2, lwd=.5)
+        axis(2, at = -(pretty(seq(dmin,dmax,5))), labels=pretty(seq(dmin,dmax,5)), cex.axis=cex_2)
+        mtext(text = "Depth (mm)", side = 2, line=2.2, cex=cex_1)
+      }
+      axis(3, cex.axis=cex_2)
+      mtext(text = descriptor_lab[1], side = 3, line=2.2, cex=cex_1)
+
+      if(length(descriptor_lab)>1) {
+        points(dt_suppdescriptor[,3],-dt_suppdescriptor[,1], pch=1, cex=.8, col=suppdescriptorcol[2])
+        lines(dt_suppdescriptor[,3],-dt_suppdescriptor[,1], col=suppdescriptorcol[2])
+        points(dt_suppdescriptor[,3],-dt_suppdescriptor[,1], pch=20, cex=.95,col="white")
+        axis(1)
+        mtext(text = descriptor_lab[2], side = 1, line=2.2, cex=cex_1)
+        legend("bottomright", legend = descriptor_lab, bty="n", pch=c(16,1), col=suppdescriptorcol, cex=mycex)
+      }
+    }
+
+
+    # 6.8.a plot Age Model ####
+    if(!mass_depth) par(mar=c(4.1,1.1,4.1,4.1))
+    if(mass_depth&&plotphoto|suppdescriptor) par(mar=c(4.1,0.1,4.1,4.1)) else par(mar=c(4.1,4.1,4.1,4.1))
     plot(c(-min_yr,-mround(coring_yr,10)),c(-dmin, -dmax), xlab="",ylab="", axes=F, type="n",ylim=myylim)
 
     # Plot the 'historic_test' argument i.e. know dates we want to add
@@ -1843,8 +1945,9 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     }
 
     par(xpd=T)
-    if(inst_deposit_present && !mass_depth)  {
-      for (i in 1:nrow(inst_deposit)) rect(xleft = -2100, ybottom = -inst_deposit[i,2], xright = -coring_yr, ytop = -inst_deposit[i,1],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+    if(inst_deposit_present)  {
+      if(!mass_depth) for (i in 1:nrow(inst_deposit)) rect(xleft = -2100, ybottom = -inst_deposit[i,2], xright = -coring_yr, ytop = -inst_deposit[i,1],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+      if(mass_depth&&plotphoto|suppdescriptor) for (i in 1:nrow(inst_deposit)) rect(xleft = -2100, ybottom = -inst_deposit[i,2], xright = -coring_yr, ytop = -inst_deposit[i,1],col=inst_depositcol, border=inst_depositcol, lwd=.4)
     }
     par(xpd=F)
 
@@ -1929,7 +2032,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       legend("bottomleft", legend = mylegend, pch = mypchlegend,lty = myltylegend, col = mycollegend, bty='n', cex=mycex)
     }
 
-    # 6.5.b Plot historic event on age model ####
+    # 6.8.b Plot historic event on age model ####
     if(length(historic_d)>=1 && !all(is.na(historic_d))) {
       historic_d_dt <- matrix(abs(historic_d), ncol = 2, byrow = T)
       for (i in seq_along(historic_a)) {
