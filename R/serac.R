@@ -11,12 +11,13 @@
 #' @param Hemisphere Chose between North Hemisphere "NH" and South Hemisphere "SH" depending on the location of your system. This argument is required if you chose to plot NWT.
 #' @param FF If 137Cs measurement were done, where do you detect the First Fallout period? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the First Fallout period in 1955. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty. Note that the two depths needs to represent a sample, or more than a sample.
 #' @param inst_deposit Upper and lower depths (in mm) of sections of abrupt accumulation that inst_deposit c() should be excised, e.g., c(100, 120, 185, 195) for two sections of 10.0-12.0 cm and 18.5-19.5 cm depth
-#' @param ignore The depth (in mm) of any sample that should be ignored from the age-depth model computation, e.g., c(55) will remove the measurement done at 5.5 cm. The data will be ploted by default in grey on the output graph (you can change this with the inst_depositcol argument)
+#' @param input_depth_mm Units for SML, radionuclides peaks (Chernobyl, Nuclear War Tests, and First Fallouts), instantaneous deposits, depths to ignore. Default is TRUE, and inputs must be in mm - unless "input_depth_mm=F". If turned to FALSE, input can be given in g/cm2.
+#' @param ignore The depth (in mm - unless "input_depth_mm=F") of any sample that should be ignored from the age-depth model computation, e.g., c(55) will remove the measurement done at 5.5 cm. The data will be ploted by default in grey on the output graph (you can change this with the inst_depositcol argument)
 #' @param plotpdf Logical argument to indicate whether you want the output graph to be saved to your folder.
 #' @param preview Logical argument to indicate whether you want the output graph to be ploted. Default is TRUE, and the graph is ploted within your R session. It might be convenient to turn this argument to FALSE if errors keep coming telling you your R window is too small.
-#' @param plotphoto Logical argument to indicate whether you want to plot the photo of the core along your age-model. If plotphoto=TRUE, you need to indicate the upper and lower limit of the photo in mm in following arguments.
-#' @param minphoto Mandatory if plotphoto=TRUE. Lower limit of the core photo in mm, e.g., minphoto=0 indicates that the photo starts at 0 mm. The photo will automatically be truncated acording to the minimum and maximum depth of the age model given in other arguments.
-#' @param maxphoto Mandatory if plotphoto=TRUE. Upper limit of the core photo in mm, e.g., maxphoto=320 indicates that the photo ends at 32 cm. The photo will automatically be truncated acording to the minimum and maximum depth of the age model given in other arguments.
+#' @param plotphoto Logical argument to indicate whether you want to plot the photo of the core along your age-model. If plotphoto=TRUE, you need to indicate the upper and lower limit of the photo in mm - unless "input_depth_mm=F" in following arguments.
+#' @param minphoto Mandatory if plotphoto=TRUE. Lower limit of the core photo in mm - unless "input_depth_mm=F", e.g., minphoto=0 indicates that the photo starts at 0 mm. The photo will automatically be truncated acording to the minimum and maximum depth of the age model given in other arguments.
+#' @param maxphoto Mandatory if plotphoto=TRUE. Upper limit of the core photo in mm - unless "input_depth_mm=F", e.g., maxphoto=320 indicates that the photo ends at 32 cm. The photo will automatically be truncated acording to the minimum and maximum depth of the age model given in other arguments.
 #' @param Pbcol Vector of color to plot 210Pbex data. If length(Pbcol)>1, the different colors will be used to plot the different slopes in between change(s) in sedimentation rate. Example of color vector: Pbcol=c("black","midnightblue","darkgreen").
 #' @param inst_depositcol A color to plot the data points within instantaneous deposit or ignored data. Example: inst_depositcol=grey(0.85).
 #' @param modelcol Vector of color to plot different model if length(model)>1. If length(modelcol)>1, the different colors will be used to plot the different change in sedimentation rate. Example of color vector: modelcol=c("black","red","darkorange") to plot "CFCS", "CIC", "CRS" models in this order.
@@ -37,8 +38,8 @@
 #' @param dmax Maximum depth of age-depth model (useful if the user doesn't want to plot the lower region). dmax cannot be in the middle of an instantaneous deposit. e.g. if there is an instantaneous deposit between 180 and 200 mm, dmax cannot be 190 mm, and will be converted to 200 mm automatically.
 #' @param sedchange Up to two changes in sedimentation rate, e.g., sedchange=c(175,290) indicates two changes of sedimentation rate at 17.5 and 29.0 cm.
 #' @param min_yr The minimum year limit for the age-depth model plot. The user can adjust this argument after a first computation of the model
-#' @param SML Surface Mixed Layer: a depth in mm above which the sediment is considered to be mixed. E.g., SML=30 indicates that the first 3 cm are mixed sediment: the data point are ploted but not included in the Pb models.
-#' @param stepout Depth resolution for the file out in mm.
+#' @param SML Surface Mixed Layer: a depth in mm - unless "input_depth_mm=F" above which the sediment is considered to be mixed. E.g., SML=30 indicates that the first 3 cm are mixed sediment: the data point are ploted but not included in the Pb models.
+#' @param stepout Depth resolution for the file out in mm - unless "input_depth_mm=F".
 #' @param mycex Graphical parameter: a multiplication factor to increase (mycex>1) ou decrease (mycex<1) label sizes.
 #' @param archive_metadata Logical argument. If TRUE, require fields regarding the measurements on the core. Allows missing information; just press 'ENTER' in your computer (leave an empty field).
 #' @param mass_depth Logical argument. If TRUE, require density, and will plot the radionuclides against massic depth. Core photo and supplementary descriptor are not available under this option.
@@ -64,7 +65,7 @@
 #'
 
 serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,inst_deposit=c(0),
-                  ignore=c(), mass_depth=FALSE,
+                  input_depth_mm = T,ignore=c(), mass_depth=FALSE,
                   plotpdf=FALSE,preview=TRUE,plotphoto=FALSE,minphoto=c(),maxphoto=c(),
                   Pbcol=c("black","midnightblue","darkgreen"),inst_depositcol=grey(0.85),
                   modelcol=c("black","red","darkorange"),
@@ -76,7 +77,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
                   min_yr=1880, SML=c(0), stepout=5, mycex=1,
                   archive_metadata=FALSE, save_code=TRUE)
 .serac(name, model,Cher,NWT,Hemisphere,FF,inst_deposit,
-       ignore,mass_depth,
+       input_depth_mm,ignore,mass_depth,
        plotpdf,preview,plotphoto,minphoto,maxphoto,
        Pbcol,inst_depositcol,
        modelcol,
@@ -89,7 +90,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
        archive_metadata,save_code)
 
 .serac <- function(name, model,Cher,NWT,Hemisphere,FF,inst_deposit,
-                   ignore,mass_depth,
+                   input_depth_mm,ignore,mass_depth,
                    plotpdf,preview,plotphoto,minphoto,maxphoto,
                    Pbcol,inst_depositcol,
                    modelcol,
@@ -337,7 +338,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
   # 1.4.2 mass_depth - Create an extra column 'which_scale' for depth, according to mass_depth==T/F ####
   if(!mass_depth) dt$which_scale <- dt$d else dt$which_scale <- dt$mass_depth_avg_corr
-  # 1.4.3 mass_depth - Create an interpolated mass_depth vector
+  # 1.4.3 mass_depth - Create an interpolated mass_depth vector ####
   # If mass_depth=T, we'll need to match depths in g/cm2 to depths in mm.
   # CFCS ages between two depths are easy to find (linear relationship)
   # For mass_depth, if the interval is too big, we can really lose a lot
@@ -355,7 +356,20 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   md_interp     <- as.data.frame(md_interp)
   colnames(md_interp) <- c("depth_mm", "md_top", "md_bott", "md_avg")
   # 1.5. If scale was given in mass_depth, change the parameters####
-  # Work in progress for 1.5 ####
+  if(input_depth_mm==F) {
+    # SML
+    if(!is.null(SML)&&!is.na(SML)) SML <- md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - SML))]
+    # Cher
+    if(!is.null(Cher)&&!is.na(Cher)) for(i in seq_along(Cher)) Cher[i] <- md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - Cher[i]))]
+    # NWT
+    if(!is.null(NWT)&&!is.na(NWT))  for(i in seq_along(NWT))  NWT[i] <- md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - NWT[i]))]
+    # FF
+    if(!is.null(FF)&&!is.na(FF))  for(i in seq_along(FF))    FF[i] <- md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - FF[i]))]
+    # inst_deposit
+    if(!is.null(inst_deposit)&&!is.na(inst_deposit))  for(i in seq_along(inst_deposit))    inst_deposit[i] <- md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i]))]
+    # ignore
+    if(!is.null(ignore)&&!is.na(ignore))  for(i in seq_along(ignore))    ignore[i] <- md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - ignore[i]))]
+  }
 
   # 1.6. Which keep ####
   # When calculating the inventories, we don't want to take in account the depth included
@@ -786,35 +800,35 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   }
 
   #### 4. AGE DEPTH MODEL -----
-  # 4. Prep If mass_depth==T, convert here every depth in cm into depth g.cm ####
+  # 4. Prep If mass_depth==T, convert here every depth in cm into depth g.cm2 ####
   if(mass_depth) {
     sedchange_corr_allscales <- NULL
-    for(i in seq_along(sedchange_corr)) sedchange_corr_allscales <- c(sedchange_corr_allscales,dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - sedchange_corr[i]))])
+    for(i in seq_along(sedchange_corr)) sedchange_corr_allscales <- c(sedchange_corr_allscales,md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - sedchange_corr[i]))])
     sedchange_allscales      <- NULL
-    for(i in seq_along(sedchange)) sedchange_allscales <- c(sedchange_allscales,dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - sedchange[i]))])
+    for(i in seq_along(sedchange)) sedchange_allscales <- c(sedchange_allscales,md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - sedchange[i]))])
     Cher_allscales           <- NULL
-    for(i in seq_along(Cher)) Cher_allscales <- c(Cher_allscales,dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - Cher[i]))])
+    for(i in seq_along(Cher)) Cher_allscales <- c(Cher_allscales,md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - Cher[i]))])
     NWT_allscales            <- NULL
-    for(i in seq_along(NWT)) NWT_allscales <- c(NWT_allscales,dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - NWT[i]))])
+    for(i in seq_along(NWT)) NWT_allscales <- c(NWT_allscales,md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - NWT[i]))])
     FF_allscales             <- NULL
-    for(i in seq_along(FF)) FF_allscales <- c(FF_allscales,dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - FF[i]))])
+    for(i in seq_along(FF)) FF_allscales <- c(FF_allscales,md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - FF[i]))])
     depth_avg_to_date_allscales <- NULL
-    for(i in seq_along(depth_avg_to_date)) c(depth_avg_to_date_allscales,depth_avg_to_date_allscales <- c(depth_avg_to_date_allscales,dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - depth_avg_to_date[i]))]))
+    for(i in seq_along(depth_avg_to_date)) c(depth_avg_to_date_allscales,depth_avg_to_date_allscales <- c(depth_avg_to_date_allscales,md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - depth_avg_to_date[i]))]))
     depth_avg_to_date_allscales[1] <- 0
     depth_avg_to_date_corr_allscales <- NULL
-    for(i in seq_along(depth_avg_to_date_corr)) depth_avg_to_date_corr_allscales <- c(depth_avg_to_date_corr_allscales,dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - depth_avg_to_date_corr[i]))])
+    for(i in seq_along(depth_avg_to_date_corr)) depth_avg_to_date_corr_allscales <- c(depth_avg_to_date_corr_allscales,md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - depth_avg_to_date_corr[i]))])
     depth_avg_to_date_corr_allscales[1] <- 0
     if (all(!is.na(Cher))) {
       peakCher_allscales <- NULL
-      for(i in seq_along(peakCher)) peakCher_allscales <- c(peakCher_allscales,-dt$mass_depth_bottom[which.min(abs(dt$depth_bottom + peakCher[i]))])
+      for(i in seq_along(peakCher)) peakCher_allscales <- c(peakCher_allscales,-md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm + peakCher[i]))])
     }
     if (all(!is.na(NWT))) {
       peakNWT_allscales <- NULL
-      for(i in seq_along(peakNWT)) peakNWT_allscales <- c(peakNWT_allscales,-dt$mass_depth_bottom[which.min(abs(dt$depth_bottom + peakNWT[i]))])
+      for(i in seq_along(peakNWT)) peakNWT_allscales <- c(peakNWT_allscales,-md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm + peakNWT[i]))])
     }
     if (all(!is.na(FF))) {
       peakFF_allscales <- NULL
-      for(i in seq_along(peakFF)) peakFF_allscales <- c(peakFF_allscales,-dt$mass_depth_bottom[which.min(abs(dt$depth_bottom + peakFF[i]))])
+      for(i in seq_along(peakFF)) peakFF_allscales <- c(peakFF_allscales,-md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm + peakFF[i]))])
     }
   } else {
     sedchange_corr_allscales <- sedchange_corr
@@ -1013,7 +1027,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   if(exists("Cher") | exists("NWT") | exists("FF")) {
     if(mass_depth) {
       err_dated_depth_avg_allscales <- NULL
-      for(i in seq_along(err_dated_depth_avg)) err_dated_depth_avg_allscales <- c(err_dated_depth_avg_allscales,dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - err_dated_depth_avg[i]))])
+      for(i in seq_along(err_dated_depth_avg)) err_dated_depth_avg_allscales <- c(err_dated_depth_avg_allscales,md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - err_dated_depth_avg[i]))])
       err_dated_depth_avg_allscales <- matrix(err_dated_depth_avg_allscales[!is.na(err_dated_depth_avg_allscales)],nrow=2,byrow = F)
     }
     err_dated_depth_avg <- matrix(-err_dated_depth_avg[!is.na(err_dated_depth_avg)],nrow=2,byrow = F)
@@ -1392,11 +1406,11 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
         myxlim_min=min(log(dt$Pbex),na.rm=T)-.5*(max(log(dt$Pbex),na.rm=T)-min(log(dt$Pbex),na.rm=T))
         myxlim_max=max(log(dt$Pbex),na.rm=T)+.5*(max(log(dt$Pbex),na.rm=T)-min(log(dt$Pbex),na.rm=T))
 
-        if(inst_deposit_present)  for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = log(.1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
-        if(SML>0) rect(xleft = log(.1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - SML))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = 0, col=grey(0.97), border=NA)
+        if(inst_deposit_present)  for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = log(.1), ybottom = -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,2]))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+        if(SML>0) rect(xleft = log(.1), ybottom = -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - SML))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = 0, col=grey(0.97), border=NA)
         par(xpd=T)
-        if(inst_deposit_present)  for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = log(15000), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
-        if(SML>0) rect(xleft = log(15000), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - SML))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = 0, col=grey(0.97), border=NA)
+        if(inst_deposit_present)  for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = log(15000), ybottom = -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,2]))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+        if(SML>0) rect(xleft = log(15000), ybottom = -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - SML))], xright = log(max(log(dt$Pbex),na.rm=T)), ytop = 0, col=grey(0.97), border=NA)
         par(xpd=F)
 
         axis(2, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 20),n=40), labels = NA, cex.axis=cex_2, lwd=.5)
@@ -1518,26 +1532,26 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
             )
 
             par(xpd=T)
-            if(SML>0) rect(xleft = log(.1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - SML))] , xright = log(18000), ytop = 0, col=grey(0.97), border=NA)
+            if(SML>0) rect(xleft = log(.1), ybottom = -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - SML))] , xright = log(18000), ytop = 0, col=grey(0.97), border=NA)
             if(inst_deposit_present) {
-              for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = log(.1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(.8), ytop = -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+              for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = log(.1), ybottom = -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,2]))], xright = log(.8), ytop = -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
               for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) {
                 pol_x <- c(log(.8),log(2),log(max(dt$Pbex,na.rm=T)),log(max(dt$Pbex,na.rm=T))+log(2)-log(.8),
                            log(max(dt$Pbex,na.rm=T))+log(2)-log(.8),log(max(dt$Pbex,na.rm=T)),log(2),log(.8))
-                pol_y <- c(-dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit[i,1]))],
-                           -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit_corr[i,1]))],
-                           -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit_corr[i,1]))],
-                           -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit[i,1]))],
-                           -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))],
-                           -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit_corr[i,1]))],
-                           -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit_corr[i,1]))],
-                           -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))])
+                pol_y <- c(-md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,1]))],
+                           -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit_corr[i,1]))],
+                           -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit_corr[i,1]))],
+                           -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,1]))],
+                           -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,2]))],
+                           -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit_corr[i,1]))],
+                           -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit_corr[i,1]))],
+                           -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,2]))])
                 polygon(x=pol_x, y = pol_y, col=inst_depositcol, border=NA)
-                lines(c(log(2),log(max(dt$Pbex,na.rm=T))), c(-dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit_corr[i,1]))],-dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit_corr[i,1]))]),col=inst_depositcol, lwd=.5)
+                lines(c(log(2),log(max(dt$Pbex,na.rm=T))), c(-md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit_corr[i,1]))],-md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit_corr[i,1]))]),col=inst_depositcol, lwd=.5)
               }
               for (i in 1:nrow(inst_deposit)) rect(xleft = log(max(dt$Pbex,na.rm=T))+log(2)-log(.8),
-                                                   ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(18000),
-                                                   ytop = -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+                                                   ybottom = -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,2]))], xright = log(18000),
+                                                   ytop = -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
               points(log(dt_sed1$Pbex),-dt_sed1$mass_depth_avg, pch=16, cex=.8)
             }
             par(xpd=F)
@@ -1551,21 +1565,21 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
             )
 
             if(inst_deposit_present) {
-              if(SML>0) rect(xleft = log(.1), ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - SML))] , xright = log(18000), ytop = 0, col=grey(0.97), border=NA)
+              if(SML>0) rect(xleft = log(.1), ybottom = -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - SML))] , xright = log(18000), ytop = 0, col=grey(0.97), border=NA)
               par(xpd=T)
               for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) {
                 pol_x <- c(log(.5),log(2),log(max(dt$Pbex,na.rm=T)),log(max(dt$Pbex,na.rm=T))+log(2)-log(.5),log(max(dt$Pbex,na.rm=T))+log(2)-log(.5),log(max(dt$Pbex,na.rm=T)),log(2),log(.5))
-                pol_y <- c(-dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit[i,1]))],
-                           -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit_corr[i,1]))],
-                           -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit_corr[i,1]))],
-                           -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,1]))],
-                           -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit[i,2]))],
-                           -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit_corr[i,1]))],
-                           -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit_corr[i,1]))],
-                           -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))])
+                pol_y <- c(-md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,1]))],
+                           -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit_corr[i,1]))],
+                           -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit_corr[i,1]))],
+                           -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,1]))],
+                           -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,2]))],
+                           -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit_corr[i,1]))],
+                           -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit_corr[i,1]))],
+                           -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,2]))])
                 polygon(x=pol_x, y = pol_y, col=inst_depositcol, border=NA)
               }
-              for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = log(max(dt$Pbex,na.rm=T))+log(2)-log(.5), -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = log(18000), ytop = -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+              for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = log(max(dt$Pbex,na.rm=T))+log(2)-log(.5), -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,2]))], xright = log(18000), ytop = -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
               par(xpd=F)
               points(log(dt_sed1$Pbex),-dt_sed1$mass_depth_avg_corr, pch=16, cex=.8)
             }
@@ -1751,8 +1765,8 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
           , expr = errbar(Cs,-mass_depth_avg,-mass_depth_top,-mass_depth_bottom, pch=16, cap=.01, xlab="",ylab="", axes=F,ylim=myylim_md, xlim=c(myxlim_min,myxlim_max),col=grey(.65), errbar.col = grey(.65), cex=.8)
         )
         par(xpd=TRUE)
-        if(inst_deposit_present) for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = -2000, ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - inst_deposit[i,2]))], xright = max(dt$Cs,na.rm=T)*1.5+2000, ytop = -dt$mass_depth_top[which.min(abs(dt$depth_top - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
-        if(SML>0) rect(xleft = -2000, ybottom = -dt$mass_depth_bottom[which.min(abs(dt$depth_bottom - SML))], xright = max(dt$Cs,na.rm=T)*1.5, ytop = 0, col=grey(0.97), border=NA)
+        if(inst_deposit_present) for (i in 1:length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[!is.na(dt$density)],na.rm=T),1])) rect(xleft = -2000, ybottom = -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,2]))], xright = max(dt$Cs,na.rm=T)*1.5+2000, ytop = -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+        if(SML>0) rect(xleft = -2000, ybottom = -md_interp$mass_depth_avg[which.min(abs(md_interp$depth_mm - SML))], xright = max(dt$Cs,na.rm=T)*1.5, ytop = 0, col=grey(0.97), border=NA)
         par(xpd=FALSE)
       }
 
