@@ -762,9 +762,9 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       m_CRS_high <- m_CRS + Tm_CRS_err
 
       # Save output
-      out_list$`CRS model` <- data.frame("m_CIC"      = m_CRS,
-                                         "m_CIC_low"  = m_CRS_low,
-                                         "m_CIC_high" = m_CRS_high)
+      out_list$`CRS model` <- data.frame("m_CRS"      = m_CRS,
+                                         "m_CRS_low"  = m_CRS_low,
+                                         "m_CRS_high" = m_CRS_high)
     }
   }
 
