@@ -427,7 +427,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   ### Create the composite free depth_avg - step 2: inst_deposit
   if (length(sedchange)==1 && sedchange == 0) sedchange_corr=max(dt$depth_avg,na.rm = T) else sedchange_corr=sedchange
 
-  if(exists("inst_deposit")&&length(inst_deposit) > 1)
+  if(exists("inst_deposit")&length(inst_deposit) > 1)
   {
     if(length(inst_deposit) %% 2 == 1) stop("\n Warning, inst_deposits need both upper and lower depths. Please check the manual.", call.=FALSE)
     inst_deposit_present = TRUE # Argument inst_deposit_present = FALSE decided elsewhere if no inst_deposit
@@ -468,6 +468,8 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     dt$d=dt$depth_avg_2
     complete_core_depth_corr <- complete_core_depth[!is.na(complete_core_depth_2)]
   }
+  # Problems finding inst_deposit?
+  if(!exists("inst_deposit_present")) inst_deposit_present=FALSE
 
   # By the end here, you should have 3 columns for depth_avg: 1 with original depth_avg, 1 with removed events + suspicious data, 1 with event free depth_avg
 
