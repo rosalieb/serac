@@ -1687,7 +1687,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
         # One other special case regarding the next lines (before if()): when the surface samples are ignored, the regression line must not extend to the surface
         # We then define the value 'top linear model' to decrease the number of conditons in the code...
         if (length(ignore)>0) toplm <- max(c(SML,min(dt$depth_avg[!dt$depth_avg %in% ignore], na.rm = T)), na.rm = T) else toplm <- SML
-        if(mass_depth) toplm <- dt$mass_depth_bottom_corr[which.min(abs(dt$depth_bottom - toplm))]
+        if (mass_depth) toplm <- md_interp$md_avg[which.min(abs(md_interp$depth_mm - toplm))]
 
         if (is.null(ignore) || !is.null(is.null(ignore)) && sedchange_corr[1] > max(ignore,na.rm=T)) lines(c(-toplm,-sedchange_corr_allscales[1])~ c(lm_sed1$coefficients[1]+toplm*lm_sed1$coefficients[2],lm_sed1$coefficients[1]+sedchange_corr_allscales[1]*lm_sed1$coefficients[2]), col=Pbcol[1], lwd=2)
         if (length(ignore)>0 && sedchange_corr[1] <= max(ignore, na.rm=T)) {
