@@ -2021,7 +2021,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       pol_x <- c(-m_CIC_low[!is.na(dt$depth_avg_2)&!is.na(m_CIC_low)&!is.na(m_CIC_high)], rev(-m_CIC_high[!is.na(dt$depth_avg_2)&!is.na(m_CIC_low)&!is.na(m_CIC_high)]))
       pol_y <- c(-dt$depth_avg[!is.na(dt$depth_avg_2)&!is.na(m_CIC_low)&!is.na(m_CIC_high)], rev(-dt$depth_avg[!is.na(dt$depth_avg_2)&!is.na(m_CIC_low)&!is.na(m_CIC_high)]))
       polygon(x=pol_x, y = pol_y, col=adjustcolor(modelcol[2], alpha.f=0.2), border=NA)
-      lines(-m_CIC[!is.na(dt$depth_avg_2)],-dt$depth_avg[!is.na(dt$depth_avg_2)], col=modelcol[2])
+      lines(-m_CIC[!is.na(dt$depth_avg_2)&!is.na(m_CIC)],-dt$depth_avg[!is.na(dt$depth_avg_2)&!is.na(m_CIC)], col=modelcol[2])
     }
 
     if(any(model=="CRS")) {
