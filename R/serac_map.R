@@ -57,6 +57,7 @@ serac_map <- function(which_lakes=c(), output_name=c())
   # Transform coordinates to the same CRS than base layer
   my_coord <- data.frame("lon" = as.numeric(paste(system_x)),
                          "lat" = as.numeric(paste(system_y)))
+  my_coord <- my_coord[complete.cases(my_coord),]
   coordinates(my_coord)<-~lon+lat
   proj4string(my_coord)<-CRS("+proj=longlat +datum=WGS84")
   my_coord<-spTransform(my_coord,crs(world))
