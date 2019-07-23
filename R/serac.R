@@ -871,21 +871,6 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       }
     }
 
-    # todelete to delete this shouldnt be necessary, as already specified in 1.6 and 1.9? ####
-    # # Delete any age in an inst_deposit
-    # if(inst_deposit_present) {
-    #   which_keep2 <- NULL
-    #   for(i in 1:nrow(inst_deposit)) {
-    #     which_keep2 <- c(which_keep2,which(depth_avg_to_date>inst_deposit[i,1]&depth_avg_to_date<inst_deposit[i,2]))
-    #   }
-    #   if(length(which_keep2)>0) {
-    #     depth_avg_to_date_allscales <- depth_avg_to_date_allscales[-which_keep2]
-    #     depth_avg_to_date_corr_allscales <- depth_avg_to_date_corr_allscales[-which_keep2]
-    #   }
-    #   rm(which_keep2)
-    # }
-    # # stop delete ####
-
     output_agemodel_CFCS <- matrix(rep(NA,length(depth_avg_to_date_allscales)*4), ncol=4)
     for(i in seq_along(depth_avg_to_date_allscales)){
       output_agemodel_CFCS[i,1] <- depth_avg_to_date[i]
@@ -893,12 +878,12 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       output_agemodel_CFCS[i,3] <- output_agemodel_CFCS[i,2]-depth_avg_to_date_corr_allscales[i]*abs(sr_sed1_err)/abs(sr_sed1)^2
       output_agemodel_CFCS[i,4] <- output_agemodel_CFCS[i,2]+depth_avg_to_date_corr_allscales[i]*abs(sr_sed1_err)/abs(sr_sed1)^2
 
-      if(max(sedchange)>0 && depth_avg_to_date[i]>sedchange[1]) {
+      if(max(sedchange)>0 && depth_avg_to_date[i]>=sedchange[1]) {
         output_agemodel_CFCS[i,2] <- age_break-(depth_avg_to_date_corr_allscales[i]-sedchange_corr_allscales[1])/abs(sr_sed2)
         output_agemodel_CFCS[i,3] <- output_agemodel_CFCS[i,2]-(depth_avg_to_date_corr_allscales[i])*abs(sr_sed2_err)/abs(sr_sed2)^2
         output_agemodel_CFCS[i,4] <- output_agemodel_CFCS[i,2]+(depth_avg_to_date_corr_allscales[i])*abs(sr_sed2_err)/abs(sr_sed2)^2
       }
-      if(length(sedchange)>1 && depth_avg_to_date[i]>sedchange[2]) {
+      if(length(sedchange)>1 && depth_avg_to_date[i]>=sedchange[2]) {
         output_agemodel_CFCS[i,2] <- age_break2-(depth_avg_to_date_corr_allscales[i]-sedchange_corr_allscales[2])/abs(sr_sed3)
         output_agemodel_CFCS[i,3] <- output_agemodel_CFCS[i,2]-(depth_avg_to_date_corr_allscales[i])*abs(sr_sed3_err)/abs(sr_sed3)^2
         output_agemodel_CFCS[i,4] <- output_agemodel_CFCS[i,2]+(depth_avg_to_date_corr_allscales[i])*abs(sr_sed3_err)/abs(sr_sed3)^2
@@ -909,6 +894,8 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     if(mass_depth) output_agemodel_CFCS$mass_depth <- depth_avg_to_date_allscales
     output_agemodel_CFCS <- output_agemodel_CFCS[!duplicated(output_agemodel_CFCS[,1]),]
 
+    # if mass depth, we do not want to interpolate below the last depth with measurement
+    if(mass_depth) output_agemodel_CFCS <- output_agemodel_CFCS[output_agemodel_CFCS$depth<=max(dt$depth_bottom[!is.na(dt$Pbex)],na.rm=T),]
 
     output_agemodel_CFCS_inter <- as.data.frame(seq(0,max(output_agemodel_CFCS$depth,na.rm = T),by=stepout))
     if (length(historic_d)>=1 && !all(is.na(historic_d)) && any(is.na(historic_a))) {
