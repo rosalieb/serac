@@ -5,32 +5,34 @@
 #' @export
 #' @param which_lakes Name of the sites to be plotted. Must match folders names. Default: all the folder in the Cores folder.
 #' @param output_name Extension to be added to the output name.
+#' @param lon_lim Longitude limit for the plot (WGS84), expressed in a vector of length==2
+#' @param lat_lim Latitude limit for the plot (WGS84), expressed in a vector of length==2
+#' @param add_labels Logical argument. Whether the names of the sites (which_lakes) should be plotted.
 #' @keywords age-depth modelling
 #' @keywords visualisation
 #' @examples serac_input_formatting('PB06')
 #'
 
-serac_map <- function(which_lakes=c(), output_name=c())
-  .serac_map(which_lakes,output_name)
-.serac_map <- function(which_lakes,output_name) {
+serac_map <- function(which_lakes=NULL, output_name=NULL, lon_lim=NULL, lat_lim=NULL, add_labels = TRUE)
+  .serac_map(which_lakes,output_name, lon_lim, lat_lim, add_labels)
+.serac_map <- function(which_lakes,output_name, lon_lim, lat_lim, add_labels) {
   # First, download packages
-  #pkgTest("ggmap")
-  #pkgTest("maptools")
-  #pkgTest("maps")
   pkgTest("ggplot2") # base ggplot2
   pkgTest("ggspatial")
   pkgTest("raster") # for function crs()
   pkgTest("sf")
   pkgTest("rnaturalearth") # base layer
-  #pkgTest("rnaturalearthdata")
 
   # which lakes - either a selection, or all the folder in the Cores subfolder
   if(!is.null(which_lakes)) which_lakes=which_lakes else which_lakes <- list.dirs(path = "./Cores", full.names = FALSE, recursive = TRUE)
+  # remove any folder totally empty
+  which_lakes <- which_lakes[which_lakes != ""]
 
   # Go and read in every core_metadata files the coordinates
   stop_map = FALSE
   system_y = NULL
   system_x = NULL
+  which_lakes2 = NULL
   while(stop_map==FALSE) {
     for (i in 1:length(which_lakes)) {
       mylake <- which_lakes[i]
@@ -42,6 +44,7 @@ serac_map <- function(which_lakes=c(), output_name=c())
           if (length(grep("coordinates_y",mdt[,1])==1) && !is.na(mdt[grep("coordinates_y",mdt[,1]),2]) && length(grep("coordinates_x",mdt[,1])==1) && !is.na(mdt[grep("coordinates_x",mdt[,1]),2])) {
             system_y <- c(system_y,as.numeric(paste(mdt[grep("coordinates_y",mdt[,1]),2])))
             system_x <- c(system_x,as.numeric(paste(mdt[grep("coordinates_x",mdt[,1]),2])))
+            which_lakes2 <- c(which_lakes2,which_lakes[i])
           } else {
             cat(paste("\n The format of coordinates for ",mylake," couldn't be read.\n Please check the input format you chose when you ran serac for your core.\n You can do that by running your code again and turning the argument \n archive_metadata to TRUE, or by accessing the 'serac_metadata_suppmetadata'\n file in your core folder. \n\n\n", sep=""))
           }
@@ -55,24 +58,41 @@ serac_map <- function(which_lakes=c(), output_name=c())
   world <- ne_coastline(scale = "small", returnclass = "sf")
 
   # Transform coordinates to the same CRS than base layer
-  my_coord <- data.frame("lon" = as.numeric(paste(system_x)),
-                         "lat" = as.numeric(paste(system_y)))
+  my_coord <- data.frame("lon" = system_x,
+                         "lat" = system_y)
+  rownames(my_coord) <- which_lakes2
   my_coord <- my_coord[complete.cases(my_coord),]
+  which_lakes2 <- rownames(my_coord)
   coordinates(my_coord)<-~lon+lat
   proj4string(my_coord)<-CRS("+proj=longlat +datum=WGS84")
   my_coord<-spTransform(my_coord,crs(world))
+  my_coord$labels <- which_lakes2
 
   # Using GGPLOT, plot the Base World Map
-  mapWorld <- ggplot(data = world) +
-    geom_sf(color = "black", fill = "lightgreen")  +
-    annotation_scale(location = "bl", width_hint = 0.5) +
-    annotation_north_arrow(location = "bl", which_north = "true",
-                           pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
-                           style = north_arrow_fancy_orienteering) +
-    xlab("Longitude") + ylab("Latitude")
+  if(!is.null(lon_lim) & !is.null(lat_lim) & length(lon_lim) == 2 & length(lat_lim) == 2) {
+    mapWorld <- ggplot() +
+      geom_sf(data = world, color = "black", fill = "lightgrey")  +
+      annotation_scale(location = "bl", width_hint = 0.5) +
+      annotation_north_arrow(location = "bl", which_north = "true",
+                             pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
+                             style = north_arrow_fancy_orienteering) +
+      xlab("Longitude") + ylab("Latitude") + coord_sf(xlim = lon_lim, ylim = lat_lim, crs = crs(world))
+  } else {
+    mapWorld <- ggplot() +
+      geom_sf(data = world, color = "black", fill = "lightgrey")  +
+      annotation_scale(location = "bl", width_hint = 0.5) +
+      annotation_north_arrow(location = "bl", which_north = "true",
+                             pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
+                             style = north_arrow_fancy_orienteering) +
+      xlab("Longitude") + ylab("Latitude")
+  }
+
 
   # Now Layer the coring locations on top
-  mp <- mapWorld + geom_point(aes(x=my_coord$lon, y=my_coord$lat) ,color="orange", size=1, alpha=0.05)
+  mp <- mapWorld + geom_point(aes(x=my_coord$lon, y=my_coord$lat),color="orange", alpha=0.6)
+
+  # Add label if add_labels=T
+  if(add_labels) mp <- mp + geom_label(aes(x=my_coord$lon, y=my_coord$lat, label=my_coord$labels),hjust = 0, nudge_x = 0.1)
 
   # Save the output
   if (is.null(output_name)) output_name <- "" else output_name <- paste("_",output_name, sep="")
