@@ -14,9 +14,15 @@ serac_map <- function(which_lakes=c(), output_name=c())
   .serac_map(which_lakes,output_name)
 .serac_map <- function(which_lakes,output_name) {
   # First, download packages
-  pkgTest("ggmap")
-  pkgTest("maptools")
-  pkgTest("maps")
+  #pkgTest("ggmap")
+  #pkgTest("maptools")
+  #pkgTest("maps")
+  pkgTest("ggplot2") # base ggplot2
+  pkgTest("ggspatial")
+  pkgTest("raster") # for function crs()
+  pkgTest("sf")
+  pkgTest("rnaturalearth") # base layer
+  #pkgTest("rnaturalearthdata")
 
   # which lakes - either a selection, or all the folder in the Cores subfolder
   if(!is.null(which_lakes)) which_lakes=which_lakes else which_lakes <- list.dirs(path = "./Cores", full.names = FALSE, recursive = TRUE)
@@ -44,14 +50,28 @@ serac_map <- function(which_lakes=c(), output_name=c())
       if (i==length(which_lakes)) stop_map = TRUE
     }
   }
+
+  # Read base layer
+  world <- ne_coastline(scale = "small", returnclass = "sf")
+
+  # Transform coordinates to the same CRS than base layer
+  my_coord <- data.frame("lon" = as.numeric(paste(system_x)),
+                         "lat" = as.numeric(paste(system_y)))
+  coordinates(my_coord)<-~lon+lat
+  proj4string(my_coord)<-CRS("+proj=longlat +datum=WGS84")
+  my_coord<-spTransform(my_coord,crs(world))
+
   # Using GGPLOT, plot the Base World Map
-  par(mfrow=c(1,1))
-  mp <- NULL
-  mapWorld <- borders("world", colour="gray50", fill="gray50") # create a layer of borders
-  mp <- ggplot() +   mapWorld
+  mapWorld <- ggplot(data = world) +
+    geom_sf(color = "black", fill = "lightgreen")  +
+    annotation_scale(location = "bl", width_hint = 0.5) +
+    annotation_north_arrow(location = "bl", which_north = "true",
+                           pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
+                           style = north_arrow_fancy_orienteering) +
+    xlab("Longitude") + ylab("Latitude")
 
   # Now Layer the coring locations on top
-  mp <- mp+ geom_point(aes(x=system_x, y=system_y) ,color="darkred", size=1)
+  mp <- mapWorld + geom_point(aes(x=my_coord$lon, y=my_coord$lat) ,color="orange", size=1, alpha=0.05)
 
   # Save the output
   if (is.null(output_name)) output_name <- "" else output_name <- paste("_",output_name, sep="")
