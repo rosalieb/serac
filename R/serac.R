@@ -946,7 +946,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   }
 
   if(any(model=="CIC")) {
-    output_agemodel_CIC <- as.data.frame(matrix(c(c(0,dt$depth_avg),c(coring_yr,m_CIC),c(coring_yr,m_CIC_low),c(coring_yr,m_CIC_high)), byrow = F, ncol=4))
+    output_agemodel_CIC <- as.data.frame(matrix(c(c(0,dt$depth_avg[!is.na(dt$Pbex)]),c(coring_yr,m_CIC),c(coring_yr,m_CIC_low),c(coring_yr,m_CIC_high)), byrow = F, ncol=4))
     colnames(output_agemodel_CIC) <- c("depth_avg", "BestAD_CIC", "MinAD_CIC", "MaxAD_CIC")
     output_agemodel_CIC_inter <- as.data.frame(seq(0,max(output_agemodel_CIC$depth_avg,na.rm = T),stepout))
     output_agemodel_CIC_inter <- cbind(output_agemodel_CIC_inter,approx(x= output_agemodel_CIC$depth_avg, output_agemodel_CIC$BestAD_CIC, xout= seq(0,max(output_agemodel_CIC$depth_avg,na.rm = T),stepout))$y)
@@ -2007,8 +2007,10 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     }
 
     if(any(model=="CIC")) {
-      pol_x <- c(-m_CIC_low[!is.na(dt$depth_avg_2)&!is.na(m_CIC_low)&!is.na(m_CIC_high)], rev(-m_CIC_high[!is.na(dt$depth_avg_2)&!is.na(m_CIC_low)&!is.na(m_CIC_high)]))
-      pol_y <- c(-dt$depth_avg[!is.na(dt$depth_avg_2)&!is.na(m_CIC_low)&!is.na(m_CIC_high)], rev(-dt$depth_avg[!is.na(dt$depth_avg_2)&!is.na(m_CIC_low)&!is.na(m_CIC_high)]))
+      # Creating the logical vector which_CIC to plot only the CIC model point with data.
+      which_CIC <- output_agemodel_CIC$depth_avg[-1] %in% dt$depth_avg[!is.na(dt$depth_avg_2)] &!is.na(m_CIC_low)&!is.na(m_CIC_high)
+      pol_x <- c(-m_CIC_low[which_CIC], rev(-m_CIC_high[which_CIC]))
+      pol_y <- c(-dt$depth_avg[which_CIC], rev(-dt$depth_avg[which_CIC]))
       polygon(x=pol_x, y = pol_y, col=adjustcolor(modelcol[2], alpha.f=0.2), border=NA)
       lines(-m_CIC[!is.na(dt$depth_avg_2)&!is.na(m_CIC)],-dt$depth_avg[!is.na(dt$depth_avg_2)&!is.na(m_CIC)], col=modelcol[2])
     }
