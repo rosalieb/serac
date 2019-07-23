@@ -148,7 +148,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
   # todelete to delete 2 next lines ####
   # if mass_depth=TRUE, then plot photo and plot supp descriptor are turned to FALSE
-  # if(mass_depth) {plotphoto=F;suppdescriptor=F;text_CFCS = c("Mass accumulation rate (CFCS model)","g/mm/yr")} else text_CFCS= c("Sedimentation rate (CFCS model)","mm/yr")
+  # if(mass_depth) {plotphoto=F;suppdescriptor=F;text_CFCS = c("Mass accumulation rate (CFCS model)","g/mm/yr")} else text_CFCS= c("Sediment accumulation rate (CFCS model)","mm/yr")
   # stop delete
 
   #### 1. READ DATA ----
@@ -330,6 +330,9 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
   # For Iseo for example, some NA were added? Quick fix.
   ignore <- ignore[!is.na(ignore)]
+  # It is very circular, but if creating that made ignore == logical(0),
+  #    then we just want it to be back at NULL. Very quick fix.
+  if(length(ignore)==0) ignore <- NULL
 
   dt$depth_avg_2 <- rep(NA,nrow(dt))
   for (i in 1:nrow(dt)) {
@@ -354,7 +357,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     if(length(ignore)>0) ignore <- ignore[!duplicated(ignore)]
     if(length(ignore)>0) ignore <- ignore[order(ignore)]
     for (i in 1:nrow(dt)) {
-      if(length(ignore)>0&&max(ignore, na.rm=T)>0|max(inst_deposit)>0) {
+      if((length(ignore)>0&&max(ignore, na.rm=T)>0)|(max(inst_deposit)>0)) {
         if(length(ignore)>0&&any(ignore==dt$depth_avg[i])) {
           dt$depth_avg_2[i] <- NA
         } else {dt$depth_avg_2[i] <- dt$depth_avg[i]}
@@ -488,6 +491,10 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     # inst_deposit
     if(!is.null(inst_deposit)&&!is.na(inst_deposit))  for(i in 1:nrow(inst_deposit))    inst_deposit[i,1] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - inst_deposit[i,1]))]
     if(!is.null(inst_deposit)&&!is.na(inst_deposit))  for(i in 1:nrow(inst_deposit))    inst_deposit[i,2] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - inst_deposit[i,2]))]
+    # inst_deposit_corr
+    if(!is.null(inst_deposit_corr)&&!is.na(inst_deposit_corr))  for(i in 1:nrow(inst_deposit_corr))    inst_deposit_corr[i,1] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - inst_deposit_corr[i,1]))]
+    if(!is.null(inst_deposit_corr)&&!is.na(inst_deposit_corr))  for(i in 1:nrow(inst_deposit_corr))    inst_deposit_corr[i,2] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - inst_deposit_corr[i,2]))]
+
     # ignore
     if(!is.null(ignore)&&!is.na(ignore))  for(i in seq_along(ignore))    ignore[i] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - ignore[i]))]
   } else msg_conversion<-NULL
@@ -636,7 +643,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       # Print sed rate and error
       if (max(sedchange)==0) {
         if(!mass_depth) {
-          cat(paste("\n Sedimentation rate (CFCS model): V= ",abs(round(sr_sed1,3))," mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
+          cat(paste("\n Sediment accumulation rate (CFCS model): SAR= ",abs(round(sr_sed1,3))," mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
           cat(paste("                          Error:     +/- ",abs(round(sr_sed1_err,3))," mm/yr\n", sep=""))
         } else {
           cat(paste("\n Mass accumulation rate (CFCS model): MAR= ",abs(round(sr_sed1,3))," g/mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
@@ -653,9 +660,9 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
           # Print sed rate and error
           if(!mass_depth) {
-            cat(paste("\n Sedimentation rate (CFCS model) ", SML,"-",sedchange[1],"mm: V= ",abs(round(sr_sed1,3))," mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
+            cat(paste("\n Sediment accumulation rate (CFCS model) ", SML,"-",sedchange[1],"mm: V= ",abs(round(sr_sed1,3))," mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
             cat(paste("                          Error:     +/- ",abs(round(sr_sed1_err,3))," mm/yr\n", sep=""))
-            cat(paste("\n Sedimentation rate (CFCS model) ", sedchange[1],"mm-bottom",": V= ",abs(round(sr_sed2,3))," mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4),"\n", sep=""))
+            cat(paste("\n Sediment accumulation rate (CFCS model) ", sedchange[1],"mm-bottom",": V= ",abs(round(sr_sed2,3))," mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4),"\n", sep=""))
             cat(paste("                          Error:     +/- ",abs(round(sr_sed2_err,3))," mm/yr\n", sep=""))
           } else {
             cat(paste("\n Mass accumulation rate (CFCS model) ", SML,"-",sedchange[1],"mm: MAR= ",abs(round(sr_sed1,3))," g/mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
@@ -690,11 +697,11 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
           # Print sed rate and error
           if (!mass_depth) {
-            cat(paste("\n Sedimentation rate (CFCS model) ", SML,"-",sedchange[1],"mm: V= ",abs(round(sr_sed1,3))," mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
+            cat(paste("\n Sediment accumulation rate (CFCS model) ", SML,"-",sedchange[1],"mm: V= ",abs(round(sr_sed1,3))," mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
             cat(paste("                          Error:     +/- ",abs(round(sr_sed1_err,3))," mm/yr\n", sep=""))
-            cat(paste("\n Sedimentation rate (CFCS model) ", sedchange[1],"-",sedchange[2],"mm: V= ",abs(round(sr_sed2,3))," mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4),"\n", sep=""))
+            cat(paste("\n Sediment accumulation rate (CFCS model) ", sedchange[1],"-",sedchange[2],"mm: V= ",abs(round(sr_sed2,3))," mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4),"\n", sep=""))
             cat(paste("                          Error:     +/- ",abs(round(sr_sed2_err,3))," mm/yr\n", sep=""))
-            cat(paste("\n Sedimentation rate (CFCS model) ", sedchange[2],"mm-bottom",": V= ",abs(round(sr_sed3,3))," mm/yr, R2= ", round(summary(lm_sed3)$r.squared,4),"\n", sep=""))
+            cat(paste("\n Sediment accumulation rate (CFCS model) ", sedchange[2],"mm-bottom",": V= ",abs(round(sr_sed3,3))," mm/yr, R2= ", round(summary(lm_sed3)$r.squared,4),"\n", sep=""))
             cat(paste("                          Error:     +/- ",abs(round(sr_sed3_err,3))," mm/yr\n", sep=""))
           } else {
             cat(paste("\n Mass accumulation rate (CFCS model) ", SML,"-",sedchange[1],"mm: MAR= ",abs(round(sr_sed1,3))," g/mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
@@ -1111,22 +1118,43 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
   # Add in output the results of the sedimentation rate
   if(any(model=="CFCS")) {
-    if (max(sedchange)>0) {
-      metadata <- rbind(metadata,
-                        c(paste("Sedimentation rate (CFCS model) ", SML,"-",sedchange[1],"mm",sep=""),paste("V= ",abs(round(sr_sed1,3)),"mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),", Error +/- ",abs(round(sr_sed1_err,3)),"mm/yr", sep="")))
-    } else {
-      metadata <- rbind(metadata,
-                        c("Sedimentation rate (CFCS model)",paste("V= ",abs(round(sr_sed1,3)),"mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),", Error +/- ",abs(round(sr_sed1_err,3)),"mm/yr", sep="")))
-    }
-    if (max(sedchange)>0) {
-      if(length(sedchange)==1) {
+    if(!mass_depth) {
+      if (max(sedchange)>0) {
         metadata <- rbind(metadata,
-                          c(paste("Sedimentation rate (CFCS model) ", sedchange[1],"mm-bottom", sep=""),paste("V= ",abs(round(sr_sed2,3)),"mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4), ", Error +/- ",abs(round(sr_sed1_err,3)),"mm/yr",sep="")))
+                          c(paste("Sediment accumulation rate (CFCS model) ", SML,"-",sedchange[1],"mm",sep=""),paste("SAR= ",abs(round(sr_sed1,3)),"mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),", Error +/- ",abs(round(sr_sed1_err,3)),"mm/yr", sep="")))
+      } else {
+        metadata <- rbind(metadata,
+                          c("Sediment accumulation rate (CFCS model)",paste("SAR= ",abs(round(sr_sed1,3)),"mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),", Error +/- ",abs(round(sr_sed1_err,3)),"mm/yr", sep="")))
       }
-      if(length(sedchange)==2) {
+      if (max(sedchange)>0) {
+        if(length(sedchange)==1) {
+          metadata <- rbind(metadata,
+                            c(paste("Sediment accumulation rate (CFCS model) ", sedchange[1],"mm-bottom", sep=""),paste("SAR= ",abs(round(sr_sed2,3)),"mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4), ", Error +/- ",abs(round(sr_sed1_err,3)),"mm/yr",sep="")))
+        }
+        if(length(sedchange)==2) {
+          metadata <- rbind(metadata,
+                            c(paste("Sediment accumulation rate (CFCS model) ", sedchange[1],"-",sedchange[2],"mm", sep=""),paste("SAR= ",abs(round(sr_sed2,3)),"mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4), ", Error +/- ",abs(round(sr_sed1_err,3)),"mm/yr",sep="")),
+                            c(paste("Sediment accumulation rate (CFCS model) ", sedchange[2],"mm-bottom", sep=""),paste("SAR= ",abs(round(sr_sed3,3)),"mm/yr, R2= ", round(summary(lm_sed3)$r.squared,4), ", Error +/- ",abs(round(sr_sed1_err,3)),"mm/yr",sep="")))
+        }
+      }
+    } else {
+      if (max(sedchange)>0) {
         metadata <- rbind(metadata,
-                          c(paste("Sedimentation rate (CFCS model) ", sedchange[1],"-",sedchange[2],"mm", sep=""),paste("V= ",abs(round(sr_sed2,3)),"mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4), ", Error +/- ",abs(round(sr_sed1_err,3)),"mm/yr",sep="")),
-                          c(paste("Sedimentation rate (CFCS model) ", sedchange[2],"mm-bottom", sep=""),paste("V= ",abs(round(sr_sed3,3)),"mm/yr, R2= ", round(summary(lm_sed3)$r.squared,4), ", Error +/- ",abs(round(sr_sed1_err,3)),"mm/yr",sep="")))
+                          c(paste("Mass accumulation rate (CFCS model) ", SML,"-",sedchange[1],"mm",sep=""),paste("MAR= ",abs(round(sr_sed1,3)),"g/cm2/yr, R2= ", round(summary(lm_sed1)$r.squared,4),", Error +/- ",abs(round(sr_sed1_err,3)),"g/cm2/yr", sep="")))
+      } else {
+        metadata <- rbind(metadata,
+                          c("Mass accumulation rate (CFCS model)",paste("MAR= ",abs(round(sr_sed1,3)),"g/cm2/yr, R2= ", round(summary(lm_sed1)$r.squared,4),", Error +/- ",abs(round(sr_sed1_err,3)),"g/cm2/yr", sep="")))
+      }
+      if (max(sedchange)>0) {
+        if(length(sedchange)==1) {
+          metadata <- rbind(metadata,
+                            c(paste("Mass accumulation rate (CFCS model) ", sedchange[1],"mm-bottom", sep=""),paste("MAR= ",abs(round(sr_sed2,3)),"g/cm2/yr, R2= ", round(summary(lm_sed2)$r.squared,4), ", Error +/- ",abs(round(sr_sed1_err,3)),"g/cm2/yr",sep="")))
+        }
+        if(length(sedchange)==2) {
+          metadata <- rbind(metadata,
+                            c(paste("Mass accumulation rate (CFCS model) ", sedchange[1],"-",sedchange[2],"mm", sep=""),paste("MAR= ",abs(round(sr_sed2,3)),"g/cm2/yr, R2= ", round(summary(lm_sed2)$r.squared,4), ", Error +/- ",abs(round(sr_sed1_err,3)),"g/cm2/yr",sep="")),
+                            c(paste("Mass accumulation rate (CFCS model) ", sedchange[2],"mm-bottom", sep=""),paste("MAR= ",abs(round(sr_sed3,3)),"g/cm2/yr, R2= ", round(summary(lm_sed3)$r.squared,4), ", Error +/- ",abs(round(sr_sed1_err,3)),"g/cm2/yr",sep="")))
+        }
       }
     }
   }
