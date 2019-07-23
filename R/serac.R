@@ -725,14 +725,16 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
     if(any(model=="CIC")) {
       # Calculation of age to be substracted
-      Tm_CIC <- (1/lambda)*log(dt$Pbex[1]/dt$Pbex)
+      Tm_CIC <- (1/lambda)*log(dt$Pbex[1]/dt$Pbex[!is.na(dt$Pbex)])
       # calculation age error: delta(tx)= 1/lambda*[(lambda_err*t)^2+(delta(A0)/A0)^2+(delta(Ax)/Ax)^2]^(0.5)
       # with Ax: activity at depth x; A0: initial activity
       # Two steps, 1 and 2
-      # 1) replace any NA per 0 (just for this calculation, in temporary vectors)
-      Pbex <- dt$Pbex
-      Pbex[is.na(Pbex)] <- 0
-      Pbex_er <- dt$Pbex_er
+      # 1) replace error NA per 0 (just for this calculation, in temporary vectors)
+      # We are not selecting the Pbex data with NAs, the model will interpolate between this ages
+      # Having NA data breaks the assumptions of CIC model, so it's not
+      #   recommended to use it in the first place if NAs are present.
+      Pbex <- dt$Pbex[!is.na(dt$Pbex)]
+      Pbex_er <- dt$Pbex_er[!is.na(dt$Pbex)]
       Pbex_er[is.na(Pbex_er)] <- 0
       # 2) Actual error
       Tm_CIC_err <- (1/lambda)*((lambda_err*Tm_CIC)^2+(Pbex_er[1]/Pbex[1])^2+(Pbex_er/Pbex)^2)^(0.5)
