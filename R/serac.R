@@ -290,7 +290,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     rm(myseq)
   } else whichkeep <- myvec
   whichkeep <- whichkeep[!whichkeep %in% which(complete_core_depth %in% ignore)]
-  whichkeep <- whichkeep[!whichkeep %in% which(complete_core_depth %in% dt$depth_avg[is.na(dt$Pbex)])]
+  #whichkeep <- whichkeep[!whichkeep %in% which(complete_core_depth %in% dt$depth_avg[is.na(dt$Pbex)])]
   rm(myvec)
   whichkeep <- whichkeep[!is.na(whichkeep)]
   # whichkeep tells you which "complete_core_depth" are not in an instantaneous deposit
