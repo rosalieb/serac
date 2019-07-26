@@ -1240,15 +1240,6 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
     # Set plot panels
     mylayout <- NULL # mylayout vector will set the width of the different windows within the plot
-    # todelete to delete next 6 lines if we keep the core photo for mass depth ####
-    # if(plotphoto) mylayout <- c(mylayout,.2)
-    # if(suppdescriptor) mylayout <- c(mylayout,1)
-    # if(plot_Pb) mylayout <- c(mylayout,1)
-    # if(plot_Pb_inst_deposit) mylayout <- c(mylayout,1.3)
-    # if(plot_Cs) mylayout <- c(mylayout,1.3)
-    # if(!mass_depth) mylayout <- c(mylayout,1.6) else mylayout <- c(mylayout,2) #Add more space if mass depth, to have double scale
-    # stop delete
-
 
     if(!mass_depth) { # Layout if depth in mm is used
       if(plotphoto) mylayout <- c(mylayout,.2)
@@ -1261,6 +1252,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       if(plot_Pb) mylayout <- c(mylayout,1)
       if(plot_Pb_inst_deposit) mylayout <- c(mylayout,1.3)
       if(plot_Cs) mylayout <- c(mylayout,1.3)
+      rev(mylayout)[1] <- rev(mylayout)[1] + .1
       if(plotphoto) mylayout <- c(mylayout,.6,.6) # more space than for the mm situation because we need place here for the second scale in g.cm2
       if(suppdescriptor&plotphoto) mylayout <- c(mylayout,.9)
       if(suppdescriptor&!plotphoto) mylayout <- c(mylayout,1.8)
