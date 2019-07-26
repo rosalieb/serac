@@ -18,9 +18,9 @@ user_infos <- function()
 
   # First, check whether a file already exists
   if(length(list.files(paste0(getwd(),"/Cores/"), pattern="serac_metadata*", full.names=TRUE))==1) {
-    metadata <- read.delim(list.files(paste(getwd(),"/Cores/"), pattern="serac_metadata*", full.names=TRUE), header=T, sep="")
+    metadata <- read.delim(list.files(paste0(getwd(),"/Cores/"), pattern="serac_metadata*", full.names=TRUE), header=T, sep="")
     message("\nA file with metadata already exists in this folder, with the \ninformation below:\n")
-    metadata
+    print(metadata)
     message("\nIf you want to replace it, type 1 in the console (then 'Enter'). \nPress any other key (then 'Enter') to exit the function.")
     answer <- readline()
   }
