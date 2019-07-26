@@ -19,20 +19,20 @@ devtools::install_github("rosalieb/serac")
 library(serac)
 
 
-## ----eval=FALSE-------------------------------------------------------------------------
+## ----getwd, eval=FALSE------------------------------------------------------------------
 #  getwd()
 
-## ----eval=FALSE-------------------------------------------------------------------------
-#  setwd("/myProject/Age depth model")
+## ----setwd, eval=FALSE------------------------------------------------------------------
+#  setwd("~/myProject/Age depth model")
 
-## ----eval=TRUE--------------------------------------------------------------------------
+## ----create core folder,  eval=TRUE-----------------------------------------------------
 dir.create(file.path(getwd(), 'Cores'), showWarnings = FALSE)
 
-## ----eval=TRUE--------------------------------------------------------------------------
+## ----create example data folder, eval=TRUE----------------------------------------------
 dir.create(file.path(paste(getwd(),'/Cores',sep=""), 'serac_example_ALO09P12'), showWarnings = FALSE)
 
 
-## ----eval=TRUE--------------------------------------------------------------------------
+## ----write example data, eval=TRUE------------------------------------------------------
 ?serac_example_ALO09P12
 write.table(x = serac_example_ALO09P12, file = paste(getwd(),'/Cores/serac_example_ALO09P12/serac_example_ALO09P12.txt',sep=""),col.names = T, row.names = F,sep="\t")
 
@@ -40,12 +40,17 @@ write.table(x = serac_example_ALO09P12, file = paste(getwd(),'/Cores/serac_examp
 write.table(x = serac_example_ALO09P12_proxy, file = paste(getwd(),'/Cores/serac_example_ALO09P12/serac_example_ALO09P12_proxy.txt',sep=""),col.names = T, row.names = F,sep="\t")
 
 
-## ----eval=TRUE--------------------------------------------------------------------------
+## ----user_infos,eval=FALSE, message=FALSE, warning=FALSE--------------------------------
+#  user_infos()
+
+## ----model 1, eval=TRUE-----------------------------------------------------------------
 serac(name="serac_example_ALO09P12",coring_yr=2009,
       save_code=FALSE) #do not include this in the code if you're working outside a Rmarkdown document
 
-## ---- eval=TRUE-------------------------------------------------------------------------
-serac(name="serac_example_ALO09P12", coring_yr=2009, model=c("CFCS"),
+## ----model 2, eval=TRUE-----------------------------------------------------------------
+# Code:
+model_ALO09P12 <-
+  serac(name="serac_example_ALO09P12", coring_yr=2009, model=c("CFCS"),
       plotphoto=FALSE, minphoto=c(0), maxphoto=c(210),
       plot_Pb=T, plot_Am=T, plot_Cs=T, Cher=c(30,40), Hemisphere=c("NH"), NWT=c(51,61),
       sedchange=c(75.5),
@@ -59,12 +64,18 @@ serac(name="serac_example_ALO09P12", coring_yr=2009, model=c("CFCS"),
       plotpdf=T, preview=T,
       save_code=FALSE)
 
+# Output:
 
-## ----eval=TRUE--------------------------------------------------------------------------
+## ----view final plot, echo=FALSE, message=FALSE, warning=FALSE--------------------------
+model_ALO09P12$plot
+
+## ----save output, eval=TRUE-------------------------------------------------------------
+# Code:
 mymodel1 <- serac(name="serac_example_ALO09P12", coring_yr=2009, preview = T,save_code=FALSE)
 
+# Output:
 
-## ----eval=TRUE--------------------------------------------------------------------------
+## ----explore outputs, eval=TRUE, message=FALSE, warning=FALSE---------------------------
 mymodel1$plot 
 
 # Visualize the input data
@@ -79,11 +90,11 @@ mymodel1$plot
 dev.off()
 
 
-## ----include=FALSE----------------------------------------------------------------------
+## ----remove folder at the end, include=FALSE--------------------------------------------
 # remove folder that was created for compilation of this vignette.
 unlink(paste0(getwd(),"/Cores"), recursive = TRUE)
 
-## ----eval=FALSE, include=FALSE----------------------------------------------------------
-#  # run that line to build vignette
-#  devtools::build_vignettes()
+## ----build_vigentte, eval=FALSE, include=FALSE------------------------------------------
+#  # copy and run that line in the console to build vignette
+#  #devtools::build_vignettes()
 
