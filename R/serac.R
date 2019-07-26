@@ -741,9 +741,10 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       # We are not selecting the Pbex data with NAs, the model will interpolate between this ages
       # Having NA data breaks the assumptions of CIC model, so it's not
       #   recommended to use it in the first place if NAs are present.
-      Pbex <- dt$Pbex[!is.na(dt$Pbex)]
-      Pbex_er <- dt$Pbex_er[!is.na(dt$Pbex)]
-      Pbex_er[is.na(Pbex_er)] <- 0
+      Pbex    <- dt$Pbex[!is.na(dt$Pbex)]
+      Pbex_er <- dt$Pbex_er[!is.na(dt$Pbex)&!is.na(dt$Pbex_er)]
+      Pbex_er <- approx(x = dt$depth_avg[!is.na(dt$Pbex)&!is.na(dt$Pbex_er)], y = Pbex_er,
+                        xout = dt$depth_avg[!is.na(dt$Pbex)])$y
       # 2) Actual error
       Tm_CIC_err <- (1/lambda)*((lambda_err*Tm_CIC)^2+(Pbex_er[1]/Pbex[1])^2+(Pbex_er/Pbex)^2)^(0.5)
 
