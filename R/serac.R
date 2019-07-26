@@ -1252,7 +1252,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       if(plot_Pb) mylayout <- c(mylayout,1)
       if(plot_Pb_inst_deposit) mylayout <- c(mylayout,1.3)
       if(plot_Cs) mylayout <- c(mylayout,1.3)
-      rev(mylayout)[1] <- rev(mylayout)[1] + .1
+      rev(mylayout)[1] <- rev(mylayout)[1] + .3
       if(plotphoto) mylayout <- c(mylayout,.6,.6) # more space than for the mm situation because we need place here for the second scale in g.cm2
       if(suppdescriptor&plotphoto) mylayout <- c(mylayout,.9)
       if(suppdescriptor&!plotphoto) mylayout <- c(mylayout,1.8)
