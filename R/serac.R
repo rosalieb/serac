@@ -661,9 +661,9 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
           # Print sed rate and error
           if(!mass_depth) {
-            cat(paste("\n Sediment accumulation rate (CFCS model) ", SML,"-",sedchange[1],"mm: V= ",abs(round(sr_sed1,3))," mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
+            cat(paste("\n Sediment accumulation rate (CFCS model) ", SML,"-",sedchange[1],"mm: SAR= ",abs(round(sr_sed1,3))," mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
             cat(paste("                          Error:     +/- ",abs(round(sr_sed1_err,3))," mm/yr\n", sep=""))
-            cat(paste("\n Sediment accumulation rate (CFCS model) ", sedchange[1],"mm-bottom",": V= ",abs(round(sr_sed2,3))," mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4),"\n", sep=""))
+            cat(paste("\n Sediment accumulation rate (CFCS model) ", sedchange[1],"mm-bottom",": SAR= ",abs(round(sr_sed2,3))," mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4),"\n", sep=""))
             cat(paste("                          Error:     +/- ",abs(round(sr_sed2_err,3))," mm/yr\n", sep=""))
           } else {
             cat(paste("\n Mass accumulation rate (CFCS model) ", SML,"-",sedchange[1],"mm: MAR= ",abs(round(sr_sed1,3))," g/mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
@@ -698,11 +698,11 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
           # Print sed rate and error
           if (!mass_depth) {
-            cat(paste("\n Sediment accumulation rate (CFCS model) ", SML,"-",sedchange[1],"mm: V= ",abs(round(sr_sed1,3))," mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
+            cat(paste("\n Sediment accumulation rate (CFCS model) ", SML,"-",sedchange[1],"mm: SAR= ",abs(round(sr_sed1,3))," mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
             cat(paste("                          Error:     +/- ",abs(round(sr_sed1_err,3))," mm/yr\n", sep=""))
-            cat(paste("\n Sediment accumulation rate (CFCS model) ", sedchange[1],"-",sedchange[2],"mm: V= ",abs(round(sr_sed2,3))," mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4),"\n", sep=""))
+            cat(paste("\n Sediment accumulation rate (CFCS model) ", sedchange[1],"-",sedchange[2],"mm: SAR= ",abs(round(sr_sed2,3))," mm/yr, R2= ", round(summary(lm_sed2)$r.squared,4),"\n", sep=""))
             cat(paste("                          Error:     +/- ",abs(round(sr_sed2_err,3))," mm/yr\n", sep=""))
-            cat(paste("\n Sediment accumulation rate (CFCS model) ", sedchange[2],"mm-bottom",": V= ",abs(round(sr_sed3,3))," mm/yr, R2= ", round(summary(lm_sed3)$r.squared,4),"\n", sep=""))
+            cat(paste("\n Sediment accumulation rate (CFCS model) ", sedchange[2],"mm-bottom",": SAR= ",abs(round(sr_sed3,3))," mm/yr, R2= ", round(summary(lm_sed3)$r.squared,4),"\n", sep=""))
             cat(paste("                          Error:     +/- ",abs(round(sr_sed3_err,3))," mm/yr\n", sep=""))
           } else {
             cat(paste("\n Mass accumulation rate (CFCS model) ", SML,"-",sedchange[1],"mm: MAR= ",abs(round(sr_sed1,3))," g/mm/yr, R2= ", round(summary(lm_sed1)$r.squared,4),"\n", sep=""))
@@ -2028,7 +2028,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     mtext(text = "Year (C.E.)", side = 3, line=2.2, cex=cex_1)
 
     if(any(model=="CFCS")) {
-      lines(-output_agemodel_CFCS$BestAD,-output_agemodel_CFCS$depth, col=modelcol[1],lty=2,lwd=.5)
+      if(!mass_depth) lines(-output_agemodel_CFCS$BestAD,-output_agemodel_CFCS$depth, col=modelcol[1],lty=2,lwd=.5)
       pol_x <- c(-output_agemodel_CFCS$MinAD, rev(-output_agemodel_CFCS$MaxAD))
       pol_y <- c(-output_agemodel_CFCS$depth, rev(-output_agemodel_CFCS$depth))
       polygon(x=pol_x, y = pol_y, col=adjustcolor(modelcol[1], alpha.f=0.2), border=NA)
