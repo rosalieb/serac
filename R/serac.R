@@ -146,11 +146,6 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     if(SML>0)                                       stop("\n Warning, CIC model should not be run if you assume the presence of a surface mixed layer. \n\n")
   }
 
-  # todelete to delete 2 next lines ####
-  # if mass_depth=TRUE, then plot photo and plot supp descriptor are turned to FALSE
-  # if(mass_depth) {plotphoto=F;suppdescriptor=F;text_CFCS = c("Mass accumulation rate (CFCS model)","g/mm/yr")} else text_CFCS= c("Sediment accumulation rate (CFCS model)","mm/yr")
-  # stop delete
-
   #### 1. READ DATA ----
   dt <- read.delim(file = paste(getwd(),"/Cores/",name,"/",name,".txt", sep=""))
   dt <- dt[,colSums(is.na(dt))<nrow(dt)]
