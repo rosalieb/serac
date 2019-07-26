@@ -101,7 +101,6 @@ serac(name="serac_example_ALO09P12",coring_yr=2009,
 
 Several sedimentation hypotheses were tested, and this is what the authors (<a href="https://www.sciencedirect.com/science/article/pii/S0033589412000294">Wilhelm _et al_, 2012</a>) chose as the best model:  
 ```{r model 2, eval=TRUE}
-# Code:
 model_ALO09P12 <-
   serac(name="serac_example_ALO09P12", coring_yr=2009, model=c("CFCS"),
       plotphoto=FALSE, minphoto=c(0), maxphoto=c(210),
@@ -117,7 +116,6 @@ model_ALO09P12 <-
       plotpdf=T, preview=T,
       save_code=FALSE)
 
-# Output:
 ```
 
 If you want to see the preview, change preview=T in the code.
@@ -133,10 +131,8 @@ model_ALO09P12$plot
 Files with age-depth model and metadata are automatically saved in your working folder. If you assign your function to an object, serac will return a list with the parameters.
 
 ```{r save output, eval=TRUE}
-# Code:
 mymodel1 <- serac(name="serac_example_ALO09P12", coring_yr=2009, preview = T,save_code=FALSE)
 
-# Output:
 ```
 
 As always when computing a new code, _serac_ will check whether you tried the code combination previously. Here, we used the same code than in the previous section, so the code display this message.
