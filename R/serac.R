@@ -1252,7 +1252,6 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       if(plot_Pb) mylayout <- c(mylayout,1)
       if(plot_Pb_inst_deposit) mylayout <- c(mylayout,1.3)
       if(plot_Cs) mylayout <- c(mylayout,1.3)
-      rev(mylayout)[1] <- rev(mylayout)[1] + .3
       if(plotphoto) mylayout <- c(mylayout,.6,.6) # more space than for the mm situation because we need place here for the second scale in g.cm2
       if(suppdescriptor&plotphoto) mylayout <- c(mylayout,.9)
       if(suppdescriptor&!plotphoto) mylayout <- c(mylayout,1.8)
@@ -1768,7 +1767,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     if(plot_Cs) {
       if(plotphoto || suppdescriptor || plot_Pb || plot_Pb_inst_deposit) par(mar=c(4.1,1.1,4.1,1.1)) else par(mar=c(4.1,4.1,4.1,1.1))
 
-      if(!mass_depth) myxlim_max <- max(dt$Cs, na.rm=T)*1.2+max(dt$Cs_er, na.rm = T) else myxlim_max <- max(dt$Cs, na.rm=T)*1.3+max(dt$Cs_er, na.rm = T)
+      if(!mass_depth) myxlim_max <- max(dt$Cs, na.rm=T)*1.2+max(dt$Cs_er, na.rm = T) else myxlim_max <- max(dt$Cs, na.rm=T)*1.35+max(dt$Cs_er, na.rm = T)
       myxlim_min <- min(dt$Cs, na.rm=T)-max(dt$Cs_er, na.rm = T)
 
       if(!mass_depth) {
