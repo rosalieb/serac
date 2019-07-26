@@ -1673,7 +1673,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
           #par(xpd=T)
           axis(4, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 20),n=40), labels = NA, cex.axis=cex_2, lwd=.5,line=1.1)
           axis(4, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 5)), labels=-(pretty(seq(myylim_md[1], myylim_md[2], length.out = 5))), cex.axis=cex_2,line=1.1)
-          mtext(text = bquote("Mass depth (g.cm"*~""^-2*")"), side = 4, line=3.2, cex=cex_1)
+          mtext(text = bquote("Mass depth (g.cm"*~""^-2*")"), side = 4, line=3.3, cex=cex_1)
           #par(xpd=F)
         }
       }
@@ -1693,13 +1693,16 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
         # 210Pb linear model needs to stop in case deepest depth have been set to be 'ignored'
         # (bug observed on 2018-10-26 by PS on CA08 - answer in email RB to PS on 2018-11-13)
+        # Also adding more condition to still plot the linear model when a element is set to ignore but there are still values to be consider afterwards
         # When plotting the linear model, we'll use either of these two following lines (after toplm definition)
         # One other special case regarding the next lines (before if()): when the surface samples are ignored, the regression line must not extend to the surface
         # We then define the value 'top linear model' to decrease the number of conditons in the code...
         if (length(ignore)>0) toplm <- max(c(SML,min(dt$depth_avg[!dt$depth_avg %in% ignore], na.rm = T)), na.rm = T) else toplm <- SML
         if (mass_depth) toplm <- md_interp$md_avg[which.min(abs(md_interp$depth_mm - toplm))]
 
-        if (is.null(ignore) || !is.null(is.null(ignore)) && sedchange_corr[1] > max(ignore,na.rm=T)) lines(c(-toplm,-sedchange_corr_allscales[1])~ c(lm_sed1$coefficients[1]+toplm*lm_sed1$coefficients[2],lm_sed1$coefficients[1]+sedchange_corr_allscales[1]*lm_sed1$coefficients[2]), col=Pbcol[1], lwd=2)
+        if (is.null(ignore) || !is.null(is.null(ignore)) && which.min(abs(dt$depth_avg-max(ignore, na.rm=T)))<nrow(dt) && any(!is.na(dt$depth_avg_2[which.min(abs(dt$depth_avg-max(ignore, na.rm=T))):nrow(dt)]))) {
+          lines(c(-toplm,-sedchange_corr_allscales[1])~ c(lm_sed1$coefficients[1]+toplm*lm_sed1$coefficients[2],lm_sed1$coefficients[1]+sedchange_corr_allscales[1]*lm_sed1$coefficients[2]), col=Pbcol[1], lwd=2)
+        }
         if (length(ignore)>0 && sedchange_corr[1] <= max(ignore, na.rm=T)) {
           if(!mass_depth) lines(c(-toplm,-max(dt$d[!dt$depth_avg %in% ignore & dt$d<sedchange_corr[1]],na.rm=T))~ c(lm_sed1$coefficients[1]+toplm*lm_sed1$coefficients[2],lm_sed1$coefficients[1]+max(dt$d[!dt$depth_avg %in% ignore & dt$d<sedchange_corr[1]],na.rm=T)*lm_sed1$coefficients[2]), col=Pbcol[1], lwd=2)
           if(mass_depth)  lines(c(-toplm,-max(dt$mass_depth_avg_corr[!dt$depth_avg %in% ignore & dt$d<sedchange_corr[1]],na.rm=T))~ c(lm_sed1$coefficients[1]+toplm*lm_sed1$coefficients[2],lm_sed1$coefficients[1]+max(dt$mass_depth_avg_corr[!dt$depth_avg %in% ignore & dt$d<sedchange_corr[1]],na.rm=T)*lm_sed1$coefficients[2]), col=Pbcol[1], lwd=2)
@@ -1835,7 +1838,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
         #par(xpd=T)
         axis(4, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 20),n=40), labels = NA, cex.axis=cex_2, lwd=.5,line=1.1)
         axis(4, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 5)), labels=-(pretty(seq(myylim_md[1], myylim_md[2], length.out = 5))), cex.axis=cex_2, line=1.1)
-        mtext(text = bquote("Mass depth (g.cm"*~""^-2*")"), side = 4, line=3.2, cex=cex_1)
+        mtext(text = bquote("Mass depth (g.cm"*~""^-2*")"), side = 4, line=3.3, cex=cex_1)
         #par(xpd=F)
       }
 
