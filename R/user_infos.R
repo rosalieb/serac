@@ -5,6 +5,8 @@
 #' @export
 #' @keywords age-depth modelling
 #' @keywords visualisation
+#' @keywords reproducibility
+#' @keywords data management
 #' @examples user_infos()
 #'
 
@@ -24,9 +26,9 @@ user_infos <- function()
   }
 
   if(answer=="1")  {
-    message("\nEnter an username. (recommended: first and last name)")
+    message("\nEnter an username. (recommended: first and last name, e.g., Rosalie Bruel)")
     username <- readline()
-    message("\nWhat is your affiliation?")
+    message("\nWhat is your affiliation?, e.g., University Savoie Mont-Blanc")
     affiliation <- readline()
     message("\nORCID number:")
     ORCID <- readline()
