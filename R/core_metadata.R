@@ -213,7 +213,7 @@ core_metadata <- function(name=c())
                              ncol=2, byrow = T)
       # View result
       cat("_______________________________________________________")
-      message(paste("You're all set! Please contact the authors if you would \nlike to see any other metadata included.\n",sep=""))
+      message(paste("\nYou're all set! Please contact the authors if you would \nlike to see any other metadata included.\n",sep=""))
       suppmetadata2<- as.data.frame(suppmetadata[-1,2]); rownames(suppmetadata2) <- suppmetadata[-1,1]; colnames(suppmetadata2) <- suppmetadata[1,2]
       print(suppmetadata2)
       cat("_______________________________________________________")
