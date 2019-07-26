@@ -1773,7 +1773,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     if(plot_Cs) {
       if(plotphoto || suppdescriptor || plot_Pb || plot_Pb_inst_deposit) par(mar=c(4.1,1.1,4.1,1.1)) else par(mar=c(4.1,4.1,4.1,1.1))
 
-      myxlim_max <- max(dt$Cs, na.rm=T)*1.2+max(dt$Cs_er, na.rm = T)
+      if(!mass_depth) myxlim_max <- max(dt$Cs, na.rm=T)*1.2+max(dt$Cs_er, na.rm = T) else myxlim_max <- max(dt$Cs, na.rm=T)*1.3+max(dt$Cs_er, na.rm = T)
       myxlim_min <- min(dt$Cs, na.rm=T)-max(dt$Cs_er, na.rm = T)
 
       if(!mass_depth) {
@@ -1865,13 +1865,13 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       }
       #NWT
       if (exists("NWT")&&!is.na(NWT)) {
-        lines(rep(max(dt$Cs[which_scale>min(NWT_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(NWT_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)*1.1,2),c(-NWT_allscales[1],-NWT_allscales[2]), lwd=1.5)
+        lines(rep(max(dt$Cs[which_scale>min(NWT_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(NWT_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)*1.2,2),c(-NWT_allscales[1],-NWT_allscales[2]), lwd=1.5)
         if(!mass_depth) {
           if (Hemisphere == "NH") shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(min(NWT_allscales)),
                                              labels = "NWT 1963", pos = 3, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
           if (Hemisphere == "SH") shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(min(NWT_allscales)),
                                              labels = "NWT 1964/1965", pos = 3, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
-          lines(c(max(dt$Cs[which_scale>min(NWT_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(NWT_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)*1.1, max(dt$Cs,na.rm = T)*2),rep(peakNWT_allscales,2), lty=2)
+          lines(c(max(dt$Cs[which_scale>min(NWT_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(NWT_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)*1.2, max(dt$Cs,na.rm = T)*2),rep(peakNWT_allscales,2), lty=2)
         } else {
           if (Hemisphere == "NH") shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),peakNWT_allscales,
                                              labels = "NWT 1963", pos = 3, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
@@ -1881,11 +1881,11 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       }
       #First radionuclides fallout
       if (exists("FF")&&!is.na(FF)) {
-        lines(rep(max(dt$Cs[which_scale>min(FF_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(FF_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)*1.1,2),c(-FF_allscales[1],-FF_allscales[2]), lwd=1.5)
+        lines(rep(max(dt$Cs[which_scale>min(FF_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(FF_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)*1.2,2),c(-FF_allscales[1],-FF_allscales[2]), lwd=1.5)
         if(!mass_depth) {
           shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),-(max(FF_allscales)),
                      labels = c("FF 1955"), pos = 1, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
-          lines(c(max(dt$Cs[which_scale>min(FF_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(FF_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)*1.1, max(dt$Cs,na.rm = T)*2),rep(peakFF_allscales,2), lty=2)
+          lines(c(max(dt$Cs[which_scale>min(FF_allscales-.01*(max(dt$which_scale,na.rm=T))) & which_scale<max(FF_allscales+.01*(max(dt$which_scale,na.rm=T)))],na.rm = T)*1.2, max(dt$Cs,na.rm = T)*2),rep(peakFF_allscales,2), lty=2)
         } else {
           shadowtext(max(dt$Cs,na.rm = T)+0.1*max(dt$Cs,na.rm=T),peakFF_allscales,
                      labels = c("FF 1955"), pos = 1, col="black",bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
