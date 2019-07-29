@@ -8,7 +8,10 @@ Authors@R: c(
            role = c("aut", "cre"), 
            comment = c(ORCID = "0000-0001-8351-7539")
     ),
-    person("Pierre", "Sabatier", role = "ctb", comment = c(ORCID = "0000-0002-9620-1514"))
+    person("Pierre", "Sabatier", 
+            email = pierre.sabatier@univ-smb.fr, 
+            role = "ctb",
+            comment = c(ORCID = "0000-0002-9620-1514")))
 Maintainer: Rosalie Bruel <rosaliebruel@gmail.com>
 Description: serac allows the user to compute age-depth model and provide an output graph, as well as age model in a text file and metadata, on the free open-source statistical software R.
     serac ensure the reproducibility of age-depth model, and grant the possibility to test several 210Pbex models (CFCS, CIC, CRS) and sedimentation hypotheses (change in sedimentation rates, instantaneous deposits, varved sedimentation, etc.).
