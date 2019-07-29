@@ -186,7 +186,7 @@ Enter here a more extensive list of parameters associated to your core. Current 
   * instrument type (e.g., alpha spectrometry, well-type germanium detector, P-type germanium detector) <br>
   * start of the measurements (YYYY-MM-DD) <br>
   * end of the measurements (YYYY-MM-DD) <br>
-  * any additional comment (e.g., 210Pb background reached, first centimetres lost during coring, etc.) <br
+  * any additional comment (e.g., 210Pb background reached, first centimetres lost during coring, etc.) <br>
 
 
 ## 4.4 serac_map()
