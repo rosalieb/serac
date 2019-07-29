@@ -32,6 +32,17 @@ opts_chunk$set(
 library(devtools)
 devtools::install_github("rosalieb/serac")
 library(serac)
+
+# I sometimes have issues getting this library:
+pkgTest <- function(x)
+{
+  if (!require(x,character.only = TRUE))
+  {
+    install.packages(x,dep=TRUE)
+    if(!require(x,character.only = TRUE)) stop("Package not found")
+  }
+}
+pkgTest("Hmisc")
 ```
 
 The present vignette helps you compute your first age-depth model with _serac_, a R package for ShortlivEd RAdionuclide Chronology of recent sediment cores.
