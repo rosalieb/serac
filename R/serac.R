@@ -107,11 +107,6 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   # Calculate how long the function took to run
   old_time <- Sys.time() # get start time
 
-  # load packages
-  pkgTest("Hmisc")
-  pkgTest("jpeg")
-  pkgTest("TeachingDemos")
-
   # create empty list where outputs will be saved
   out_list <- list()
 

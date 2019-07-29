@@ -9,6 +9,6 @@ Description: serac allows the user to compute age-depth model and provide an out
 License: MIT
 Encoding: UTF-8
 LazyData: true
-Imports: Hmisc, jpeg, TeachingDemos
+Imports: Hmisc, jpeg, TeachingDemos, ggplot2, ggspatial, raster, sf, rnaturalearth
 Suggests: knitr, rmarkdown 
 VignetteBuilder: knitr
