@@ -1,16 +1,15 @@
 ---
-title: "serac"
+title: "Introduction to _serac_"
 author: "Rosalie Bruel and Pierre Sabatier"
 date: "Last update: `r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
     toc: yes
     toc_depth: 3
-    number_sections: true
 vignette: >
-  %\VignetteIndexEntry{serac}
-  \usepackage[utf8]{inputenc}
+  %\VignetteIndexEntry{Introduction to serac}
   %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
 editor_options: 
   chunk_output_type: console
 ---
@@ -199,7 +198,7 @@ If you enter a vector, e.g., *serac_map(c("Lake1", "Lake2", "Lagoon1"))*, then t
 unlink(paste0(getwd(),"/Cores"), recursive = TRUE)
 ```
 
-```{r build_vigentte, eval=FALSE, include=FALSE}
+```{r build_vignette, eval=FALSE, include=FALSE}
 # copy and run that line in the console to build vignette
-#devtools::build_vignettes()
+# devtools::build_vignettes()
 ```
