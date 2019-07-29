@@ -20,7 +20,7 @@ Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.5.2)
 Imports: Hmisc, jpeg, TeachingDemos
-Suggests: knitr, rmarkdown, ggplot2, ggspatial, raster, sf, rnaturalearth
+Suggests: knitr, rmarkdown, ggspatial, raster, sf, rnaturalearth
 URL: https://github.com/rosalieb/serac
 BugReports: https://github.com/rosalieb/serac/issues
 VignetteBuilder: knitr

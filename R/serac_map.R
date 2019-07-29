@@ -17,7 +17,6 @@ serac_map <- function(which_lakes=NULL, output_name=NULL, lon_lim=NULL, lat_lim=
   .serac_map(which_lakes,output_name, lon_lim, lat_lim, add_labels)
 .serac_map <- function(which_lakes,output_name, lon_lim, lat_lim, add_labels) {
 
-  devtools::use_package("ggplot2", "Suggests")
   devtools::use_package("ggspatial", "Suggests")
   devtools::use_package("raster", "Suggests")
   devtools::use_package("sf", "Suggests")
