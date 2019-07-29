@@ -43,9 +43,9 @@ write.table(x = serac_example_ALO09P12_proxy, file = paste(getwd(),'/Cores/serac
 ## ----user_infos,eval=FALSE, message=FALSE, warning=FALSE--------------------------------
 #  user_infos()
 
-## ----model 1, eval=TRUE-----------------------------------------------------------------
-serac(name="serac_example_ALO09P12",coring_yr=2009,
-      save_code=FALSE) #do not include this in the code if you're working outside a Rmarkdown document
+## ----model 1, eval=FALSE----------------------------------------------------------------
+#  serac(name="serac_example_ALO09P12",coring_yr=2009,
+#        save_code=FALSE) #do not include this in the code if you're working outside a Rmarkdown document
 
 ## ----model 2, eval=TRUE-----------------------------------------------------------------
 model_ALO09P12 <-

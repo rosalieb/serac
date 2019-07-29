@@ -67,9 +67,9 @@ dir.create(file.path(paste(getwd(),'/Cores',sep=""), 'serac_example_ALO09P12'), 
 
 ```
 
-We are writing in this subfolder an example dataset (Source: <a href:"https://www.sciencedirect.com/science/article/pii/S0033589412000294">Wilhelm et al., 2012</a>.
+We are writing in this subfolder an example dataset (Source: <a href:"https://www.sciencedirect.com/science/article/pii/S0033589412000294">Wilhelm et al., 2012</a>).
 
-Format your own data following this template, or get help with formatting using the serac_input_formatting() function
+Format your own data following this template, or get help with formatting using the <a href="#serac_input_formatting">serac_input_formatting()</a> function.
 
 ```{r write example data, eval=TRUE}
 ?serac_example_ALO09P12
@@ -95,13 +95,13 @@ user_infos()
 ## Minimum arguments
 At the minimum, your function will be need the name of the core and the coring year. In the example below, I included the **save_code** argument because Rmarkdown doesn't save code history the way the code can use it. Unless you're including a plot in a Rmarkdown, I recommend you do not specify this argument, or turn it to its default, i.e., TRUE. That way, you can go back and see your code.
 
-```{r model 1, eval=TRUE}
+```{r model 1, eval=FALSE}
 serac(name="serac_example_ALO09P12",coring_yr=2009,
       save_code=FALSE) #do not include this in the code if you're working outside a Rmarkdown document
 ```
 
 ## Final model
-Several sedimentation hypotheses were tested, and this is what the authors (<a href="https://www.sciencedirect.com/science/article/pii/S0033589412000294">Wilhelm _et al_, 2012</a>) chose as the best model:  
+Several sedimentation hypotheses were tested, and this is what the authors (<a href="https://www.sciencedirect.com/science/article/pii/S0033589412000294">Wilhelm _et al_, 2012</a>) chose as the best model (type in only the function serac -- everything that appears below ("Sediment accumulation rate ...") are model outputs):  
 ```{r model 2, eval=TRUE}
 model_ALO09P12 <-
   serac(name="serac_example_ALO09P12", coring_yr=2009, model=c("CFCS"),
@@ -153,10 +153,11 @@ mymodel1 <- serac(name="serac_example_ALO09P12", coring_yr=2009, preview = T,sav
 
 ```
 
-As always when computing a new code, _serac_ will check whether you tried the code combination previously. Here, we used the same code than in the previous section, so the code display this message.
+As always when computing a new code, _serac_ will check whether you tried the code combination previously. Here, we used the same code than in the previous section, so the code display a message before the outputs.
 
-Several objects are accessible from **mymodel1**:
-`r paste("</br>    - ",names(mymodel1))`
+Note that several objects are accessible from **mymodel1**:
+`r paste("</br>    - ",names(mymodel1))` <br>
+Depending on the code you chose (and the number of models you visualize), the list of objects increases or decreases.
 
 
 
@@ -181,11 +182,11 @@ dev.off()
 ## help_serac()
 Another way to read some help.
 
-## serac_input_formatting() 
+## serac_input_formatting() <a name="#serac_input_formatting"></a>
 If you unsure about the input format of your core (if you have depth in mm, or column names that don't follow our example), you can use the function *serac_input_formatting(name = "MyCore")* (MyCore being the name of your core and folder in which the data are located) and follow the steps.
 
 ## core_metadata()
-Enter here a more extensive list of parameters associated to your core. Current list of parameters include:<br>
+Enter here a more extensive list of parameters associated to your core. Current list of parameters includes:<br>
 
   * ISGN <br>
   * sample date (YYYY-MM-DD) <br>
