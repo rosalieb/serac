@@ -23,4 +23,5 @@ Imports: Hmisc, jpeg, TeachingDemos
 Suggests: knitr, rmarkdown, ggspatial, raster, sf, rnaturalearth
 URL: https://github.com/rosalieb/serac
 BugReports: https://github.com/rosalieb/serac/issues
+NeedsCompilation:	yes
 VignetteBuilder: knitr
