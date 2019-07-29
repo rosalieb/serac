@@ -632,7 +632,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       # Save output
       if(!mass_depth) {
         out_list$`CFCS sediment accumulation rate` <- data.frame("SAR_mm.yr-1"=as.numeric(sr_sed1),"error_mm.yr-1"=as.numeric(sr_sed1_err),"R2"=summary(lm_sed1)$r.squared)
-        rownames(out_list$`CFCS sedimentation rate`) <- "sedchange1"
+        rownames(out_list$`CFCS sediment accumulation rate`) <- "sedchange1"
       } else {
         out_list$`CFCS mass accumulation rate` <- data.frame("MAR_g.mm-1.yr-1"=as.numeric(sr_sed1),"error_g.mm-1.yr-1"=as.numeric(sr_sed1_err),"R2"=summary(lm_sed1)$r.squared)
         rownames(out_list$`CFCS mass accumulation rate`) <- "sedchange1"
@@ -671,9 +671,9 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
           # Save output
           if(!mass_depth) { # default
-            out_list$`CFCS sedimentation rate` <- rbind(out_list$`CFCS sedimentation rate`,
-                                                        c(as.numeric(sr_sed2),as.numeric(sr_sed2_err),summary(lm_sed2)$r.squared))
-            rownames(out_list$`CFCS sedimentation rate`) <- c("sedchange1","sedchange2")
+            out_list$`CFCS sediment accumulation rate` <- rbind(out_list$`CFCS sediment accumulation rate`,
+                                                                c(as.numeric(sr_sed2),as.numeric(sr_sed2_err),summary(lm_sed2)$r.squared))
+            rownames(out_list$`CFCS sediment accumulation rate`) <- c("sedchange1","sedchange2")
           } else {
             out_list$`CFCS mass accumulation rate` <- rbind(out_list$`CFCS mass accumulation rate`,
                                                             c(as.numeric(sr_sed2),as.numeric(sr_sed2_err),summary(lm_sed2)$r.squared))
@@ -712,11 +712,11 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
           # Save output
           if(!mass_depth) {
-            out_list$`CFCS sedimentation rate` <- rbind(out_list$`CFCS sedimentation rate`,
-                                                        c(as.numeric(sr_sed2),as.numeric(sr_sed2_err),summary(lm_sed2)$r.squared))
-            out_list$`CFCS sedimentation rate` <- rbind(out_list$`CFCS sedimentation rate`,
-                                                        c(as.numeric(sr_sed3),as.numeric(sr_sed3_err),summary(lm_sed3)$r.squared))
-            rownames(out_list$`CFCS sedimentation rate`) <- c("sedchange1","sedchange2","sedchange3")
+            out_list$`CFCS sediment accumulation rate` <- rbind(out_list$`CFCS sediment accumulation rate`,
+                                                                c(as.numeric(sr_sed2),as.numeric(sr_sed2_err),summary(lm_sed2)$r.squared))
+            out_list$`CFCS sediment accumulation rate` <- rbind(out_list$`CFCS sediment accumulation rate`,
+                                                                c(as.numeric(sr_sed3),as.numeric(sr_sed3_err),summary(lm_sed3)$r.squared))
+            rownames(out_list$`CFCS sediment accumulation rate`) <- c("sedchange1","sedchange2","sedchange3")
           } else {
             out_list$`CFCS mass accumulation rate` <- rbind(out_list$`CFCS mass accumulation rate`,
                                                             c(as.numeric(sr_sed2),as.numeric(sr_sed2_err),summary(lm_sed2)$r.squared))
