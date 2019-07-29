@@ -2020,11 +2020,17 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     mtext(text = "Year (C.E.)", side = 3, line=2.2, cex=cex_1)
 
     if(any(model=="CFCS")) {
-      if(!mass_depth) lines(-output_agemodel_CFCS$BestAD,-output_agemodel_CFCS$depth, col=modelcol[1],lty=2,lwd=.5)
-      pol_x <- c(-output_agemodel_CFCS$MinAD, rev(-output_agemodel_CFCS$MaxAD))
-      pol_y <- c(-output_agemodel_CFCS$depth, rev(-output_agemodel_CFCS$depth))
+      which_CFCS <- output_agemodel_CFCS$depth<=max(dt$depth_avg[!is.na(dt$d)])
+      if(!mass_depth) {
+        lines(-output_agemodel_CFCS$BestAD,-output_agemodel_CFCS$depth, col=modelcol[1],lty=2,lwd=.5)
+        pol_x <- c(-output_agemodel_CFCS$MinAD, rev(-output_agemodel_CFCS$MaxAD))
+        pol_y <- c(-output_agemodel_CFCS$depth, rev(-output_agemodel_CFCS$depth))
+      } else {
+        pol_x <- c(-output_agemodel_CFCS$MinAD[which_CFCS], rev(-output_agemodel_CFCS$MaxAD[which_CFCS]))
+        pol_y <- c(-output_agemodel_CFCS$depth[which_CFCS], rev(-output_agemodel_CFCS$depth[which_CFCS]))
+      }
       polygon(x=pol_x, y = pol_y, col=adjustcolor(modelcol[1], alpha.f=0.2), border=NA)
-      lines(-output_agemodel_CFCS$BestAD[output_agemodel_CFCS$depth>=SML&output_agemodel_CFCS$depth<=max(dt$depth_avg[!is.na(dt$d)])],-output_agemodel_CFCS$depth[output_agemodel_CFCS$depth>=SML&output_agemodel_CFCS$depth<=max(dt$depth_avg[!is.na(dt$d)])], col=modelcol[1])
+      lines(-output_agemodel_CFCS$BestAD[output_agemodel_CFCS$depth>=SML&which_CFCS],-output_agemodel_CFCS$depth[output_agemodel_CFCS$depth>=SML&which_CFCS], col=modelcol[1])
     }
 
     if(any(model=="CIC")) {
