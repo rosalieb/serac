@@ -92,6 +92,7 @@ user_infos()
 
 
 # Run serac
+## Minimum arguments
 At the minimum, your function will be need the name of the core and the coring year. In the example below, I included the **save_code** argument because Rmarkdown doesn't save code history the way the code can use it. Unless you're including a plot in a Rmarkdown, I recommend you do not specify this argument, or turn it to its default, i.e., TRUE. That way, you can go back and see your code.
 
 ```{r model 1, eval=TRUE}
@@ -99,9 +100,9 @@ serac(name="serac_example_ALO09P12",coring_yr=2009,
       save_code=FALSE) #do not include this in the code if you're working outside a Rmarkdown document
 ```
 
+## Final model
 Several sedimentation hypotheses were tested, and this is what the authors (<a href="https://www.sciencedirect.com/science/article/pii/S0033589412000294">Wilhelm _et al_, 2012</a>) chose as the best model:  
 ```{r model 2, eval=TRUE}
-# Code:
 model_ALO09P12 <-
   serac(name="serac_example_ALO09P12", coring_yr=2009, model=c("CFCS"),
       plotphoto=FALSE, minphoto=c(0), maxphoto=c(210),
@@ -117,26 +118,39 @@ model_ALO09P12 <-
       plotpdf=T, preview=T,
       save_code=FALSE)
 
-# Output:
 ```
 
 If you want to see the preview, change preview=T in the code.
 Before that, make sure to extend your window in RStudio (large plot!)
 
-```{r view final plot, echo=FALSE, message=FALSE, warning=FALSE}
+```{r view final plot, echo=FALSE, message=FALSE, warning=FALSE, fig.height=4}
 model_ALO09P12$plot
 ```
 
+## Plot against mass_depth
+We offer the possibility to plot the figure against mass depth, using mass accumulation rate instead of sediment accumulation rate for the CFCS model. The code is similar to what we used previously, you just need to add **'mass_depth = TRUE'** to your function.
+
+```{r plot in mass depth}
+model_ALO09P12_mass_depth <-
+  serac(name="serac_example_ALO09P12", coring_yr=2009, preview = T,save_code=FALSE,
+      mass_depth=TRUE)
+```
+
+
+Note that you can then decide to enter the depth data for the Cesium peaks, instantaneous deposit, and points to ignore in the unit g.cm<sup>-2</sup>. If you want to do that, add the argument **input_depth_mm = FALSE**.
+
+
+```{r view final plot mass depth, echo=FALSE, message=FALSE, warning=FALSE, fig.height=4}
+model_ALO09P12_mass_depth$plot
+```
 
 
 # Explore outputs
 Files with age-depth model and metadata are automatically saved in your working folder. If you assign your function to an object, serac will return a list with the parameters.
 
 ```{r save output, eval=TRUE}
-# Code:
 mymodel1 <- serac(name="serac_example_ALO09P12", coring_yr=2009, preview = T,save_code=FALSE)
 
-# Output:
 ```
 
 As always when computing a new code, _serac_ will check whether you tried the code combination previously. Here, we used the same code than in the previous section, so the code display this message.
@@ -172,20 +186,22 @@ If you unsure about the input format of your core (if you have depth in mm, or c
 
 ## core_metadata()
 Enter here a more extensive list of parameters associated to your core. Current list of parameters include:<br>
-* ISGN <br>
-* sample date (YYYY-MM-DD) <br>
-* latitude (in WGS84)
-* longtiude (in WGS84)
-* coring method (e.g., gravity corer, piston corer, percussion, etc.) <br>
-* subsampling method at the laboratory (e.g., calibrated volumetric sampler, extrusion, etc.) <br>
-* instrument type (e.g., alpha spectrometry, well-type germanium detector, P-type germanium detector) <br>
-* start of the measurements (YYYY-MM-DD) <br>
-* end of the measurements (YYYY-MM-DD) <br>
-* any additional comment (e.g., 210Pb background reached, first centimetres lost during coring, etc.) <br
+
+  * ISGN <br>
+  * sample date (YYYY-MM-DD) <br>
+  * latitude (in WGS84)
+  * longtiude (in WGS84)
+  * coring method (e.g., gravity corer, piston corer, percussion, etc.) <br>
+  * subsampling method at the laboratory (e.g., calibrated volumetric sampler, extrusion, etc.) <br>
+  * instrument type (e.g., alpha spectrometry, well-type germanium detector, P-type germanium detector) <br>
+  * start of the measurements (YYYY-MM-DD) <br>
+  * end of the measurements (YYYY-MM-DD) <br>
+  * any additional comment (e.g., 210Pb background reached, first centimetres lost during coring, etc.) <br
 
 
 ## serac_map()
-If you entered GPS coordinates for your core in the previous step, tape in *serac_map()* into your console and view the location of all the systems you entered GPS coordinates for. If you enter a vector, e.g., *serac_map(c("Lake1", "Lake2", "Lagoon1"))*, then the map will be generated solely for these systems.
+If you entered GPS coordinates for your core in the previous step, tape in *serac_map()* into your console and view the location of all the systems you entered GPS coordinates for. <br>
+If you enter a vector, e.g., *serac_map(c("Lake1", "Lake2", "Lagoon1"))*, then the map will be generated solely for these systems.
 
 
 ```{r remove folder at the end, include=FALSE}

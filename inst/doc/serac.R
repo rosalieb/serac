@@ -48,7 +48,6 @@ serac(name="serac_example_ALO09P12",coring_yr=2009,
       save_code=FALSE) #do not include this in the code if you're working outside a Rmarkdown document
 
 ## ----model 2, eval=TRUE-----------------------------------------------------------------
-# Code:
 model_ALO09P12 <-
   serac(name="serac_example_ALO09P12", coring_yr=2009, model=c("CFCS"),
       plotphoto=FALSE, minphoto=c(0), maxphoto=c(210),
@@ -64,16 +63,21 @@ model_ALO09P12 <-
       plotpdf=T, preview=T,
       save_code=FALSE)
 
-# Output:
 
-## ----view final plot, echo=FALSE, message=FALSE, warning=FALSE--------------------------
+## ----view final plot, echo=FALSE, message=FALSE, warning=FALSE, fig.height=4------------
 model_ALO09P12$plot
 
+## ----plot in mass depth-----------------------------------------------------------------
+model_ALO09P12_mass_depth <-
+  serac(name="serac_example_ALO09P12", coring_yr=2009, preview = T,save_code=FALSE,
+      mass_depth=TRUE)
+
+## ----view final plot mass depth, echo=FALSE, message=FALSE, warning=FALSE, fig.height=4----
+model_ALO09P12_mass_depth$plot
+
 ## ----save output, eval=TRUE-------------------------------------------------------------
-# Code:
 mymodel1 <- serac(name="serac_example_ALO09P12", coring_yr=2009, preview = T,save_code=FALSE)
 
-# Output:
 
 ## ----explore outputs, eval=TRUE, message=FALSE, warning=FALSE---------------------------
 mymodel1$plot 
