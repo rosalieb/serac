@@ -63,7 +63,7 @@ dir.create(file.path(getwd(), 'Cores'), showWarnings = FALSE)
 
 Within the 'Cores' folder, user needs to create one folder per core.
 ```{r create example data folder, eval=TRUE}
-dir.create(file.path(paste(getwd(),'/Cores',sep=""), 'serac_example_ALO09P12'), showWarnings = FALSE)
+dir.create(file.path(paste0(getwd(),'/Cores'), 'serac_example_ALO09P12'), showWarnings = FALSE)
 
 ```
 
@@ -73,10 +73,10 @@ Format your own data following this template, or get help with formatting using 
 
 ```{r write example data, eval=TRUE}
 ?serac_example_ALO09P12
-write.table(x = serac_example_ALO09P12, file = paste(getwd(),'/Cores/serac_example_ALO09P12/serac_example_ALO09P12.txt',sep=""),col.names = T, row.names = F,sep="\t")
+write.table(x = serac_example_ALO09P12, file = paste0(getwd(),'/Cores/serac_example_ALO09P12/serac_example_ALO09P12.txt'),col.names = T, row.names = F,sep="\t")
 
 # Including proxy data for this core too
-write.table(x = serac_example_ALO09P12_proxy, file = paste(getwd(),'/Cores/serac_example_ALO09P12/serac_example_ALO09P12_proxy.txt',sep=""),col.names = T, row.names = F,sep="\t")
+write.table(x = serac_example_ALO09P12_proxy, file = paste0(getwd(),'/Cores/serac_example_ALO09P12/serac_example_ALO09P12_proxy.txt'),col.names = T, row.names = F,sep="\t")
 
 ```
 
