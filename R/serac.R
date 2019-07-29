@@ -2035,12 +2035,12 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
     if(any(model=="CIC")) {
       # Creating the logical vector which_CIC to plot only the CIC model point with data.
-      which_CIC <- output_agemodel_CIC$depth_avg[-1] %in% dt$depth_avg[!is.na(dt$depth_avg_2)] &!is.na(m_CIC_low)&!is.na(m_CIC_high)
-      pol_x <- c(-m_CIC_low[which_CIC], rev(-m_CIC_high[which_CIC]))
-      pol_y <- c(-dt$depth_avg[which_CIC], rev(-dt$depth_avg[which_CIC]))
+      which_CIC <- output_agemodel_CIC$depth_avg[-1] %in% dt$depth_avg[!is.na(dt$depth_avg_2)] & !is.na(m_CIC_low)& !is.na(m_CIC_high)
+      pol_x <- c(-c(coring_yr,m_CIC_low[which_CIC]), c(rev(-m_CIC_high[which_CIC]), -coring_yr))
+      pol_y <- c(-output_agemodel_CIC$depth_avg[which_CIC], rev(-output_agemodel_CIC$depth_avg[which_CIC]))
       polygon(x=pol_x, y = pol_y, col=adjustcolor(modelcol[2], alpha.f=0.2), border=NA)
       which_CIC <- output_agemodel_CIC$depth_avg[-1] %in% dt$depth_avg[!is.na(dt$depth_avg_2)] &!is.na(m_CIC)
-      lines(-m_CIC[which_CIC],-dt$depth_avg[which_CIC], col=modelcol[2])
+      lines(-m_CIC[which_CIC],-output_agemodel_CIC$depth_avg[which_CIC], col=modelcol[2])
     }
 
     if(any(model=="CRS")) {
