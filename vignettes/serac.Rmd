@@ -30,11 +30,9 @@ opts_chunk$set(
   out.width = "100%",
   fig.align = "center"
 )
-
 library(devtools)
 devtools::install_github("rosalieb/serac")
 library(serac)
-
 ```
 
 The present vignette helps you compute your first age-depth model with _serac_, a R package for ShortlivEd RAdionuclide Chronology of recent sediment cores.
@@ -64,7 +62,6 @@ dir.create(file.path(getwd(), 'Cores'), showWarnings = FALSE)
 Within the 'Cores' folder, user needs to create one folder per core.
 ```{r create example data folder, eval=TRUE}
 dir.create(file.path(paste0(getwd(),'/Cores'), 'serac_example_ALO09P12'), showWarnings = FALSE)
-
 ```
 
 We are writing in this subfolder an example dataset (Source: <a href:"https://www.sciencedirect.com/science/article/pii/S0033589412000294">Wilhelm et al., 2012</a>).
@@ -74,10 +71,8 @@ Format your own data following this template, or get help with formatting using 
 ```{r write example data, eval=TRUE}
 ?serac_example_ALO09P12
 write.table(x = serac_example_ALO09P12, file = paste0(getwd(),'/Cores/serac_example_ALO09P12/serac_example_ALO09P12.txt'),col.names = T, row.names = F,sep="\t")
-
 # Including proxy data for this core too
 write.table(x = serac_example_ALO09P12_proxy, file = paste0(getwd(),'/Cores/serac_example_ALO09P12/serac_example_ALO09P12_proxy.txt'),col.names = T, row.names = F,sep="\t")
-
 ```
 
 
@@ -117,7 +112,6 @@ model_ALO09P12 <-
       dmax=c(180), 
       plotpdf=T, preview=T,
       save_code=FALSE)
-
 ```
 
 If you want to see the preview, change preview=T in the code.
@@ -150,7 +144,6 @@ Files with age-depth model and metadata are automatically saved in your working 
 
 ```{r save output, eval=TRUE}
 mymodel1 <- serac(name="serac_example_ALO09P12", coring_yr=2009, preview = T,save_code=FALSE)
-
 ```
 
 As always when computing a new code, _serac_ will check whether you tried the code combination previously. Here, we used the same code than in the previous section, so the code display a message before the outputs.
@@ -163,18 +156,14 @@ Depending on the code you chose (and the number of models you visualize), the li
 
 ```{r explore outputs, eval=TRUE, message=FALSE, warning=FALSE}
 mymodel1$plot 
-
 # Visualize the input data
 knitr::kable(mymodel1$data, format = "markdown")
-
 # Visualize the inventories (if density was in the input data file)
 mymodel1$Inventories
-
 # Save the plot with custom parameters, e.g., Courier font and grey scale without editing default colors.
 pdf(paste0(getwd(),"/Cores/serac_example_ALO09P12/serac_example_ALO09P12_custom.pdf"),width = 10, height = 5, family="Courier", colormodel = "grey")
 mymodel1$plot
 dev.off()
-
 ```
 
 # Other functions
@@ -214,4 +203,3 @@ unlink(paste0(getwd(),"/Cores"), recursive = TRUE)
 # copy and run that line in the console to build vignette
 #devtools::build_vignettes()
 ```
-
