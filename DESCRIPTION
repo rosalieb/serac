@@ -3,24 +3,27 @@ Type: Package
 Title: ShortlivEd RAdionuclide Chronology of recent sediment cores
 Version: 0.1.0
 Authors@R: c(
-    person("Rosalie", "Bruel",
-           email = "rosaliebruel@gmail.com", 
-           role = c("aut", "cre"), 
-           comment = c(ORCID = "0000-0001-8351-7539")
-    ),
-    person("Pierre", "Sabatier", 
-            email = "pierre.sabatier@univ-smb.fr", 
-            role = "ctb",
-            comment = c(ORCID = "0000-0002-9620-1514")))
+          person("Rosalie", "Bruel",
+          email = "rosaliebruel@gmail.com", 
+          role = c("aut", "cre"), 
+          comment = c(ORCID = "0000-0001-8351-7539")
+          ),
+          person("Pierre", "Sabatier"))
 Maintainer: Rosalie Bruel <rosaliebruel@gmail.com>
 Description: serac allows the user to compute age-depth model and provide an output graph, as well as age model in a text file and metadata, on the free open-source statistical software R.
     serac ensure the reproducibility of age-depth model, and grant the possibility to test several 210Pbex models (CFCS, CIC, CRS) and sedimentation hypotheses (change in sedimentation rates, instantaneous deposits, varved sedimentation, etc.).
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 3.5.2)
-Imports: Hmisc, jpeg, TeachingDemos
-Suggests: knitr, rmarkdown
+Depends:
+  R (>= 3.5.2)
+Imports:
+  Hmisc,
+  jpeg,
+  TeachingDemos
+Suggests:
+  knitr,
+  rmarkdown
 URL: https://github.com/rosalieb/serac
 BugReports: https://github.com/rosalieb/serac/issues
 VignetteBuilder: knitr
