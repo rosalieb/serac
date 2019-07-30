@@ -1,4 +1,5 @@
 .onAttach = function(libname, pkgname){
+  packageStartupMessage("")
   packageStartupMessage("Hi there, welcome to serac, a package for ShortlivEd RAdionuclide")
   packageStartupMessage("Chronology of recent sediment cores.")
   packageStartupMessage("")
