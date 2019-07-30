@@ -2007,8 +2007,8 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
     par(xpd=T)
     if(inst_deposit_present)  {
-      if(!mass_depth) for (i in 1:nrow(inst_deposit)) rect(xleft = -2100, ybottom = -inst_deposit[i,2], xright = -coring_yr, ytop = -inst_deposit[i,1],col=inst_depositcol, border=inst_depositcol, lwd=.4)
-      if(mass_depth&&plotphoto|suppdescriptor) for (i in 1:nrow(inst_deposit)) rect(xleft = -2100, ybottom = -inst_deposit[i,2], xright = -coring_yr, ytop = -inst_deposit[i,1],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+      if(!mass_depth) for (i in 1:nrow(inst_deposit)) rect(xleft = -2300, ybottom = -inst_deposit[i,2], xright = -coring_yr, ytop = -inst_deposit[i,1],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+      if(mass_depth&&plotphoto|suppdescriptor) for (i in 1:nrow(inst_deposit)) rect(xleft = -2300, ybottom = -inst_deposit[i,2], xright = -coring_yr, ytop = -inst_deposit[i,1],col=inst_depositcol, border=inst_depositcol, lwd=.4)
     }
     par(xpd=F)
 
@@ -2083,7 +2083,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
         if(!mass_depth) {
           par(xpd=T)
           for (i in 1:length(dates)) {
-            lines(c(-2100,-dates[i]), rep(dates_depth_avg[i],2), lty=2)
+            lines(c(-2300,-dates[i]), rep(dates_depth_avg[i],2), lty=2)
           }
           par(xpd=F)
         } else {
