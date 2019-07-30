@@ -236,8 +236,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     message(paste0("     - ",dt$depth_bottom[which(test1>0)],"-",dt$depth_top[which(test1>0)+1]," mm \n"))
   }
 
-  # 1.3. Fill in missing data ####
-  # 1.4 Complete core vector ####
+  # 1.3 Complete core vector ####
   # Create the vector complete_core_depth when the measurements haven't been done for all the layers.
   # Necessary for inventory for instance.
   complete_core_temporary <- c(0,dt$depth_top, dt$depth_bottom,inst_deposit)
@@ -268,7 +267,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   # It is just a linear interpolation.
   if(length(grep("density",x = colnames(dt)))>=1) complete_core_density <- approx(x= dt$depth_avg, dt$density, xout= complete_core_depth, rule = 2)$y
 
-  # 1.5. Which keep ####
+  # 1.4. Which keep ####
   # When calculating the inventories, we don't want to take in account the depth included
   # in a instantaneous deposit, or the depth explicitely 'ignored' by the operator.
   # Here, I'm creating an index of data that will be ignored from the inventory calculation.
@@ -296,7 +295,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   complete_core_depth_2 <- complete_core_depth
   complete_core_depth_2[!complete_core_depth_2 %in% complete_core_depth_2[whichkeep]] <- NA
 
-  # 1.6. Set some parameters ####
+  # 1.5. Set some parameters ####
   if(!is.na(NWT) && Hemisphere=="NH") NWT_a <- 1963
   if(!is.na(NWT) && Hemisphere=="SH") NWT_a <- 1965
   if(is.null(dmin)) dmin <- min(dt$depth_avg,na.rm=T)
@@ -319,7 +318,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   myltylegend <- NULL
   mycollegend <- NULL
 
-  # 1.7 Create the composite free depth_avg ####
+  # 1.6 Create the composite free depth_avg ####
   ### Create the composite free depth_avg - step 1
   if(!exists("ignore")) ignore <- NULL
   if(SML>0) ignore <- c(ignore,dt$depth_avg[dt$depth_avg<=SML])
@@ -386,9 +385,9 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
   # By the end here, you should have 3 columns for depth_avg: 1 with original depth_avg, 1 with removed events + suspicious data, 1 with event free depth_avg
 
-  # 1.8 Mass_depth ####
+  # 1.7 Mass_depth ####
   {
-    # 1.8.1 mass_depth - Create the composite mass depth corrected for event ####
+    # 1.7.1 mass_depth - Create the composite mass depth corrected for event ####
     if(mass_depth) {
       # Step 1.1: mass thickness (epaisseur massique)
       dt$mass_depth_top    <- rep(NA, nrow(dt))
@@ -451,9 +450,9 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     #    replicate because there's actual depth (for plot_Pb)
     #    and depth with inst_deposit (for plot_Pb_inst_deposit)
 
-    # 1.8.2 mass_depth - Create an extra column 'which_scale' for depth, according to mass_depth==T/F ####
+    # 1.7.2 mass_depth - Create an extra column 'which_scale' for depth, according to mass_depth==T/F ####
     if(!mass_depth) dt$which_scale <- dt$d else dt$which_scale <- dt$mass_depth_avg_corr
-    # 1.8.3 mass_depth - Create an interpolated mass_depth vector ####
+    # 1.7.3 mass_depth - Create an interpolated mass_depth vector ####
     # If mass_depth=T, we'll need to match depths in g/cm2 to depths in mm.
     # CFCS ages between two depths are easy to find (linear relationship)
     # For mass_depth, if the interval is too big, we can really lose a lot
@@ -471,11 +470,13 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     md_interp     <- as.data.frame(md_interp)
     colnames(md_interp) <- c("depth_mm", "md_top", "md_bott", "md_avg")
   }
-  # 1.9. If scale was given in mass_depth, convert in mm so the rest of the script work####
+  # 1.8. If scale was given in mass_depth, convert in mm so the rest of the script work####
   if(input_depth_mm==F) {
     # User gave the input in g/cm2. Converting it in mm, because the script was initially built that way.
     # message if conversion
     msg_conversion <- " (depth converted from g/cm2)\n     "
+    # sedchange
+    if(sedchange!=0) sedchange <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - sedchange))]
     # SML
     if(SML!=0) SML <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - SML))]
     # Cher
@@ -485,16 +486,18 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     # FF
     if(!is.null(FF)&&!is.na(FF))  for(i in seq_along(FF))    FF[i] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - FF[i]))]
     # inst_deposit
-    if(!is.null(inst_deposit)&&!is.na(inst_deposit))  for(i in 1:nrow(inst_deposit))    inst_deposit[i,1] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - inst_deposit[i,1]))]
-    if(!is.null(inst_deposit)&&!is.na(inst_deposit))  for(i in 1:nrow(inst_deposit))    inst_deposit[i,2] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - inst_deposit[i,2]))]
-    # inst_deposit_corr
-    if(!is.null(inst_deposit_corr)&&!is.na(inst_deposit_corr))  for(i in 1:nrow(inst_deposit_corr))    inst_deposit_corr[i,1] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - inst_deposit_corr[i,1]))]
-    if(!is.null(inst_deposit_corr)&&!is.na(inst_deposit_corr))  for(i in 1:nrow(inst_deposit_corr))    inst_deposit_corr[i,2] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - inst_deposit_corr[i,2]))]
-
+    if(max(inst_deposit>0))  {
+      for(i in 1:nrow(inst_deposit))    inst_deposit[i,1] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - inst_deposit[i,1]))]
+      for(i in 1:nrow(inst_deposit))    inst_deposit[i,2] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - inst_deposit[i,2]))]
+      # inst_deposit_corr
+      if(!is.null(inst_deposit_corr)&&!is.na(inst_deposit_corr))  for(i in seq_along(inst_deposit_corr))    inst_deposit_corr[i,1] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - inst_deposit_corr[i,1]))]
+      if(!is.null(inst_deposit_corr)&&!is.na(inst_deposit_corr))  for(i in seq_along(inst_deposit_corr))    inst_deposit_corr[i,2] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - inst_deposit_corr[i,2]))]
+    }
     # ignore
     if(!is.null(ignore)&&!is.na(ignore))  for(i in seq_along(ignore))    ignore[i] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - ignore[i]))]
   } else msg_conversion<-NULL
-  # 1.10. Prepare depth vectors for CFCS model ####
+
+  # 1.9. Prepare depth vectors for CFCS model ####
   # Step somehow related to the creation of the composite free depht_avg
   # Here, we are looking to get two vectors:
   #     - (a) One vector of the actual depths on the core we are trying to date (upper and lower limits of instantaneous deposit for instance)
@@ -540,7 +543,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     }
   rm(inst_deposit_corr2)
 
-  # 1.11 Create separate datasets for different sedimentation rates ####
+  # 1.10 Create separate datasets for different sedimentation rates ####
   if(length(sedchange)==1 && sedchange==0) {dt_sed1=dt} else {
     if(length(sedchange)==1) {
       dt_sed1 <- dt[dt$depth_avg<sedchange,]
@@ -552,12 +555,12 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     }
   }
 
-  # 1.12. Save data to the output list ####
+  # 1.11. Save data to the output list ####
   out_list$data <- dt[-grep("which_scale",colnames(dt))]
   if(suppdescriptor) out_list$data_suppdescriptor <- dt_suppdescriptor
   if(varves) out_list$data_varves <- varve
 
-  # 1.13. Save the code to the output file with the code history ####
+  # 1.12. Save the code to the output file with the code history ####
   # save the model attempt in a file
   # Row with all parameters that will be incremented:
   this_code_history <- c(name,coring_yr,as.character(Sys.time()),paste(model, collapse = ", "),
