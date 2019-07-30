@@ -2164,4 +2164,4 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 }
 
 # welcome
-cat("\nHi there, welcome to serac, a function for ShortlivEd RAdionuclide Chronology of recent sediment cores.\n\nIf you need a little help to get started, type in help_serac() in the console.\nIf you're using serac for the first time, you may want to use the function\nuser_infos() to enter metadata.\n\n")
+packageStartupMessage("\nHi there, welcome to serac, a function for ShortlivEd RAdionuclide Chronology of recent sediment cores.\n\nIf you need a little help to get started, type in help_serac() in the console.\nIf you're using serac for the first time, you may want to use the function\nuser_infos() to enter metadata.\n\n")
