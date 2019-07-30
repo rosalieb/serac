@@ -558,8 +558,8 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       dt_sed1 <- dt[dt$depth_avg<sedchange,]
       dt_sed2 <- dt[dt$depth_avg>=sedchange,]
     } else {
-      dt_sed1 <- dt[dt$depth_avg<=min(sedchange),]
-      dt_sed2 <- dt[dt$depth_avg>=min(sedchange) & dt$depth_avg<=max(sedchange),]
+      dt_sed1 <- dt[dt$depth_avg<min(sedchange),]
+      dt_sed2 <- dt[dt$depth_avg>=min(sedchange) & dt$depth_avg<max(sedchange),]
       dt_sed3 <- dt[dt$depth_avg>=max(sedchange),]
     }
   }
