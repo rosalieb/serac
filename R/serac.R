@@ -1710,7 +1710,8 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
         if (mass_depth) toplm <- md_interp$md_avg[which.min(abs(md_interp$depth_mm - toplm))]
 
         if (is.null(ignore) || !is.null(is.null(ignore)) && which.min(abs(dt$depth_avg-max(ignore, na.rm=T)))<nrow(dt) && any(!is.na(dt$depth_avg_2[which.min(abs(dt$depth_avg-max(ignore, na.rm=T))):nrow(dt)]))) {
-          lines(c(-toplm,-max(dt_sed1$d, na.rm = T))~ c(lm_sed1$coefficients[1]+toplm*lm_sed1$coefficients[2],lm_sed1$coefficients[1]+max(dt_sed1$d, na.rm = T)*lm_sed1$coefficients[2]), col=Pbcol[1], lwd=2)
+          if(!mass_depth) lines(c(-toplm,-max(dt_sed1$d, na.rm = T))~ c(lm_sed1$coefficients[1]+toplm*lm_sed1$coefficients[2],lm_sed1$coefficients[1]+max(dt_sed1$d, na.rm = T)*lm_sed1$coefficients[2]), col=Pbcol[1], lwd=2)
+          if(mass_depth) lines(c(-toplm,-max(dt_sed1$mass_depth_avg_corr, na.rm = T))~ c(lm_sed1$coefficients[1]+toplm*lm_sed1$coefficients[2],lm_sed1$coefficients[1]+max(dt_sed1$mass_depth_avg_corr, na.rm = T)*lm_sed1$coefficients[2]), col=Pbcol[1], lwd=2)
         }
         if (length(ignore)>0 && sedchange_corr[1] <= max(ignore, na.rm=T)) {
           if(!mass_depth) lines(c(-toplm,-max(dt$d[!dt$depth_avg %in% ignore & dt$d<sedchange_corr[1]],na.rm=T))~ c(lm_sed1$coefficients[1]+toplm*lm_sed1$coefficients[2],lm_sed1$coefficients[1]+max(dt$d[!dt$depth_avg %in% ignore & dt$d<sedchange_corr[1]],na.rm=T)*lm_sed1$coefficients[2]), col=Pbcol[1], lwd=2)
