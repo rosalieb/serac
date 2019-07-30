@@ -521,7 +521,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   }
 
   # (c) d_for_CFCS will be the vector used for visualization
-  # (b) depth_avg_to_date_corr wll be the totally corrected vector, and is created in the next steps.
+  # (b) depth_avg_to_date_corr will be the totally corrected vector, and is created in the next steps.
   depth_avg_to_date_corr <- d_for_CFCS[order(d_for_CFCS)]
 
   # If there are more than 1 change in sedimentation rate,we also need to
@@ -531,9 +531,9 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   inst_deposit_corr2 <- inst_deposit
   if(exists("inst_deposit")&&length(inst_deposit) > 1)
     for(i in 1:nrow(inst_deposit)) {
+      depth_avg_to_date_corr[depth_avg_to_date_corr>min(inst_deposit_corr2[i,])] <-
+        depth_avg_to_date_corr[depth_avg_to_date_corr>min(inst_deposit_corr2[i,])] - (max(inst_deposit_corr2[i,])-min(inst_deposit_corr2[i,]))
       if((1+i)<=nrow(inst_deposit))  {
-        depth_avg_to_date_corr[depth_avg_to_date_corr>min(inst_deposit_corr2[i,])] <-
-          depth_avg_to_date_corr[depth_avg_to_date_corr>min(inst_deposit_corr2[i,])] - (max(inst_deposit_corr2[i,])-min(inst_deposit_corr2[i,]))
         inst_deposit_corr2[c(1+i):nrow(inst_deposit),] <-
           inst_deposit_corr2[c(1+i):nrow(inst_deposit),] - (max(inst_deposit_corr[i,])-min(inst_deposit_corr[i,]))
       }
@@ -872,10 +872,10 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
         age_break2 <- age_break-(sedchange_corr_allscales[2]-sedchange_corr_allscales[1])/abs(sr_sed2)
         age_break2_low <- age_break2-((sedchange_corr_allscales[2]-sedchange_corr_allscales[1]))*abs(sr_sed2_err)/abs(sr_sed2)^2
         age_break2_high <- age_break2+((sedchange_corr_allscales[2]-sedchange_corr_allscales[1]))*abs(sr_sed2_err)/abs(sr_sed2)^2
-        cat(paste("     Best Age (1st change): ",abs(round(age_break,0))," (incertitude: ",abs(round(age_break_low,0)),"-",abs(round(age_break_high,0)),")\n",sep=""))
-        cat(paste("     Best Age (2nd change): ",abs(round(age_break2,0))," (incertitude: ",abs(round(age_break2_low,0)),"-",abs(round(age_break2_high,0)),")\n\n",sep=""))
+        cat(paste("     Best Age (1st change): ",abs(round(age_break,0))," (uncertainty: ",abs(round(age_break_low,0)),"-",abs(round(age_break_high,0)),")\n",sep=""))
+        cat(paste("     Best Age (2nd change): ",abs(round(age_break2,0))," (uncertainty: ",abs(round(age_break2_low,0)),"-",abs(round(age_break2_high,0)),")\n\n",sep=""))
       } else {
-        cat(paste("     Best Age: ",abs(round(age_break,0))," (incertitude: ",abs(round(age_break_low,0)),"-",abs(round(age_break_high,0)),")\n\n",sep=""))
+        cat(paste("     Best Age: ",abs(round(age_break,0))," (uncertainty: ",abs(round(age_break_low,0)),"-",abs(round(age_break_high,0)),")\n\n",sep=""))
       }
     }
 
@@ -1162,12 +1162,12 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   if(max(sedchange)>0) {
     if(length(sedchange)==2) {
       metadata <- rbind(metadata,
-                        c("Best Age (1st change)",paste(abs(round(age_break,0))," (incertitude: ",abs(round(age_break_low,0)),"-",abs(round(age_break_high,0)),")",sep="")))
+                        c("Best Age (1st change)",paste(abs(round(age_break,0))," (uncertainty: ",abs(round(age_break_low,0)),"-",abs(round(age_break_high,0)),")",sep="")))
       metadata <- rbind(metadata,
-                        c("Best Age (2nd change)",paste(abs(round(age_break2,0))," (incertitude: ",abs(round(age_break2_low,0)),"-",abs(round(age_break2_high,0)),")",sep="")))
+                        c("Best Age (2nd change)",paste(abs(round(age_break2,0))," (uncertainty: ",abs(round(age_break2_low,0)),"-",abs(round(age_break2_high,0)),")",sep="")))
     } else {
       metadata <- rbind(metadata,
-                        c("Best Age",paste(abs(round(age_break,0))," (incertitude: ",abs(round(age_break_low,0)),"-",abs(round(age_break_high,0)),")",sep="")))
+                        c("Best Age",paste(abs(round(age_break,0))," (uncertainty: ",abs(round(age_break_low,0)),"-",abs(round(age_break_high,0)),")",sep="")))
     }
   }
   # Add in output the inventory of Lead if CRS hypothesis was selected
@@ -1774,7 +1774,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
           , expr = errbar(Cs,-depth_avg,c(-depth_avg+thickness/2),c(-depth_avg-thickness/2), pch=16, cap=.01, xlab="",ylab="", axes=F,ylim=myylim, xlim=c(myxlim_min,myxlim_max),col=grey(.65), errbar.col = grey(.65), cex=.8)
         )
         par(xpd=TRUE)
-        if(inst_deposit_present) for (i in 1:nrow(inst_deposit)) rect(xleft = -2000, ybottom = -inst_deposit[i,2], xright = max(dt$Cs,na.rm=T)*1.5+2000, ytop = -inst_deposit[i,1],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+        if(inst_deposit_present) for (i in 1:nrow(inst_deposit)) rect(xleft = -2000, ybottom = -inst_deposit[i,2], xright = max(dt$Cs,na.rm=T)*1.7+2000, ytop = -inst_deposit[i,1],col=inst_depositcol, border=inst_depositcol, lwd=.4)
         if(SML>0) rect(xleft = -2000, ybottom = -SML, xright = max(dt$Cs,na.rm=T)*1.5, ytop = 0, col=grey(0.97), border=NA)
         par(xpd=FALSE)
       } else {
@@ -1783,7 +1783,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
           , expr = errbar(Cs,-mass_depth_avg,-mass_depth_top,-mass_depth_bottom, pch=16, cap=.01, xlab="",ylab="", axes=F,ylim=myylim_md, xlim=c(myxlim_min,myxlim_max),col=grey(.65), errbar.col = grey(.65), cex=.8)
         )
         par(xpd=TRUE)
-        if(inst_deposit_present&length_id>0) for (i in 1:length_id) rect(xleft = -2000, ybottom = -md_interp$md_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,2]))], xright = max(dt$Cs,na.rm=T)*1.5+2000, ytop = -md_interp$md_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
+        if(inst_deposit_present&length_id>0) for (i in 1:length_id) rect(xleft = -2000, ybottom = -md_interp$md_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,2]))], xright = max(dt$Cs,na.rm=T)*1.7+2000, ytop = -md_interp$md_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i,1]))],col=inst_depositcol, border=inst_depositcol, lwd=.4)
         if(SML>0) rect(xleft = -2000, ybottom = -md_interp$md_avg[which.min(abs(md_interp$depth_mm - SML))], xright = max(dt$Cs,na.rm=T)*1.5, ytop = 0, col=grey(0.97), border=NA)
         par(xpd=FALSE)
       }
