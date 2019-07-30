@@ -171,7 +171,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   if(length(grep("Pb",colnames(dt)))>1) {
     dt$Pbex <- dt[,intersect(intersect(grep("Pb",colnames(dt)),grep("ex",colnames(dt))),grep("er",colnames(dt),invert=TRUE))[1]]
     dt$Pbex_er <- dt[,intersect(intersect(grep("Pb",colnames(dt)),grep("ex",colnames(dt))),grep("er",colnames(dt)))[1]]
-  } else if(plot_Pb|plot_Pb_inst_deposit) message("\n Warning. We did not find the Lead column (+ error) in the input file.\n\n")
+  } else if(plot_Pb|plot_Pb_inst_deposit) packageStartupMessage("\n Warning. We did not find the Lead column (+ error) in the input file.\n\n")
   # For 137Cs
   if(length(grep("Cs",colnames(dt)))>1) {
     dt$Cs <- dt[,intersect(grep("Cs",colnames(dt)),grep("er",colnames(dt),invert=TRUE))[1]]
@@ -179,7 +179,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   } else {
     dt$Cs <- rep(NA, nrow(dt))
     dt$Cs_er <- rep(NA, nrow(dt))
-    if(plot_Cs) message("\n Warning. We did not find the Cesium column (+ error) in the input file.\n\n")
+    if(plot_Cs) packageStartupMessage("\n Warning. We did not find the Cesium column (+ error) in the input file.\n\n")
   }
   # For 241Am
   if(length(grep("Am",colnames(dt)))>1) {
@@ -188,7 +188,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   } else {
     dt$Am <- rep(NA, nrow(dt))
     dt$Am_er <- rep(NA, nrow(dt))
-    if(plot_Am) message("\n Warning. We did not find the Americium column (+ error) in the input file.\n\n")
+    if(plot_Am) packageStartupMessage("\n Warning. We did not find the Americium column (+ error) in the input file.\n\n")
   }
 
   # 1.2 Calculate thickness if missing, or conversely calculate upper and lower depth of samples ####
@@ -232,8 +232,8 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     test1 <- c(test1,dt$depth_top[i]-dt$depth_bottom[i-1])
   }
   if(!is.null(dt$density) && !all(test1==0)) {
-    message(paste0("\n Warning, density is not given continuously for the whole core.\n Inventories, CRS model, and mass accumulation rate should be\n interpreted very carefully. Alternatively, enter the density\n for the whole core.\n Density is missing for ",length(test1[test1!=0])," layer(s) missing at: "))
-    message(paste0("     - ",dt$depth_bottom[which(test1>0)],"-",dt$depth_top[which(test1>0)+1]," mm \n"))
+    packageStartupMessage(paste0("\n Warning, density is not given continuously for the whole core.\n Inventories, CRS model, and mass accumulation rate should be\n interpreted very carefully. Alternatively, enter the density\n for the whole core.\n Density is missing for ",length(test1[test1!=0])," layer(s) missing at: "))
+    packageStartupMessage(paste0("     - ",dt$depth_bottom[which(test1>0)],"-",dt$depth_top[which(test1>0)+1]," mm \n"))
   }
 
   # 1.3 Complete core vector ####
@@ -333,7 +333,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       }
     }
     dt$mass_depth_top[1]=0
-    if(dt$depth_top[1]!=0) message(paste0("\n Warning. Mass depth for your first sample (",dt$depth_top[1],"-",dt$depth_bottom[1], " mm) was set\n to 0 to allow further calculation, but you did not provide\n density for the surface layer (0-",dt$depth_top[1]," mm). Include density for\n the surface layer if you can, or interpret the results with care.\n\n"))
+    if(dt$depth_top[1]!=0) packageStartupMessage(paste0("\n Warning. Mass depth for your first sample (",dt$depth_top[1],"-",dt$depth_bottom[1], " mm) was set\n to 0 to allow further calculation, but you did not provide\n density for the surface layer (0-",dt$depth_top[1]," mm). Include density for\n the surface layer if you can, or interpret the results with care.\n\n"))
 
     # Save these for later if inst_deposit_present
     md_top <- dt$mass_depth_top
@@ -1693,11 +1693,11 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     if(any(model=="CFCS")) {
       # Warning, you shouldn't plot the linear regression on the point without instantaneous deposit while you mentioned there were some
       if(exists("inst_deposit")&length(inst_deposit)>1&min(inst_deposit)<max(dt$depth_avg)&plot_Pb_inst_deposit==F&plot_CFCS_regression==F) {
-        message("\n Warning. It is not possible to visualise the linear regression calculated from\n the CFCS model on the 210Pbex curve without instantaneous deposits, on the\n initial depth. Add the argument plot_Pb_inst_deposit=TRUE to visualise the\n regression line on 210Pbex profile corrected from instananeous events.\n Keep in mind the regression line won't necesseraly match the points.\n\n")
+        packageStartupMessage("\n Warning. It is not possible to visualise the linear regression calculated from\n the CFCS model on the 210Pbex curve without instantaneous deposits, on the\n initial depth. Add the argument plot_Pb_inst_deposit=TRUE to visualise the\n regression line on 210Pbex profile corrected from instananeous events.\n Keep in mind the regression line won't necesseraly match the points.\n\n")
       }
       # If you decide to do it anyway, this message will display
       if(exists("inst_deposit")&length(inst_deposit)>1&min(inst_deposit)<max(dt$depth_avg)&plot_Pb_inst_deposit==F&plot_CFCS_regression==T) {
-        message("\n Warning. It seems you requested to visualise the linear regression calculated\n from the CFCS model on the 210Pbex curve without instantaneous deposits,\n while you specified there were some.\n Please bear in mind the linear regression does not correspond to the points. \n Turn plot_Pb_inst_deposit to TRUE or plot_CFCS_regression to FALSE.\n\n")
+        packageStartupMessage("\n Warning. It seems you requested to visualise the linear regression calculated\n from the CFCS model on the 210Pbex curve without instantaneous deposits,\n while you specified there were some.\n Please bear in mind the linear regression does not correspond to the points. \n Turn plot_Pb_inst_deposit to TRUE or plot_CFCS_regression to FALSE.\n\n")
       }
       if(plot_Pb & plot_CFCS_regression | plot_Pb_inst_deposit & plot_CFCS_regression) {
 
