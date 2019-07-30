@@ -1273,7 +1273,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
     # If inst_deposit present, we do not always want to plot all of the inst_deposit
     # This length_id vector identifies which instantaneous deposit have corresponding density | radionuclides data
-    which_non_NA_density <- !is.na(dt$density)
+    if(!is.null(dt$density)) which_non_NA_density <- !is.na(dt$density) else which_non_NA_density <- 1:nrow(dt)
     if(length(inst_deposit)>1) length_id <- length(inst_deposit[inst_deposit[,1]<=max(dt$depth_top[which_non_NA_density],na.rm=T),1]) else length_id = 0
 
     # Save plot to an object using a null PDF device
