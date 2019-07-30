@@ -1710,7 +1710,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
         if (mass_depth) toplm <- md_interp$md_avg[which.min(abs(md_interp$depth_mm - toplm))]
 
         if (is.null(ignore) || !is.null(is.null(ignore)) && which.min(abs(dt$depth_avg-max(ignore, na.rm=T)))<nrow(dt) && any(!is.na(dt$depth_avg_2[which.min(abs(dt$depth_avg-max(ignore, na.rm=T))):nrow(dt)]))) {
-          lines(c(-toplm,-sedchange_corr_allscales[1])~ c(lm_sed1$coefficients[1]+toplm*lm_sed1$coefficients[2],lm_sed1$coefficients[1]+sedchange_corr_allscales[1]*lm_sed1$coefficients[2]), col=Pbcol[1], lwd=2)
+          lines(c(-toplm,-max(dt_sed1$d, na.rm = T))~ c(lm_sed1$coefficients[1]+toplm*lm_sed1$coefficients[2],lm_sed1$coefficients[1]+max(dt_sed1$d, na.rm = T)*lm_sed1$coefficients[2]), col=Pbcol[1], lwd=2)
         }
         if (length(ignore)>0 && sedchange_corr[1] <= max(ignore, na.rm=T)) {
           if(!mass_depth) lines(c(-toplm,-max(dt$d[!dt$depth_avg %in% ignore & dt$d<sedchange_corr[1]],na.rm=T))~ c(lm_sed1$coefficients[1]+toplm*lm_sed1$coefficients[2],lm_sed1$coefficients[1]+max(dt$d[!dt$depth_avg %in% ignore & dt$d<sedchange_corr[1]],na.rm=T)*lm_sed1$coefficients[2]), col=Pbcol[1], lwd=2)
@@ -1750,7 +1750,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
               shadowtext(x = 0,y = -d_legend-.06*dmax,labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed2)$r.squared,4))), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1)
               shadowtext(x = 0,y = -d_legend,labels = bquote(SAR ~ "=" ~ .(abs(round(sr_sed2,3))) ~ mm.yr^-1), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1)
 
-              if (is.null(ignore) || !is.null(is.null(ignore)) && max(dt_sed3$depth_avg, na.rm = T) > max(ignore, na.rm=T))  lines(c(-min(dt_sed3$d, na.rm = T),-max(dt_sed3$d, na.rm = T))~ c(lm_sed3$coefficients[1]+-min(dt_sed3$d, na.rm = T)*lm_sed3$coefficients[2],lm_sed3$coefficients[1]+max(dt_sed3$d, na.rm = T)*lm_sed3$coefficients[2]), lwd=2, col=Pbcol[3])
+              if (is.null(ignore) || !is.null(is.null(ignore)) && max(dt_sed3$depth_avg, na.rm = T) > max(ignore, na.rm=T))  lines(c(-min(dt_sed3$d, na.rm = T),-max(dt_sed3$d, na.rm = T))~ c(lm_sed3$coefficients[1]+min(dt_sed3$d, na.rm = T)*lm_sed3$coefficients[2],lm_sed3$coefficients[1]+max(dt_sed3$d, na.rm = T)*lm_sed3$coefficients[2]), lwd=2, col=Pbcol[3])
               if (length(ignore)>0 && max(dt_sed3$depth_avg, na.rm = T) <= max(ignore, na.rm=T)) lines(c(-min(dt_sed3$d, na.rm = T),-max(dt$d[!dt$depth_avg %in% ignore],na.rm=T))~ c(lm_sed3$coefficients[1]+max(dt_sed3$d, na.rm = T)*lm_sed3$coefficients[2],lm_sed3$coefficients[1]+max(dt$d[!dt$depth_avg %in% ignore],na.rm=T)*lm_sed3$coefficients[2]), lwd=2, col=Pbcol[2])
               d_legend <- mean(c(min(dt_sed3$d,na.rm = T),max(dt_sed3$d,na.rm = T)))*.8
               shadowtext(x = 0,y = -d_legend-.06*dmax,labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed3)$r.squared,4))), pos = 4, col=Pbcol[3], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
