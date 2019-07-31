@@ -34,14 +34,15 @@ user_infos <- function()
     ORCID <- readline()
     message("\nemail:")
     email <- readline()
-    message("\nThanks for filling up this file; as long as you don't delete this file\nor run the function again, the information you entered will be added\nto the metadata of your projects.")
-    metadata <- matrix(c("SECTIONS","USER INFORMATIONS",
-                         "username",username,
-                         "affiliation",affiliation,
-                         "ORCID",ORCID,
-                         "email",email),
-                       ncol = 2, byrow = T)
-    write.table(x = metadata, file = paste(getwd(),"/Cores/serac_metadata_",username,".txt",sep = ""),col.names = F, row.names = F)
+    metadata <- data.frame("SECTIONS"= c("username","affiliation","ORCID","email"),
+                           "USER INFORMATIONS" = c(username,affiliation,ORCID,email))
+    write.table(x = metadata, file = paste(getwd(),"/Cores/serac_metadata_",username,".txt",sep = ""),col.names = T, row.names = F)
+    cat("\nYou're all set! Here are the information you entered\n ")
+    cat("_______________________________________________________\n")
+    print(metadata)
+    cat("_______________________________________________________")
+    message("\nThanks for filling up these information; as long as you don't delete this file\nor run the function again, the information you entered will be added\nto the metadata of your projects.")
+
   }
 
 }
