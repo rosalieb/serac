@@ -384,11 +384,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     if(!is.null(FF)&&!is.na(FF))  for(i in seq_along(FF))    FF[i] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - FF[i]))]
     # inst_deposit
     if(max(inst_deposit>0))  {
-      for(i in 1:nrow(inst_deposit))    inst_deposit[i,1] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - inst_deposit[i,1]))]
-      for(i in 1:nrow(inst_deposit))    inst_deposit[i,2] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - inst_deposit[i,2]))]
-      # inst_deposit_corr
-      if(!is.null(inst_deposit_corr)&&!is.na(inst_deposit_corr))  for(i in seq_along(inst_deposit_corr))    inst_deposit_corr[i,1] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - inst_deposit_corr[i,1]))]
-      if(!is.null(inst_deposit_corr)&&!is.na(inst_deposit_corr))  for(i in seq_along(inst_deposit_corr))    inst_deposit_corr[i,2] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - inst_deposit_corr[i,2]))]
+      for(i in seq_along(inst_deposit))    inst_deposit[i] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - inst_deposit[i]))]
     }
     # ignore
     if(!is.null(ignore)&&!is.na(ignore))  for(i in seq_along(ignore))    ignore[i] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - ignore[i]))]
@@ -2163,5 +2159,3 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
 }
 
-# welcome
-packageStartupMessage("\nHi there, welcome to serac, a function for ShortlivEd RAdionuclide Chronology of recent sediment cores.\n\nIf you need a little help to get started, type in help_serac() in the console.\nIf you're using serac for the first time, you may want to use the function\nuser_infos() to enter metadata.\n\n")
