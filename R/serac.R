@@ -872,16 +872,16 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
   if(any(model=="CFCS")) {
     if(max(sedchange)>0) {
-      Tm <- sedchange_corr_allscales[1]/abs(sr_sed1)
-      age_break <- coring_yr-Tm
-      age_break_low <- age_break-Tm*abs(sr_sed1_err)/abs(sr_sed1)
-      age_break_high <- age_break+Tm*abs(sr_sed1_err)/abs(sr_sed1)
+      Tm1 <- sedchange_corr_allscales[1]/abs(sr_sed1)
+      age_break <- coring_yr-Tm1
+      age_break_low <- age_break-Tm1*abs(sr_sed1_err)/abs(sr_sed1)
+      age_break_high <- age_break+Tm1*abs(sr_sed1_err)/abs(sr_sed1)
       cat(paste(" Approximation of age at change(s) in sedimentation rate:\n"))
       if(length(sedchange)==2) {
-        Tm <- (sedchange_corr_allscales[2]-sedchange_corr_allscales[1])/abs(sr_sed2)
-        age_break2 <- age_break-Tm
-        age_break2_low <- age_break2-Tm*abs(sr_sed2_err)/abs(sr_sed2)
-        age_break2_high <- age_break2+Tm*abs(sr_sed2_err)/abs(sr_sed2)
+        Tm2 <- (sedchange_corr_allscales[2]-sedchange_corr_allscales[1])/abs(sr_sed2)
+        age_break2 <- age_break-Tm2
+        age_break2_low <- age_break2-Tm2*abs(sr_sed2_err)/abs(sr_sed2)
+        age_break2_high <- age_break2+Tm2*abs(sr_sed2_err)/abs(sr_sed2)
         cat(paste("     Best Age (1st change): ",abs(round(age_break,0))," (uncertainty: ",abs(round(age_break_low,0)),"-",abs(round(age_break_high,0)),")\n",sep=""))
         cat(paste("     Best Age (2nd change): ",abs(round(age_break2,0))," (uncertainty: ",abs(round(age_break2_low,0)),"-",abs(round(age_break2_high,0)),")\n\n",sep=""))
       } else {
@@ -900,14 +900,14 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       if(max(sedchange)>0 && depth_avg_to_date[i]>=sedchange[1]) {
         Tm <- (depth_avg_to_date_corr_allscales[i]-sedchange_corr_allscales[1])/abs(sr_sed2)
         output_agemodel_CFCS[i,2] <- age_break-Tm
-        output_agemodel_CFCS[i,3] <- output_agemodel_CFCS[i,2]-Tm*abs(sr_sed2_err)/abs(sr_sed2)
-        output_agemodel_CFCS[i,4] <- output_agemodel_CFCS[i,2]+Tm*abs(sr_sed2_err)/abs(sr_sed2)
+        output_agemodel_CFCS[i,3] <- output_agemodel_CFCS[i,2]-(Tm+Tm1)*abs(sr_sed2_err)/abs(sr_sed2)
+        output_agemodel_CFCS[i,4] <- output_agemodel_CFCS[i,2]+(Tm+Tm1)*abs(sr_sed2_err)/abs(sr_sed2)
       }
       if(length(sedchange)>1 && depth_avg_to_date[i]>=sedchange[2]) {
         Tm <- (depth_avg_to_date_corr_allscales[i]-sedchange_corr_allscales[2])/abs(sr_sed3)
         output_agemodel_CFCS[i,2] <- age_break2-Tm
-        output_agemodel_CFCS[i,3] <- output_agemodel_CFCS[i,2]-Tm*abs(sr_sed3_err)/abs(sr_sed3)
-        output_agemodel_CFCS[i,4] <- output_agemodel_CFCS[i,2]+Tm*abs(sr_sed3_err)/abs(sr_sed3)
+        output_agemodel_CFCS[i,3] <- output_agemodel_CFCS[i,2]-(Tm+Tm2)*abs(sr_sed3_err)/abs(sr_sed3)
+        output_agemodel_CFCS[i,4] <- output_agemodel_CFCS[i,2]+(Tm+Tm2)*abs(sr_sed3_err)/abs(sr_sed3)
       }
     }
     output_agemodel_CFCS <- as.data.frame(output_agemodel_CFCS)
