@@ -52,16 +52,19 @@
 #'
 #' # Lake Iseo
 #' # serac(name="Iseo",coring_yr=2010)
-#' # serac(name="Iseo",coring_yr=2010,model=c("CFCS","CIC","CRS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(320),plot_Pb=T,plot_Am=T,plot_Cs=T,Cher=c(70,75),Hemisphere=c("NH"),NWT=c(130,140),FF=c(164,173),varves=TRUE,plotpdf=T,preview=T,stepout=5)
+#' # serac(name="Iseo",coring_yr=2010,model=c("CFCS","CIC","CRS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(320),plot_Pb=T,plot_Am=T,plot_Cs=T,Cher=c(70,75),Hemisphere=c("NH"),NWT=c(130,140),FF=c(164,173),varves=TRUE,plotpdf=T,stepout=5)
+#'
+#' # Lake Luitel
+#' # serac(name="LUI",coring_yr=2012,model=c("CFCS","CIC","CRS"),mass_depth=T,plotphoto=T,minphoto=c(0),maxphoto=c(470),plot_Pb=T,plot_Cs=T,Cher=c(115,125),Hemisphere=c("NH"),NWT=c(285,295),FF=c(305,315),plotpdf=TRUE)
 #'
 #' # Lake Saint-Andre
-#' # serac(name="SAN",coring_yr=2011,model=c("CFCS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(420),plot_Pb=T,plot_Am=T,plot_Cs=T,Cher=c(195,205),Hemisphere=c("NH"),NWT=c(275,295),FF=c(315,325),sedchange=c(165,260),plotpdf=TRUE)
+#' # serac(name="SAN",coring_yr=2011,model=c("CFCS","CIC","CRS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(420),plot_Pb=T,sedchange=c(165,260),plot_Am=T,plot_Cs=T,Cher=c(195,205),Hemisphere=c("NH"),NWT=c(275,295),FF=c(315,325),plotpdf=TRUE,archive_metadata=F)
 #'
 #' # Lake Allos
 #' # serac(name="ALO09P12",coring_yr=2009,model=c("CFCS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(210),plot_Pb=T,plot_Am=T,plot_Cs=T,Cher=c(30,40),Hemisphere=c("NH"),NWT=c(51,61),sedchange=c(75.5),plot_Pb_inst_deposit=T,inst_deposit=c(20,28,100,107,135,142,158,186),suppdescriptor=TRUE,descriptor_lab=c("Ca/Fe"),historic_d=c(20,28,100,107,135,142,158,186),historic_a=c(1994,1920,1886,1868),historic_n=c("sept1 994 flood","1920 flood","1886 flood","1868 flood ?"), min_yr=c(1750),dmax=c(180), plotpdf=TRUE,preview=F)
 #'
 #' # Pierre-Blanche lagoon
-#' # serac(name="PB06",coring_yr=2006,model=c("CFCS","CRS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(350),plot_Pb=T,plot_Cs=T,Cher=c(50,60),Hemisphere=c("NH"),NWT=c(100,120),suppdescriptor=T,descriptor_lab=c("Si/Al"),SML=30,inst_deposit=c(315,350),historic_d=c(315,350),historic_a=c(1893),historic_n=c("1894storm"),min_yr=1870,dmax=c(350),plotpdf=TRUE)
+#' # serac(name="PB06",coring_yr=2006,model=c("CFCS","CRS"),plotphoto=TRUE,minphoto=c(0),maxphoto=c(350),plot_Pb=T,plot_Pb_inst_deposit=T,inst_deposit=c(315,350),SML=30,plot_Cs=T,Cher=c(50,60),Hemisphere=c("NH"),NWT=c(100,120),suppdescriptor=T,descriptor_lab=c("Si/Al"),historic_d=c(315,350),historic_a=c(1893),historic_n=c("1894 storm"),min_yr=1870,dmax=c(350),plotpdf=TRUE)
 #'
 
 serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,inst_deposit=c(0),
@@ -880,8 +883,8 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       if(length(sedchange)==2) {
         Tm2 <- (sedchange_corr_allscales[2]-sedchange_corr_allscales[1])/abs(sr_sed2)
         age_break2 <- age_break-Tm2
-        age_break2_low <- age_break2-Tm2*abs(sr_sed2_err)/abs(sr_sed2)
-        age_break2_high <- age_break2+Tm2*abs(sr_sed2_err)/abs(sr_sed2)
+        age_break2_low <- age_break2-(Tm1+Tm2)*abs(sr_sed2_err)/abs(sr_sed2)
+        age_break2_high <- age_break2+(Tm1+Tm2)*abs(sr_sed2_err)/abs(sr_sed2)
         cat(paste("     Best Age (1st change): ",abs(round(age_break,0))," (uncertainty: ",abs(round(age_break_low,0)),"-",abs(round(age_break_high,0)),")\n",sep=""))
         cat(paste("     Best Age (2nd change): ",abs(round(age_break2,0))," (uncertainty: ",abs(round(age_break2_low,0)),"-",abs(round(age_break2_high,0)),")\n\n",sep=""))
       } else {
@@ -1654,7 +1657,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
             if(!mass_depth) {
               with (
                 data=dt_sed3
-                , expr = errbar(log(Pbex),-d,c(-d+thickness/2),c(-d-thickness/2), pch=16, cap=.01, xlab="",ylab="", axes=F,xlim=c(log(1),log(mround(max(dt$Pbex,na.rm=T),1000))),ylim=myylim_md, col=Pbcol[3], errbar.col = Pbcol[3])
+                , expr = errbar(log(Pbex),-d,c(-d+thickness/2),c(-d-thickness/2), pch=16, cap=.01, xlab="",ylab="", axes=F,xlim=c(log(1),log(mround(max(dt$Pbex,na.rm=T),1000))),ylim=myylim, col=Pbcol[3], errbar.col = Pbcol[3])
               )
             } else {
               with (
@@ -1754,7 +1757,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
               shadowtext(x = 0,y = -d_legend,labels = bquote(SAR ~ "=" ~ .(abs(round(sr_sed2,3))) ~ mm.yr^-1), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1)
 
               if (is.null(ignore) || !is.null(is.null(ignore)) && max(dt_sed3$depth_avg, na.rm = T) > max(ignore, na.rm=T))  lines(c(-min(dt_sed3$d, na.rm = T),-max(dt_sed3$d, na.rm = T))~ c(lm_sed3$coefficients[1]+min(dt_sed3$d, na.rm = T)*lm_sed3$coefficients[2],lm_sed3$coefficients[1]+max(dt_sed3$d, na.rm = T)*lm_sed3$coefficients[2]), lwd=2, col=Pbcol[3])
-              if (length(ignore)>0 && max(dt_sed3$depth_avg, na.rm = T) <= max(ignore, na.rm=T)) lines(c(-min(dt_sed3$d, na.rm = T),-max(dt$d[!dt$depth_avg %in% ignore],na.rm=T))~ c(lm_sed3$coefficients[1]+max(dt_sed3$d, na.rm = T)*lm_sed3$coefficients[2],lm_sed3$coefficients[1]+max(dt$d[!dt$depth_avg %in% ignore],na.rm=T)*lm_sed3$coefficients[2]), lwd=2, col=Pbcol[2])
+              if (length(ignore)>0 && max(dt_sed3$depth_avg, na.rm = T) <= max(ignore, na.rm=T)) lines(c(-min(dt_sed3$d, na.rm = T),-max(dt$d[!dt$depth_avg %in% ignore],na.rm=T))~ c(lm_sed3$coefficients[1]+min(dt_sed3$d, na.rm = T)*lm_sed3$coefficients[2],lm_sed3$coefficients[1]+max(dt$d[!dt$depth_avg %in% ignore],na.rm=T)*lm_sed3$coefficients[2]), lwd=2, col=Pbcol[2])
               d_legend <- mean(c(min(dt_sed3$d,na.rm = T),max(dt_sed3$d,na.rm = T)))*.8
               shadowtext(x = 0,y = -d_legend-.06*dmax,labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed3)$r.squared,4))), pos = 4, col=Pbcol[3], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
               shadowtext(x = 0,y = -d_legend,labels = bquote(SAR ~ "=" ~ .(abs(round(sr_sed3,3))) ~ mm.yr^-1), pos = 4, col=Pbcol[3], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
@@ -1776,7 +1779,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     }
 
 
-    # 6.4. 137Cs ####
+    d# 6.4. 137Cs ####
     if(plot_Cs) {
       if(plotphoto || suppdescriptor || plot_Pb || plot_Pb_inst_deposit) par(mar=c(4.1,1.1,4.1,1.1)) else par(mar=c(4.1,4.1,4.1,1.1))
 
