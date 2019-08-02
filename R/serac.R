@@ -518,6 +518,12 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     d_for_CFCS <- unique(d_for_CFCS)
   }
   d_for_CFCS <- c(0,d_for_CFCS,sedchange,dmax)
+  #Also add the last depth before sedchange to get a better estimate of age_err.
+  if(max(sedchange)>0) {
+    d_for_CFCS <- c(d_for_CFCS,dt_sed1$depth_avg[nrow(dt_sed1)])
+    if(length(sedchange)==2) d_for_CFCS <- c(d_for_CFCS,dt_sed2$depth_avg[nrow(dt_sed2)])
+  }
+  d_for_CFCS <- unique(d_for_CFCS)
   d_for_CFCS <- d_for_CFCS[order(d_for_CFCS)]
 
   # (a) Final vector of depths that will be used for linear model (This is the 1/2 vector we're creating in this section)
