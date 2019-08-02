@@ -774,7 +774,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     }
 
     if(any(model=="CRS")) {
-      if(rev(dt$Pbex)[1] >= dt$Pbex[1]/16) cat("\n Warning, it seems that 210Pb_excess has not reached equilibrium. \n Make sure the conditions of application for CRS model are fulfilled.")
+      if(rev(dt$Pbex)[1] >= dt$Pbex[1]/16) packageStartupMessage("\n Warning, it seems that 210Pb_excess has not reached equilibrium. \n Make sure the conditions of application for CRS model are fulfilled.")
 
       Tm_CRS <- 1/lambda*log(Inventory_CRS[1]/Inventory_CRS)
       # calculation age error: delta(tx)=1/lambda*((0.00017*t)^2+(delta(I0)/I0)^2+(1-2*Ix/Io)*(delta(Ix)/Ix)^2)^(0.5)
@@ -937,13 +937,18 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     # Best Age is still correct, and the user can manually get the error using the sr_sed and sr_sed_errors.
     if(max(sedchange)>0) {
       thresh_r2 = 0.15 # threshold of difference, because this issue only gets problematic when the difference is really big
-      if(summary(lm_sed1)$r.squared+thresh_r2 < summary(lm_sed2)$r.squared)
+      pb_w_R2 = FALSE
+      if(summary(lm_sed1)$r.squared+thresh_r2 < summary(lm_sed2)$r.squared) {
         packageStartupMessage(paste0(" Ohoh. The fit for the first regression (R2= ", round(summary(lm_sed1)$r.squared,4),") is marginally smaller than the fit of the second regression (R2= ",round(summary(lm_sed2)$r.squared,4),"). "))
-      if(length(sedchange)==2) {
-        if(summary(lm_sed2)$r.squared+thresh_r2 < summary(lm_sed3)$r.squared)
-          packageStartupMessage(paste0(" Ohoh. The fit for the second regression (R2= ", round(summary(lm_sed2)$r.squared,4),") is marginally smaller than the fit of the third regression (R2= ",round(summary(lm_sed3)$r.squared,4),"). "))
+        pb_w_R2 = TRUE
       }
-      if(summary(lm_sed1)$r.squared+thresh_r2 < summary(lm_sed2)$r.squared | summary(lm_sed2)$r.squared+thresh_r2 < summary(lm_sed3)$r.squared)
+      if(length(sedchange)==2) {
+        if(summary(lm_sed2)$r.squared+thresh_r2 < summary(lm_sed3)$r.squared) {
+          packageStartupMessage(paste0(" Ohoh. The fit for the second regression (R2= ", round(summary(lm_sed2)$r.squared,4),") is marginally smaller than the fit of the third regression (R2= ",round(summary(lm_sed3)$r.squared,4),"). "))
+          pb_w_R2 = TRUE
+        }
+      }
+      if(pb_w_R2)
         packageStartupMessage(paste0(" Implications: the confidence interval error decreases after this change in sedimentation rate. Best Age calculation is still correct, but some errors may be underestimated. Please contact the authors, if we realise this is a common problem we will spend the necessary time to implement an option for this scenario."))
     }
 
