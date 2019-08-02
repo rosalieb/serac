@@ -918,6 +918,30 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     if(mass_depth) output_agemodel_CFCS$mass_depth <- depth_avg_to_date_allscales
     output_agemodel_CFCS <- output_agemodel_CFCS[!duplicated(output_agemodel_CFCS[,1]),]
 
+    # Warning message if r2 of sr_sed1> r2 of sr_sed2
+    #              or if r2 of sr_sed2> r2 of sr_sed3
+    # e.g., script below:
+    # serac(name="PRE14-P5", model=c("CFCS","CRS"),Cher=c(75,85),Hemisphere=c("NH"),NWT=c(260,270),coring_yr=2014, plotpdf = T,SML=30, inst_deposit = c(160,189, 380, 420),Pbcol=c("black","midnightblue","darkgreen"),historic_d=c(),historic_a=c(),historic_n=c(),plot_Am=T,plot_Cs=T,plot_Pb=T,plot_Pb_inst_deposit=T, min_yr=1800,plotphoto=F,minphoto=c(0),maxphoto=c(400), sedchange=c(118,275))
+    # In these instances, we get a confidence interval that decreases, which is not possible.
+    # A way to correct it would be to add a depth to date right before change in sedimentation rate.
+    # We would then get an error that suddenly decrease, but at least it wouldn't display a seemingly slowly decreasing error.
+    # It's quite some work to implement it (and make sure it works in all instances),
+    # and it should be a pretty rare situation.
+    # Instead, we're displaying a warning message to warn the user.
+    # Best Age is still correct, and the user can manually get the error using the sr_sed and sr_sed_errors.
+    if(max(sedchange)>0) {
+      thresh_r2 = 0.15 # threshold of difference, because this issue only gets problematic when the difference is really big
+      if(summary(lm_sed1)$r.squared+thresh_r2 < summary(lm_sed2)$r.squared)
+        packageStartupMessage(paste0(" Ohoh. The fit for the first regression (R2= ", round(summary(lm_sed1)$r.squared,4),") is marginally smaller than the fit of the second regression (R2= ",round(summary(lm_sed2)$r.squared,4),"). "))
+      if(length(sedchange)==2) {
+        if(summary(lm_sed2)$r.squared+thresh_r2 < summary(lm_sed3)$r.squared)
+          packageStartupMessage(paste0(" Ohoh. The fit for the second regression (R2= ", round(summary(lm_sed2)$r.squared,4),") is marginally smaller than the fit of the third regression (R2= ",round(summary(lm_sed3)$r.squared,4),"). "))
+      }
+      if(summary(lm_sed1)$r.squared+thresh_r2 < summary(lm_sed2)$r.squared | summary(lm_sed2)$r.squared+thresh_r2 < summary(lm_sed3)$r.squared)
+        packageStartupMessage(paste0(" Implications: the confidence interval error decreases after this change in sedimentation rate. Best Age calculation is still correct, but some errors may be underestimated. Please contact the authors, if we realise this is a common problem we will spend the necessary time to implement an option for this scenario."))
+    }
+
+
     # if mass depth, we do not want to interpolate below the last depth with measurement
     if(mass_depth) output_agemodel_CFCS <- output_agemodel_CFCS[output_agemodel_CFCS$depth<=max(dt$depth_bottom[!is.na(dt$Pbex)],na.rm=T),]
 
