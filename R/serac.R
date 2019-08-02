@@ -554,11 +554,11 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   # 1.12 Create separate datasets for different sedimentation rates ####
   if(length(sedchange)==1 && sedchange==0) {dt_sed1=dt} else {
     if(length(sedchange)==1) {
-      dt_sed1 <- dt[dt$depth_avg<sedchange,]
+      dt_sed1 <- dt[dt$depth_avg<=sedchange,]
       dt_sed2 <- dt[dt$depth_avg>=sedchange,]
     } else {
-      dt_sed1 <- dt[dt$depth_avg<min(sedchange),]
-      dt_sed2 <- dt[dt$depth_avg>=min(sedchange) & dt$depth_avg<max(sedchange),]
+      dt_sed1 <- dt[dt$depth_avg<=min(sedchange),]
+      dt_sed2 <- dt[dt$depth_avg>=min(sedchange) & dt$depth_avg<=max(sedchange),]
       dt_sed3 <- dt[dt$depth_avg>=max(sedchange),]
     }
   }
