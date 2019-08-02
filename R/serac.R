@@ -935,22 +935,22 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     # and it should be a pretty rare situation.
     # Instead, we're displaying a warning message to warn the user.
     # Best Age is still correct, and the user can manually get the error using the sr_sed and sr_sed_errors.
-    # if(max(sedchange)>0) {
-    #   thresh_r2 = 0.15 # threshold of difference, because this issue only gets problematic when the difference is really big
-    #   pb_w_R2 = FALSE
-    #   if(summary(lm_sed1)$r.squared+thresh_r2 < summary(lm_sed2)$r.squared) {
-    #     packageStartupMessage(paste0(" Ohoh. The fit for the first regression (R2= ", round(summary(lm_sed1)$r.squared,4),") is marginally smaller than the fit of the second regression (R2= ",round(summary(lm_sed2)$r.squared,4),"). "))
-    #     pb_w_R2 = TRUE
-    #   }
-    #   if(length(sedchange)==2) {
-    #     if(summary(lm_sed2)$r.squared+thresh_r2 < summary(lm_sed3)$r.squared) {
-    #       packageStartupMessage(paste0(" Ohoh. The fit for the second regression (R2= ", round(summary(lm_sed2)$r.squared,4),") is marginally smaller than the fit of the third regression (R2= ",round(summary(lm_sed3)$r.squared,4),"). "))
-    #       pb_w_R2 = TRUE
-    #     }
-    #   }
-    #   if(pb_w_R2)
-    #     packageStartupMessage(paste0(" Implications: the confidence interval error decreases after this change in sedimentation rate. Best Age calculation is still correct, but some errors may be underestimated. Please contact the authors, if we realise this is a common problem we will spend the necessary time to implement an option for this scenario."))
-    # }
+    if(max(sedchange)>0) {
+      thresh_r2 = 0.15 # threshold of difference, because this issue only gets problematic when the difference is really big
+      pb_w_R2 = FALSE
+      if(summary(lm_sed1)$r.squared+thresh_r2 < summary(lm_sed2)$r.squared) {
+        packageStartupMessage(paste0(" Ohoh. The fit for the first regression (R2= ", round(summary(lm_sed1)$r.squared,4),") is marginally smaller than the fit of the second regression (R2= ",round(summary(lm_sed2)$r.squared,4),"). "))
+        pb_w_R2 = TRUE
+      }
+      if(length(sedchange)==2) {
+        if(summary(lm_sed2)$r.squared+thresh_r2 < summary(lm_sed3)$r.squared) {
+          packageStartupMessage(paste0(" Ohoh. The fit for the second regression (R2= ", round(summary(lm_sed2)$r.squared,4),") is marginally smaller than the fit of the third regression (R2= ",round(summary(lm_sed3)$r.squared,4),"). "))
+          pb_w_R2 = TRUE
+        }
+      }
+      if(pb_w_R2)
+        packageStartupMessage(paste0(" Implications: the confidence interval error decreases after this change in sedimentation rate. Best Age calculation is still correct, but some errors may be underestimated. Please contact the authors, if we realise this is a common problem we will spend the necessary time to implement an option for this scenario."))
+    }
 
 
     # if mass depth, we do not want to interpolate below the last depth with measurement
@@ -1814,7 +1814,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     }
 
 
-    d# 6.4. 137Cs ####
+    # 6.4. 137Cs ####
     if(plot_Cs) {
       if(plotphoto || suppdescriptor || plot_Pb || plot_Pb_inst_deposit) par(mar=c(4.1,1.1,4.1,1.1)) else par(mar=c(4.1,4.1,4.1,1.1))
 
