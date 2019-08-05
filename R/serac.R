@@ -1429,9 +1429,11 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
           data=dt_sed1[!is.na(dt_sed1$depth_avg_2),]
           , expr = errbar(log(Pbex),-depth_avg,c(-depth_avg+thickness/2),c(-depth_avg-thickness/2), pch=16, cap=.01, xlab="",ylab="", axes=F,xlim=c(log(1),log(mround(max(dt$Pbex,na.rm=T),1000))),ylim=myylim, col=Pbcol[1], errbar.col = Pbcol[1], cex=.8)
         )
-        for (i in which(dt_sed1$depth_avg_2>0 & !is.na(dt_sed1$Pbex_er))) {
-          lines(c(log(dt_sed1$Pbex[i]+dt_sed1$Pbex_er[i]),log(dt_sed1$Pbex[i]-dt_sed1$Pbex_er[i])),
-                rep(-dt_sed1$depth_avg[i],2), type="o", pch="|", cex=.5, col=Pbcol[1])
+        for (i in which(dt_sed1$depth_avg_2>0 & !is.na(dt_sed1$Pbex_er) & !is.na(dt_sed1$depth_avg_2))) {
+          if(dt_sed1$Pbex[i]-dt_sed1$Pbex_er[i]>0) lines(c(log(dt_sed1$Pbex[i]+dt_sed1$Pbex_er[i]),log(dt_sed1$Pbex[i]-dt_sed1$Pbex_er[i])),
+                                                         rep(-dt_sed1$depth_avg[i],2), type="o", pch="|", cex=.5, col=Pbcol[1]) else
+                                                           lines(c(log(dt_sed1$Pbex[i]+dt_sed1$Pbex_er[i]),0),
+                                                                 rep(-dt_sed1$depth_avg[i],2), type="o", pch="|", cex=.5, col=Pbcol[1])
         }
 
         if (max(sedchange)>0) {
@@ -1441,8 +1443,10 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
             , expr = errbar(log(Pbex),-depth_avg,c(-depth_avg+thickness/2),c(-depth_avg-thickness/2), pch=16, cap=.01, xlab="",ylab="", axes=F,xlim=c(log(1),log(mround(max(dt$Pbex,na.rm=T),1000))),ylim=myylim, col=Pbcol[2], errbar.col = Pbcol[2])
           )
           for (i in which(dt_sed2$depth_avg>0 & !is.na(dt_sed2$Pbex_er))) {
-            lines(c(log(dt_sed2$Pbex[i]+dt_sed2$Pbex_er[i]),log(dt_sed2$Pbex[i]-dt_sed2$Pbex_er[i])),
-                  rep(-dt_sed2$depth_avg[i],2), type="o", pch="|", cex=.5, col=Pbcol[2])
+            if(dt_sed2$Pbex[i]-dt_sed2$Pbex_er[i]>0) lines(c(log(dt_sed2$Pbex[i]+dt_sed2$Pbex_er[i]),log(dt_sed2$Pbex[i]-dt_sed2$Pbex_er[i])),
+                                                           rep(-dt_sed2$depth_avg[i],2), type="o", pch="|", cex=.5, col=Pbcol[2]) else
+                                                             lines(c(log(dt_sed2$Pbex[i]+dt_sed2$Pbex_er[i]),0),
+                                                                   rep(-dt_sed2$depth_avg[i],2), type="o", pch="|", cex=.5, col=Pbcol[2])
           }
           if (length(sedchange)==2) {
             par(new=T)
@@ -1451,8 +1455,10 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
               , expr = errbar(log(Pbex),-depth_avg,c(-depth_avg+thickness/2),c(-depth_avg-thickness/2), pch=16, cap=.01, xlab="",ylab="", axes=F,xlim=c(log(1),log(mround(max(dt$Pbex,na.rm=T),1000))),ylim=myylim, col=Pbcol[3], errbar.col = Pbcol[3])
             )
             for (i in which(dt_sed3$depth_avg>0 & !is.na(dt_sed3$Pbex_er))) {
-              lines(c(log(dt_sed3$Pbex[i]+dt_sed3$Pbex_er[i]),log(dt_sed3$Pbex[i]-dt_sed3$Pbex_er[i])),
-                    rep(-dt_sed3$depth_avg[i],2), type="o", pch="|", cex=.5, col=Pbcol[3])
+              if(dt_sed3$Pbex[i]-dt_sed3$Pbex_er[i]>0) lines(c(log(dt_sed3$Pbex[i]+dt_sed3$Pbex_er[i]),log(dt_sed3$Pbex[i]-dt_sed3$Pbex_er[i])),
+                                                             rep(-dt_sed3$depth_avg[i],2), type="o", pch="|", cex=.5, col=Pbcol[3]) else
+                                                               lines(c(log(dt_sed3$Pbex[i]+dt_sed3$Pbex_er[i]),0),
+                                                                     rep(-dt_sed3$depth_avg[i],2), type="o", pch="|", cex=.5, col=Pbcol[3])
             }
           }
         }
