@@ -17,10 +17,10 @@ serac_map <- function(which_lakes=NULL, output_name=NULL, lon_lim=NULL, lat_lim=
   .serac_map(which_lakes,output_name, lon_lim, lat_lim, add_labels)
 .serac_map <- function(which_lakes,output_name, lon_lim, lat_lim, add_labels) {
 
-  devtools::use_package("ggspatial", "Suggests")
-  devtools::use_package("raster", "Suggests")
-  devtools::use_package("sf", "Suggests")
-  devtools::use_package("rnaturalearth", "Suggests")
+  pckTest("ggspatial")
+  pckTest("raster")
+  pckTest("sf")
+  pckTest("rnaturalearth")
 
   # which lakes - either a selection, or all the folder in the Cores subfolder
   if(!is.null(which_lakes)) which_lakes=which_lakes else which_lakes <- list.dirs(path = "./Cores", full.names = FALSE, recursive = TRUE)
