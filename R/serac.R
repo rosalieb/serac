@@ -1666,8 +1666,8 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
         if(!mass_depth) which_scale = dt_sed1$d else which_scale = dt_sed1$mass_depth_avg_corr
         for (i in which(dt_sed1$d>0)) {
-          lines(c(log(dt_sed1$Pbex[i]+dt_sed1$Pbex_er[i]),log(dt_sed1$Pbex[i]-dt_sed1$Pbex_er[i])),
-                rep(-which_scale[i],2), type="o", pch="|", cex=.5, col=Pbcol[1])
+          if(dt_sed1$Pbex[i]-dt_sed1$Pbex_er[i]>0) lines(c(log(dt_sed1$Pbex[i]+dt_sed1$Pbex_er[i]),log(dt_sed1$Pbex[i]-dt_sed1$Pbex_er[i])),
+                                                         rep(-which_scale[i],2), type="o", pch="|", cex=.5, col=Pbcol[1])
         }
 
         # This was the base graph for the points until the 1st sedimentation rate
@@ -1688,8 +1688,8 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
           if(!mass_depth) which_scale = dt_sed2$d else which_scale = dt_sed2$mass_depth_avg_corr
           for (i in which(dt_sed2$d>0)) {
-            lines(c(log(dt_sed2$Pbex[i]+dt_sed2$Pbex_er[i]),log(dt_sed2$Pbex[i]-dt_sed2$Pbex_er[i])),
-                  rep(-which_scale[i],2), type="o", pch="|", cex=.5, col=Pbcol[2])
+            if(dt_sed2$Pbex[i]-dt_sed2$Pbex_er[i]>0) lines(c(log(dt_sed2$Pbex[i]+dt_sed2$Pbex_er[i]),log(dt_sed2$Pbex[i]-dt_sed2$Pbex_er[i])),
+                                                           rep(-which_scale[i],2), type="o", pch="|", cex=.5, col=Pbcol[2])
           }
 
           # If there's a second change in sedimentation
@@ -1709,8 +1709,8 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
             if(!mass_depth) which_scale = dt_sed3$d else which_scale = dt_sed3$mass_depth_avg_corr
             for (i in which(dt_sed3$d>0)) {
-              lines(c(log(dt_sed3$Pbex[i]+dt_sed3$Pbex_er[i]),log(dt_sed3$Pbex[i]-dt_sed3$Pbex_er[i])),
-                    rep(-which_scale[i],2), type="o", pch="|", cex=.5, col=Pbcol[3])
+              if(dt_sed3$Pbex[i]-dt_sed3$Pbex_er[i]>0) lines(c(log(dt_sed3$Pbex[i]+dt_sed3$Pbex_er[i]),log(dt_sed3$Pbex[i]-dt_sed3$Pbex_er[i])),
+                                                             rep(-which_scale[i],2), type="o", pch="|", cex=.5, col=Pbcol[3])
             }
           }
         }
