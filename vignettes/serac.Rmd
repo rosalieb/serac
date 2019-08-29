@@ -1,7 +1,7 @@
 ---
 title: "Introduction to _serac_"
 author: "Rosalie Bruel and Pierre Sabatier"
-date: "Last update: `r Sys.Date()`"
+date: "Last update: 2019-07-29"
 output: 
   rmarkdown::html_vignette:
     toc: yes
