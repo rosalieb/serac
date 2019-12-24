@@ -909,14 +909,15 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
       if(max(sedchange)>0 && depth_avg_to_date[i]>=sedchange[1]) {
         Tm <- (depth_avg_to_date_corr_allscales[i]-sedchange_corr_allscales[1])/abs(sr_sed2)
         output_agemodel_CFCS[i,2] <- age_break-Tm
-        output_agemodel_CFCS[i,3] <- output_agemodel_CFCS[i,2]-(Tm+Tm1)*abs(sr_sed2_err)/abs(sr_sed2)
-        output_agemodel_CFCS[i,4] <- output_agemodel_CFCS[i,2]+(Tm+Tm1)*abs(sr_sed2_err)/abs(sr_sed2)
+        #                                       age          (+/-)(error at the last sed change     -  diff age * error for second age depth model)
+        output_agemodel_CFCS[i,3] <- output_agemodel_CFCS[i,2] - (Tm1*abs(sr_sed1_err)/abs(sr_sed1) + (Tm)*abs(sr_sed2_err)/abs(sr_sed2))
+        output_agemodel_CFCS[i,4] <- output_agemodel_CFCS[i,2] + (Tm1*abs(sr_sed1_err)/abs(sr_sed1) + (Tm)*abs(sr_sed2_err)/abs(sr_sed2))
       }
       if(length(sedchange)>1 && depth_avg_to_date[i]>=sedchange[2]) {
         Tm <- (depth_avg_to_date_corr_allscales[i]-sedchange_corr_allscales[2])/abs(sr_sed3)
         output_agemodel_CFCS[i,2] <- age_break2-Tm
-        output_agemodel_CFCS[i,3] <- output_agemodel_CFCS[i,2]-(Tm+Tm1+Tm2)*abs(sr_sed3_err)/abs(sr_sed3)
-        output_agemodel_CFCS[i,4] <- output_agemodel_CFCS[i,2]+(Tm+Tm1+Tm2)*abs(sr_sed3_err)/abs(sr_sed3)
+        output_agemodel_CFCS[i,3] <- output_agemodel_CFCS[i,2] - (Tm1*abs(sr_sed1_err)/abs(sr_sed1) + Tm2*abs(sr_sed2_err)/abs(sr_sed2) + Tm*abs(sr_sed3_err)/abs(sr_sed3))
+        output_agemodel_CFCS[i,4] <- output_agemodel_CFCS[i,2] + (Tm1*abs(sr_sed1_err)/abs(sr_sed1) + Tm2*abs(sr_sed2_err)/abs(sr_sed2) + Tm*abs(sr_sed3_err)/abs(sr_sed3))
       }
     }
     output_agemodel_CFCS <- as.data.frame(output_agemodel_CFCS)
