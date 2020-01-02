@@ -305,6 +305,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   if(!is.null(dmax) && length(inst_deposit)>1 && dmax<max(inst_deposit)) dmax <- max(inst_deposit)
   if(is.null(dmax)) if(exists("historic_d")) dmax <- max(c(dt$depth_avg,historic_d),na.rm=T) else dmax <- max(c(dt$depth_avg),na.rm=T)
   if(is.null(sedchange)) sedchange <- 0
+  sedchange <- sedchange[order(sedchange)]
   if(is.null(inst_deposit)) inst_deposit <- 0
   if(is.null(SML)) SML=0
   # Two next lines to prevent plotting the linear regression on raw 210Pb if instantaneous deposit are present
