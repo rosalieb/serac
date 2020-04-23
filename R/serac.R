@@ -43,6 +43,7 @@
 #' @param mycex Graphical parameter: a multiplication factor to increase (mycex>1) ou decrease (mycex<1) label sizes.
 #' @param archive_metadata Logical argument. If TRUE, require fields regarding the measurements on the core. Allows missing information; just press 'ENTER' in your computer (leave an empty field).
 #' @param mass_depth Logical argument. If TRUE, require density, and will plot the radionuclides against massic depth. Core photo and supplementary descriptor are not available under this option.
+#' @param prop_height_fig Increase of decrease the height of the figure output using this argument. prop_height_fig < 1 will make the figure smaller, prop_height_fig > 1 will make the figure taller
 #' @keywords age-depth modelling
 #' @keywords visualisation
 #' @examples
@@ -78,7 +79,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
                   plot_Pb_inst_deposit=FALSE,plot_CFCS_regression=c(),
                   varves=FALSE, dmin=c(),dmax=c(),sedchange=c(0),
                   min_yr=1880, SML=c(0), stepout=5, mycex=1,
-                  archive_metadata=FALSE, save_code=TRUE)
+                  archive_metadata=FALSE, save_code=TRUE, prop_height_fig=1)
 .serac(name, model,Cher,NWT,Hemisphere,FF,inst_deposit,
        input_depth_mm,ignore,mass_depth,
        plotpdf,preview,plotphoto,minphoto,maxphoto,
@@ -90,7 +91,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
        plot_Pb_inst_deposit,plot_CFCS_regression,
        varves, dmin,dmax,sedchange,
        min_yr, SML,stepout, mycex,
-       archive_metadata,save_code)
+       archive_metadata,save_code,prop_height_fig)
 
 .serac <- function(name, model,Cher,NWT,Hemisphere,FF,inst_deposit,
                    input_depth_mm,ignore,mass_depth,
@@ -103,7 +104,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
                    plot_Pb_inst_deposit,plot_CFCS_regression,
                    varves, dmin,dmax,sedchange,
                    min_yr, SML,stepout, mycex,
-                   archive_metadata,save_code) {
+                   archive_metadata,save_code,prop_height_fig) {
 
 
   # 0. INITIALIZE ####
@@ -2187,7 +2188,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
     # Save the plot to pdf
     if(plotpdf) {
-      pdf(paste(getwd(),"/Cores/",name,"/",name,".pdf",sep=""),width = 1.2+1.8*nwindows, height = 5,family = "Helvetica")
+      pdf(paste(getwd(),"/Cores/",name,"/",name,".pdf",sep=""),width = 1.2+1.8*nwindows, height = 5*prop_height_fig,family = "Helvetica")
       replayPlot(out_list$plot)
       dev.off()
     }
