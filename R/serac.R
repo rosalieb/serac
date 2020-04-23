@@ -950,9 +950,10 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
           pb_w_R2 = TRUE
         }
       }
-      if(pb_w_R2)
+      if(pb_w_R2) {
         packageStartupMessage(paste0(" "))
-      packageStartupMessage(paste0(" Implications: the confidence interval error decreases after this change in sedimentation rate. Best Age calculation is still correct, but some errors may be underestimated. Please contact the authors, if we realise this is a common problem we will spend the necessary time to implement an option for this scenario. (Also, consider changing model / hypotheses for sedchange / instantenous deposit / depths to ignore."))
+        packageStartupMessage(paste0(" Implications: the confidence interval error decreases after this change in sedimentation rate. Best Age calculation is still correct, but some errors may be underestimated. Please contact the authors, if we realise this is a common problem we will spend the necessary time to implement an option for this scenario. (Also, consider changing model / hypotheses for sedchange / instantenous deposit / depths to ignore."))
+      }
     }
 
 
