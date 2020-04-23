@@ -179,14 +179,20 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   if(length(grep("Pb",colnames(dt)))>1) {
     dt$Pbex <- dt[,intersect(intersect(grep("Pb",colnames(dt)),grep("ex",colnames(dt))),grep("er",colnames(dt),invert=TRUE))[1]]
     dt$Pbex_er <- dt[,intersect(intersect(grep("Pb",colnames(dt)),grep("ex",colnames(dt))),grep("er",colnames(dt)))[1]]
-  } else if(plot_Pb|plot_Pb_inst_deposit) packageStartupMessage("\n Warning. We did not find the Lead column (+ error) in the input file.\n\n")
+    Pb_exists = T
+  } else {
+    Pb_exists = F
+    if(plot_Pb|plot_Pb_inst_deposit) packageStartupMessage("\n Warning. We did not find the Lead column (+ error) in the input file.\n\n")
+  }
   # For 137Cs
   if(length(grep("Cs",colnames(dt)))>1) {
     dt$Cs <- dt[,intersect(grep("Cs",colnames(dt)),grep("er",colnames(dt),invert=TRUE))[1]]
     dt$Cs_er <- dt[,intersect(grep("Cs",colnames(dt)),grep("er",colnames(dt)))[1]]
+    Cs_exists = T
   } else {
     dt$Cs <- rep(NA, nrow(dt))
     dt$Cs_er <- rep(NA, nrow(dt))
+    Cs_exists = F
     if(plot_Cs) packageStartupMessage("\n Warning. We did not find the Cesium column (+ error) in the input file.\n\n")
   }
   # For 241Am
@@ -268,8 +274,12 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   # Generated the complete 210Pbex and 137Cs profile (in case the sampling was not continuous)
   complete_core_Pbex <- approx(x= dt$depth_avg, dt$Pbex, xout= complete_core_depth, rule = 2, ties = mean)$y
   complete_core_Pbex_err <- approx(x= dt$depth_avg, dt$Pbex_er, xout= complete_core_depth, rule = 2, ties = mean)$y
+  # Case when there are some NAs for Cs
   if(any(!is.na(dt$Cs))) complete_core_Cs <- approx(x= dt$depth_avg, dt$Cs, xout= complete_core_depth, rule = 2, ties = mean)$y
   if(any(!is.na(dt$Cs))) complete_core_Cs_err <- approx(x= dt$depth_avg, dt$Cs_er, xout= complete_core_depth, rule = 2, ties = mean)$y
+  # Case when there are only NAs for Cs
+  if(all(is.na(dt$Cs))) complete_core_Cs <- rep(NA, length(complete_core_depth))
+  if(all(is.na(dt$Cs))) complete_core_Cs_err <- rep(NA, length(complete_core_depth))
 
   # Generate the complete density (in case the sampling was not continuous).
   # It is just a linear interpolation.
@@ -1094,7 +1104,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
 
   # Various parameter to print (e.g. Inventories)
   # Inventory Lead
-  if(length(grep("Pb",x = colnames(dt)))>1 & length(grep("density",x = colnames(dt)))>=1) {
+  if(Pb_exists & length(grep("Pb",x = colnames(dt)))>1 & length(grep("density",x = colnames(dt)))>=1) {
     # We multiply the value by 10 because we ask for the depth in mm, and the density in g/cm3
     cat(paste(" Inventory (Lead): ",round(Inventory_CRS[1],3), " Bq/m2 (range: ",round(Inventory_CRS[1]-Inventory_CRS_error[1]), "-",round(Inventory_CRS[1]+Inventory_CRS_error[1])," Bq/m2)\n", sep=""))
 
@@ -1107,7 +1117,7 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
   }
 
   # Inventory Cesium
-  if(length(grep("Cs",x = colnames(dt)))>1 & length(grep("density",x = colnames(dt)))>=1) {
+  if(Cs_exists & length(grep("Cs",x = colnames(dt)))>1 & length(grep("density",x = colnames(dt)))>=1) {
     # Inventory = sum(activity layer z * dry sediment accumuated at layer z * thickness layer z)
     # The inventory should account only for the continuous deposition:
     # [whichkeep] allows to keep only the data for the depth that are not in an instantaneous deposit
@@ -1231,13 +1241,13 @@ serac <- function(name="", model=c("CFCS"),Cher=NA,NWT=NA,Hemisphere=NA,FF=NA,in
     }
   }
   # Add in output the inventory of Lead if CRS hypothesis was selected
-  if(length(grep("Pb",x = colnames(dt)))>1 & length(grep("density",x = colnames(dt)))>=1) {
+  if(Pb_exists & length(grep("Pb",x = colnames(dt)))>1 & length(grep("density",x = colnames(dt)))>=1) {
     metadata <- rbind(metadata,
                       c("Inventory (Lead)",paste(round(Inventory_CRS[1],3), " Bq/m2 (range: ",round(Inventory_CRS[1]-Inventory_CRS_error[1]), "-",round(Inventory_CRS[1]+Inventory_CRS_error[1])," Bq/m2)\n", sep="")))
   }
 
   # Add in output the inventory of Cesium if Cs and density available
-  if(length(grep("Cs",x = colnames(dt)))>1 & length(grep("density",x = colnames(dt)))>=1) {
+  if(Cs_exists & length(grep("Cs",x = colnames(dt)))>1 & length(grep("density",x = colnames(dt)))>=1) {
     metadata <- rbind(metadata,
                       c("Inventory (Cesium)",paste(round(sum(Inventory_Cesium,na.rm=T),3), " Bq/m2 (range: ",round(sum(Inventory_Cesium_low,na.rm=T)), "-",round(sum(Inventory_Cesium_high,na.rm=T))," Bq/m2)\n", sep="")))
   }
