@@ -2,6 +2,7 @@ Package: serac
 Type: Package
 Title: ShortlivEd RAdionuclide Chronology of recent sediment cores
 Version: 0.1.0
+Year: 2020
 Authors@R: c(
           person("Rosalie", "Bruel",
           email = "rosaliebruel@gmail.com", 
