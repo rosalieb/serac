@@ -9,7 +9,7 @@ Authors@R: c(
           comment = c(ORCID = "0000-0001-8351-7539")
           ),
           person("Pierre", "Sabatier",
-          email = "pierre.sabatier@univ-smb.fr"
+          email = "pierre.sabatier@univ-smb.fr",
           role = c("aut"),
           comment = c(ORCID = "0000-0002-9620-1514")))
 Maintainer: Rosalie Bruel <rosaliebruel@gmail.com>
