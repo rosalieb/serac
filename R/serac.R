@@ -803,20 +803,21 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       # Find sedimentation rate at a given depth
       # Equation 23 in Sanchez-Cabeza and Ruiz-Fernandez (2012, Geochimica et Cosmochimica Acta)
       # for a depth i, si = delta(zi)/delta(ti)
-      sr_CIC <- NULL
+      sr_CIC <- sr_CIC_err <- NULL
       for (i in 1:nrow(dt)) {
         sr_CIC <- c(sr_CIC,
                     (0-dt$depth_avg[i]) / (coring_yr-m_CIC[i])
         )
-      }
 
+        sr_CIC_err <- c(sr_CIC_err, 0)
+      }
 
       # Save output
       out_list$`CIC model` <- data.frame("m_CIC"      = m_CIC,
                                          "m_CIC_low"  = m_CIC_low,
                                          "m_CIC_high" = m_CIC_high,
                                          "sr_CIC"     = sr_CIC,
-                                         "sr_CIC_err" = 0)
+                                         "sr_CIC_err" = sr_CIC_err)
     }
 
     if(any(model=="CRS")) {
@@ -836,13 +837,14 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       # Calculation of sediment rate at depth i
       # For MAR
       # Equation 38 in Sanchez-Cabeza and Ruiz-Fernandez (2012, Geochimica et Cosmochimica Acta)
-      sr_CRS <- NULL
+      sr_CRS <- sr_CRS_err <- NULL
       for (i in 1:length(m_CRS)) {
         sr_CRS <- c(sr_CRS,
                     #lambda * Tm_CRS[i] / complete_core_Pbex[whichkeep][i]
                     # equation above = my understanding, equation below: pierre's answer
                     lambda * Inventory_CRS[i] / complete_core_Pbex[whichkeep][i]
         )
+        sr_CRS_err <- c(sr_CRS_err, 0)
       }
 
       # need to convert sediment rate if SAR
@@ -850,6 +852,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         # Equation to convert r(i) to s(i) p 13 in Sanchez-Cabeza and Ruiz-Fernandez (2012, Geochimica et Cosmochimica Acta)
         # We use a factor of 1000 to convert the SI unit m/yr to mm/yr
         sr_CRS = sr_CRS / complete_core_density[whichkeep] * 10
+        sr_CRS_err = sr_CRS_err / complete_core_density[whichkeep] * 10
       }
 
       # Save output
@@ -857,7 +860,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                          "m_CRS_low"  = m_CRS_low,
                                          "m_CRS_high" = m_CRS_high,
                                          "sr_CRS"     = sr_CRS,
-                                         "sr_CRS_err" = 0)
+                                         "sr_CRS_err" = sr_CRS_err)
     }
 
     if(any(model=="CRS_comp")) {
