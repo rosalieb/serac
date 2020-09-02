@@ -1202,9 +1202,9 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       c(0, dt$depth_avg[!is.na(dt$Pbex)]),
       c(coring_yr, m_CIC),
       c(coring_yr, m_CIC_low),
-      c(coring_yr, m_CIC_high)),
+      c(coring_yr, m_CIC_high),
       c(0, sr_CIC),
-      c(0, sr_CIC_err),
+      c(0, sr_CIC_err)),
       byrow = F, ncol=6))
     colnames(output_agemodel_CIC) <- c("depth_avg", "BestAD_CIC", "MinAD_CIC", "MaxAD_CIC", "sr_CIC", "sr_CIC_err")
     output_agemodel_CIC_inter <- as.data.frame(seq(0, max(output_agemodel_CIC$depth_avg, na.rm = T), stepout))
