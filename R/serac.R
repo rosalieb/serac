@@ -838,7 +838,9 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       sr_CRS <- NULL
       for (i in 1:length(m_CRS)) {
         sr_CRS <- c(sr_CRS,
-                    lambda * Tm_CRS[i] / complete_core_Pbex[whichkeep][i]
+                    #lambda * Tm_CRS[i] / complete_core_Pbex[whichkeep][i]
+                    # equation above = my understanding, equation below: pierre's answer
+                    lambda * Inventory_CRS[i] / complete_core_Pbex[whichkeep][i]
         )
       }
 
@@ -846,22 +848,24 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       if(!mass_depth) {
         # Equation to convert r(i) to s(i) p 13 in Sanchez-Cabeza and Ruiz-Fernandez (2012, Geochimica et Cosmochimica Acta)
         # We use a factor of 1000 to convert the SI unit m/yr to mm/yr
-        sr_CRS = sr_CRS / complete_core_density[whichkeep] * 1000
+        sr_CRS = sr_CRS / complete_core_density[whichkeep] * 10
       }
 
       # Save output
       out_list$`CRS model` <- data.frame("m_CRS"      = m_CRS,
                                          "m_CRS_low"  = m_CRS_low,
-                                         "m_CRS_high" = m_CRS_high)
+                                         "m_CRS_high" = m_CRS_high,
+                                         "sr_CRS"     = sr_CRS)
     }
 
     if(any(model=="CRS_comp")) {
       if(rev(dt$Pbex)[1] >= dt$Pbex[1]/16) packageStartupMessage("\n Warning, it seems that 210Pb_excess has not reached equilibrium. \n Make sure the conditions of application for CRS model are fulfilled.")
 
-      # Use Inventory calculated earlier
+      # Use Inventory_CRS calculated earlier
       # Inventory: sum from depth to the bottom
       Incremental_inventory_CRS <- NULL
       # All the first period
+      # Equation 17 in Abril (2019)
       for(i in 1:length(age_forced_CRS)) {
         Incremental_inventory_CRS <- c(Incremental_inventory_CRS,
                                        ifelse(i==1, coring_yr, age_forced_CRS[i-1]), # age_max
@@ -870,13 +874,16 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                        depth_forced_CRS[i],                          # depth_max
                                        ifelse(i==1,
                                               sum(Inventory_CRS[complete_core_depth<=depth_forced_CRS[i] & !is.na(complete_core_depth_2)]),
-                                              sum(Inventory_CRS[complete_core_depth>=depth_forced_CRS[i-1] & complete_core_depth<=depth_forced_CRS[i] & !is.na(complete_core_depth_2)])),
+                                              sum(Inventory_CRS[complete_core_depth>=depth_forced_CRS[i-1] & complete_core_depth<=depth_forced_CRS[i] & !is.na(complete_core_depth_2)]))
+                                       * exp((-lambda) * (coring_yr - ifelse(i==1, coring_yr, age_forced_CRS[i-1]))),
                                        ifelse(i==1,
                                               sum(Inventory_CRS_error[complete_core_depth<=depth_forced_CRS[i] & !is.na(complete_core_depth_2)]),
                                               sum(Inventory_CRS_error[complete_core_depth>=depth_forced_CRS[i-1] & complete_core_depth<=depth_forced_CRS[i] & !is.na(complete_core_depth_2)]))
+                                       * exp((-lambda) * (coring_yr - ifelse(i==1, coring_yr, age_forced_CRS[i-1])))
         )
       }
       # Last period
+      # Equation 18 in Abril (2019)
       Incremental_inventory_CRS <-
         c(Incremental_inventory_CRS,
           age_forced_CRS[length(age_forced_CRS)], # age_max
@@ -2343,6 +2350,23 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         lines(-m_CRS[-depth_CRS_plot>=SML&-depth_CRS_plot<=max(dt$depth_avg)], depth_CRS_plot[-depth_CRS_plot>=SML&-depth_CRS_plot<=max(dt$depth_avg)], col=modelcol[3])
       }
 
+    }
+
+    if(any(model=="CRS_comp")) {
+      if(exists("inst_deposit")&&length(inst_deposit)>1) {
+        lines(-new_x_CRS_comp, -new_y_CRS_comp, col=modelcol[4], lty=2, lwd=.5)
+        pol_x <- c(-new_x_CRS_comp_low, rev(-new_x_CRS_comp_high))
+        pol_y <- c(-new_y_CRS_comp, rev(-new_y_CRS_comp))
+        polygon(x=pol_x, y = pol_y, col=adjustcolor(modelcol[4], alpha.f=0.2), border=NA)
+        lines(-new_x_CRS_comp[new_y_CRS_comp>=SML&new_y_CRS_comp<=max(dt$depth_avg)], -new_y_CRS_comp[new_y_CRS_comp>=SML&new_y_CRS_comp<=max(dt$depth_avg)], col=modelcol[4])
+      } else {
+        depth_CRS_comp_plot = -complete_core_depth[whichkeep]
+        lines(-m_CRS_comp, depth_CRS_comp_plot, col=modelcol[4], lty=2, lwd=.5)
+        pol_x <- c(-m_CRS_comp_low, rev(-m_CRS_comp_high))
+        pol_y <- c(depth_CRS_comp_plot, rev(depth_CRS_comp_plot))
+        polygon(x=pol_x, y = pol_y, col=adjustcolor(modelcol[4], alpha.f=0.2), border=NA)
+        lines(-m_CRS_comp[-depth_CRS_comp_plot>=SML&-depth_CRS_comp_plot<=max(dt$depth_avg)], depth_CRS_comp_plot[-depth_CRS_comp_plot>=SML&-depth_CRS_comp_plot<=max(dt$depth_avg)], col=modelcol[4])
+      }
     }
 
     if(varves) {
