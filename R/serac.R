@@ -842,7 +842,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         sr_CRS <- c(sr_CRS,
                     #lambda * Tm_CRS[i] / complete_core_Pbex[whichkeep][i]
                     # equation above = my understanding, equation below: pierre's answer
-                    lambda * Inventory_CRS[i] / complete_core_Pbex[whichkeep][i]
+                    lambda * Inventory_CRS[i] / complete_core_Pbex[whichkeep][i] /10
         )
         sr_CRS_err <- c(sr_CRS_err, 0)
       }
