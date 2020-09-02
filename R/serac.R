@@ -815,7 +815,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       out_list$`CIC model` <- data.frame("m_CIC"      = m_CIC,
                                          "m_CIC_low"  = m_CIC_low,
                                          "m_CIC_high" = m_CIC_high,
-                                         "sr_CIC"     = sr_CIC)
+                                         "sr_CIC"     = sr_CIC,
+                                         "sr_CIC_err" = 0)
     }
 
     if(any(model=="CRS")) {
@@ -855,7 +856,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       out_list$`CRS model` <- data.frame("m_CRS"      = m_CRS,
                                          "m_CRS_low"  = m_CRS_low,
                                          "m_CRS_high" = m_CRS_high,
-                                         "sr_CRS"     = sr_CRS)
+                                         "sr_CRS"     = sr_CRS,
+                                         "sr_CRS_err" = 0)
     }
 
     if(any(model=="CRS_comp")) {
@@ -1193,13 +1195,22 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   }
 
   if(any(model=="CIC")) {
-    output_agemodel_CIC <- as.data.frame(matrix(c(c(0, dt$depth_avg[!is.na(dt$Pbex)]), c(coring_yr, m_CIC), c(coring_yr, m_CIC_low), c(coring_yr, m_CIC_high)), byrow = F, ncol=4))
-    colnames(output_agemodel_CIC) <- c("depth_avg", "BestAD_CIC", "MinAD_CIC", "MaxAD_CIC")
+    output_agemodel_CIC <- as.data.frame(matrix(c(
+      c(0, dt$depth_avg[!is.na(dt$Pbex)]),
+      c(coring_yr, m_CIC),
+      c(coring_yr, m_CIC_low),
+      c(coring_yr, m_CIC_high)),
+      c(0, sr_CIC),
+      c(0, sr_CIC_err),
+      byrow = F, ncol=6))
+    colnames(output_agemodel_CIC) <- c("depth_avg", "BestAD_CIC", "MinAD_CIC", "MaxAD_CIC", "sr_CIC", "sr_CIC_err")
     output_agemodel_CIC_inter <- as.data.frame(seq(0, max(output_agemodel_CIC$depth_avg, na.rm = T), stepout))
     output_agemodel_CIC_inter <- cbind(output_agemodel_CIC_inter, approx(x= output_agemodel_CIC$depth_avg, output_agemodel_CIC$BestAD_CIC, xout= seq(0, max(output_agemodel_CIC$depth_avg, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CIC_inter <- cbind(output_agemodel_CIC_inter, approx(x= output_agemodel_CIC$depth_avg, output_agemodel_CIC$MinAD_CIC, xout= seq(0, max(output_agemodel_CIC$depth_avg, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CIC_inter <- cbind(output_agemodel_CIC_inter, approx(x= output_agemodel_CIC$depth_avg, output_agemodel_CIC$MaxAD_CIC, xout= seq(0, max(output_agemodel_CIC$depth_avg, na.rm = T), stepout), ties = mean)$y)
-    colnames(output_agemodel_CIC_inter) <- c("depth_avg", "BestAD_CIC", "MinAD_CIC", "MaxAD_CIC")
+    output_agemodel_CIC_inter <- cbind(output_agemodel_CIC_inter, approx(x= output_agemodel_CIC$depth_avg, output_agemodel_CIC$sr_CIC, xout= seq(0, max(output_agemodel_CIC$depth_avg, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CIC_inter <- cbind(output_agemodel_CIC_inter, approx(x= output_agemodel_CIC$depth_avg, output_agemodel_CIC$sr_CIC_err, xout= seq(0, max(output_agemodel_CIC$depth_avg, na.rm = T), stepout), ties = mean)$y)
+    colnames(output_agemodel_CIC_inter) <- c("depth_avg", "BestAD_CIC", "MinAD_CIC", "MaxAD_CIC", "sr_CIC", "sr_CIC_err")
     write.table(x = output_agemodel_CIC[order(output_agemodel_CIC$depth_avg, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CIC.txt", sep = ""), col.names = T, row.names = F)
     write.table(x = output_agemodel_CIC_inter[order(output_agemodel_CIC_inter$depth_avg, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CIC_interpolation.txt", sep = ""), col.names = T, row.names = F)
 
@@ -1235,13 +1246,22 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                xout = new_y_CRS_corr, rule = 2, ties = mean)$y
     }
 
-    output_agemodel_CRS <- as.data.frame(matrix(c(0, complete_core_depth_top[order(complete_core_depth_top, decreasing = F)][whichkeep], c(coring_yr, m_CRS), c(coring_yr, m_CRS_low), c(coring_yr, m_CRS_high)), byrow = F, ncol=4))
-    colnames(output_agemodel_CRS) <- c("depth", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS")
+    output_agemodel_CRS <- as.data.frame(matrix(
+      c(0, complete_core_depth_top[order(complete_core_depth_top, decreasing = F)][whichkeep],
+        c(coring_yr, m_CRS),
+        c(coring_yr, m_CRS_low),
+        c(coring_yr, m_CRS_high),
+        c(coring_yr, sr_CRS),
+        c(coring_yr, sr_CRS_err)),
+      byrow = F, ncol=6))
+    colnames(output_agemodel_CRS) <- c("depth", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "sr_CRS", "sr_CRS_err")
     output_agemodel_CRS_inter <- as.data.frame(seq(0, max(output_agemodel_CRS$depth, na.rm = T), stepout))
     output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth, output_agemodel_CRS$BestAD_CRS, xout= seq(0, max(output_agemodel_CRS$depth, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth, output_agemodel_CRS$MinAD_CRS, xout= seq(0, max(output_agemodel_CRS$depth, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth, output_agemodel_CRS$MaxAD_CRS, xout= seq(0, max(output_agemodel_CRS$depth, na.rm = T), stepout), ties = mean)$y)
-    colnames(output_agemodel_CRS_inter) <- c("depth", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS")
+    output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth, output_agemodel_CRS$sr_CRS, xout= seq(0, max(output_agemodel_CRS$depth, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth, output_agemodel_CRS$sr_CRS_err, xout= seq(0, max(output_agemodel_CRS$depth, na.rm = T), stepout), ties = mean)$y)
+    colnames(output_agemodel_CRS_inter) <- c("depth", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "sr_CRS", "sr_CRS_err")
     write.table(x = output_agemodel_CRS[order(output_agemodel_CRS$depth, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS.txt", sep = ""), col.names = T, row.names = F)
     write.table(x = output_agemodel_CRS_inter[order(output_agemodel_CRS_inter$depth, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_interpolation.txt", sep = ""), col.names = T, row.names = F)
 
