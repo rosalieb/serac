@@ -162,12 +162,14 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   # specific requirements to run CRS composite model.
   if(any(model=="CRS_comp")) {
     if(is.null(age_forced_CRS)&&is.null(depth_forced_CRS)&&is.null(Cher)) stop("\n Warning, if choosing to use the CRS composite model, you need to enter an age and\n a depth to force the model.\n Alternatively, the model can use Chernobyl if depths are given in the Cher argument.\n\n")
-    if(is.null(age_forced_CRS)|is.null(depth_forced_CRS)) stop("\n Warning, if choosing to use the CRS composite model, you need to enter both an age and a depth to force the model.\n\n")
     if(is.null(age_forced_CRS)&&is.null(depth_forced_CRS)) {
       age_forced_CRS = 1986
       depth_forced_CRS = mean(Cher)
+      message(paste0("\n You chose to use the CRS composite model but did not indicate how to force the model. \n By default, we are using the information you entered for Chernobyl (1986, depth = ",depth_forced_CRS," mm).\n\n"))
     }
-    if(length(age_forced_CRS) != length(depth_forced_CRS)) stop("\n Warning, age_forced_CRS and depth_forced_CRS must have the same length.\n\n")
+    if(length(age_forced_CRS) != length(depth_forced_CRS)) stop("\n Warning, age_forced_CRS and depth_forced_CRS must be vector of the same length. \n   (for every age_forced_CRS, one depth_forced_CRS)\n\n")
+    if(is.null(age_forced_CRS)|is.null(depth_forced_CRS)) stop("\n Warning, if choosing to use the CRS composite model, you need to enter both an age and a depth to force the model.\n\n")
+
   }
 
   #### 1. READ DATA ----
@@ -657,6 +659,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     Activity_Bq_m2_error <- complete_core_Pbex_err[whichkeep]*complete_core_density[whichkeep]*complete_core_thickness[whichkeep]
     Activity_Bq_m2_error[is.na(Activity_Bq_m2_error)] <- 0
     # Inventory: sum from depth to the bottom
+    Inventory_CRS <- Inventory_CRS_error <- rep(NA, length(Activity_Bq_m2))
     for(i in 1:length(Activity_Bq_m2)) {
       Inventory_CRS[i] <- sum(Activity_Bq_m2[i:length(Activity_Bq_m2)])
       Inventory_CRS_error[i] <- sum(Activity_Bq_m2_error[i:length(Activity_Bq_m2_error)])
@@ -943,7 +946,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
 
 
-
+      # Calculate age t at mass depth m (t(m))
       # Equations 19-20 in Abril (2019)
       Tm_CRS_comp_Appleby <- Tm_CRS_comp_Abril <- P_supply_rate_core <- NULL
       for (i in 1:length(complete_core_depth[whichkeep])) {
@@ -951,7 +954,6 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         t2 <- Incremental_inventory_CRS$age_min[Incremental_inventory_CRS$depth_bottom >=  complete_core_depth[whichkeep][i] & Incremental_inventory_CRS$depth_top <= complete_core_depth[whichkeep][i]]
         incremental_invent <- Incremental_inventory_CRS$incremental_invent[Incremental_inventory_CRS$depth_top <  complete_core_depth[whichkeep][i] & Incremental_inventory_CRS$depth_bottom >= complete_core_depth[whichkeep][i]]
         P_supply_rate <- Incremental_inventory_CRS$mean_Pb_supply_rate[Incremental_inventory_CRS$depth_top <  complete_core_depth[whichkeep][i] & Incremental_inventory_CRS$depth_bottom >= complete_core_depth[whichkeep][i]]
-        imin <- min(which(complete_core_depth[whichkeep] >= Incremental_inventory_CRS$depth_top[Incremental_inventory_CRS$depth_top <=  complete_core_depth[whichkeep][i] & Incremental_inventory_CRS$depth_bottom > complete_core_depth[whichkeep][i]]))
         imax <- max(which(complete_core_depth[whichkeep] <= Incremental_inventory_CRS$depth_bottom[Incremental_inventory_CRS$depth_top <=  complete_core_depth[whichkeep][i] & Incremental_inventory_CRS$depth_bottom > complete_core_depth[whichkeep][i]]))
         if(length(P_supply_rate) != 1) stop("\n P_supply_rate != 1\n   We did not find the value for mean 210Pb supply rate, to compute the CRS composite model.\n   Please contact the authors so we can assess whether it is a data or a code issue.\n")
         if(P_supply_rate != Incremental_inventory_CRS$mean_Pb_supply_rate[nrow(Incremental_inventory_CRS)])
@@ -992,6 +994,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       }
 
       Tm_CRS_comp <- abs(Tm_CRS_comp_Abril)
+      Tm_CRS_comp_err <- rep(0, length(Tm_CRS_comp))
 
       # calculation of Best Age and errors
       m_CRS_comp <- coring_yr - Tm_CRS_comp
@@ -1002,7 +1005,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       # Equation 25 from Appleby 2001
       # Equation 4 in Putyrskaya et al, 2020, Journal of Environmental Radioactivity
       # Based on the relation C = P/r. I'm calling C, "C_Pb" below.
-      sr_CRS_comp <- P_supply_rate_core * exp((-lambda)*m_CRS_comp[-1]) / Activity_Bq_m2
+      sr_CRS_comp <- P_supply_rate_core * exp((-lambda)*m_CRS_comp) / Activity_Bq_m2
       sr_CRS_comp_err <- rep(0, length(sr_CRS_comp))
 
       if(!mass_depth) {
