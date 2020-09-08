@@ -968,6 +968,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         t2 <- Incremental_inventory_CRS$age_min[Incremental_inventory_CRS$depth_bottom >=  complete_core_depth[whichkeep][i] & Incremental_inventory_CRS$depth_top <= complete_core_depth[whichkeep][i]]
         incremental_invent <- Incremental_inventory_CRS$incremental_invent[Incremental_inventory_CRS$depth_top <  complete_core_depth[whichkeep][i] & Incremental_inventory_CRS$depth_bottom >= complete_core_depth[whichkeep][i]]
         P_supply_rate <- Incremental_inventory_CRS$mean_Pb_supply_rate[Incremental_inventory_CRS$depth_top <  complete_core_depth[whichkeep][i] & Incremental_inventory_CRS$depth_bottom >= complete_core_depth[whichkeep][i]]
+        imin <- min(which(complete_core_depth[whichkeep] >= Incremental_inventory_CRS$depth_top[Incremental_inventory_CRS$depth_top <=  complete_core_depth[whichkeep][i] & Incremental_inventory_CRS$depth_bottom > complete_core_depth[whichkeep][i]]))
         imax <- max(which(complete_core_depth[whichkeep] <= Incremental_inventory_CRS$depth_bottom[Incremental_inventory_CRS$depth_top <=  complete_core_depth[whichkeep][i] & Incremental_inventory_CRS$depth_bottom > complete_core_depth[whichkeep][i]]))
         if(length(P_supply_rate) != 1) stop("\n P_supply_rate != 1\n   We did not find the value for mean 210Pb supply rate, to compute the CRS composite model.\n   Please contact the authors so we can assess whether it is a data or a code issue.\n")
         if(P_supply_rate != Incremental_inventory_CRS$mean_Pb_supply_rate[nrow(Incremental_inventory_CRS)])
@@ -980,11 +981,20 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           )
 
           # Equation 19 in Abril (2019, Quaternary Geochronology)
+          # Tm_CRS_comp_Abril <- c(Tm_CRS_comp_Abril,
+          #                    (1/lambda) * log(
+          #                      P_supply_rate / (P_supply_rate - lambda * sum(Activity_Bq_m2[1:i]))
+          #                    )
+          #   )
+
+          # Attempt at modifying started 8/9/2020
+          # go back to 6 lines above if this doesn't work
           Tm_CRS_comp_Abril <- c(Tm_CRS_comp_Abril,
-                                 (1/lambda) * log(
-                                   P_supply_rate / (P_supply_rate - lambda * sum(Activity_Bq_m2[1:i]))
+                                 (coring_yr-t1) + (1/lambda) * log(
+                                   P_supply_rate / (P_supply_rate - lambda * sum(Activity_Bq_m2[imin:i]))
                                  )
           )
+
         } else {
           #Same equation for Appleby
           Tm_CRS_comp_Appleby <- c(Tm_CRS_comp_Appleby,
