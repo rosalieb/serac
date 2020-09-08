@@ -843,6 +843,13 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         }
       }
 
+      # Print message
+      if(!mass_depth) {
+        cat(paste("\n Sediment accumulation rate (CIC model): see output file.\n", sep=""))
+      } else {
+        cat(paste("\n Mass accumulation rate (CIC model): see output file.\n", sep=""))
+      }
+
       # Save output
       out_list$`CIC model` <- data.frame("m_CIC"      = m_CIC,
                                          "m_CIC_low"  = m_CIC_low,
@@ -890,6 +897,13 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
         sr_CRS <- sar_CRS
         rm(sar_CRS)
+      }
+
+      # Print message
+      if(!mass_depth) {
+        cat(paste("\n Sediment accumulation rate (CRS model): see output file.\n", sep=""))
+      } else {
+        cat(paste("\n Mass accumulation rate (CRS model): see output file.\n", sep=""))
       }
 
       # Save output
@@ -1010,6 +1024,13 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
       if(!mass_depth) {
 
+      }
+
+      # Print message
+      if(!mass_depth) {
+        cat(paste("\n Sediment accumulation rate (CRS composite model): see output file.\n", sep=""))
+      } else {
+        cat(paste("\n Mass accumulation rate (CRS composite model): see output file.\n", sep=""))
       }
 
       # Save output
