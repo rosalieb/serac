@@ -804,14 +804,40 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       # for a depth i, si = delta(zi)/delta(ti)
       sr_CIC <- sr_CIC_err <- 0
       for (i in 2:nrow(dt[!is.na(dt$Pbex),])) {
-        sr_CIC <- c(sr_CIC,
-                    ifelse((m_CIC[i-1]-m_CIC[i]) == 0, Inf,
+        mar_CIC <-  ifelse((m_CIC[i-1]-m_CIC[i]) == 0, Inf,
                            (dt$depth_avg[!is.na(dt$Pbex)][i-1]-dt$depth_avg[!is.na(dt$Pbex)][i]) / (m_CIC[i-1]-m_CIC[i]))
-        )
+        sr_CIC <- c(sr_CIC, mar_CIC)
 
-        # error MAR CIC : delt
-        # calcul erreur taux de sed CIC: delta(t)=t*[delta(T1)+delta(T2)]/(T1-T2)
-        sr_CIC_err <- c(sr_CIC_err, 0)
+        # error MAR CIC : delta(MAR)=MAR*sqrt(delta(T1)^2+delta(T2)^2)/(T2-T1)
+        sr_CIC_err <- c(sr_CIC_err,
+                        mar_CIC * sqrt((Tm_CIC_err[i-1])^2 + (Tm_CIC_err[i])^2)/(Tm_CIC[i]-Tm_CIC[i-1])
+        )
+      }
+
+      # convert MAR to SAR
+      if(!mass_depth) {
+        sar_CIC <- NULL
+        for (j in seq_along(sr_CIC)) {
+          if(sr_CIC[i] != Inf) {
+            sar_CIC <- c(sar_CIC,
+                         sr_CIC[i] / complete_core_density[whichkeep][i] * 10)
+          } else {
+            sar_CIC <- c(sar_CIC, Inf)
+          }
+        }
+        sr_CIC <- sar_CIC
+
+        # Computation error SAR, CIC model
+        # delta(SAR)=SAR*sqrt(delta(T1)^2+delta(T2)^2)/(T2-T1)
+        sr_CIC_err <- 0
+        for (i in 2:nrow(dt[!is.na(dt$Pbex),])) {
+          if(sr_CIC[i] != Inf) {
+            sr_CIC_err <- c(sr_CIC_err,
+                            sr_CIC[i] * sqrt((Tm_CIC_err[i-1])^2 + (Tm_CIC_err[i])^2)/(Tm_CIC[i]-Tm_CIC[i-1]))
+          } else {
+            sr_CIC_err <- c(sr_CIC_err, Inf)
+          }
+        }
       }
 
       # Save output
