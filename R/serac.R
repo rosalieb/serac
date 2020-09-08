@@ -650,18 +650,17 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
   #### 2. LEAD 210 MODEL -----
   if(length(grep("Pb", x = colnames(dt)))>1 & length(grep("density", x = colnames(dt)))>=1) {
-    # Inventory = sum(activity layer z * dry sediment accumulated at layer z * thickness layer z)
+    # activity layer z in Bq/m2 = sum(activity layer z * dry sediment accumulated at layer z * thickness layer z)
     # The inventory should account only for the continuous deposition:
     # [whichkeep] allows to keep only the data for the depth that are not in an instantaneous deposit
-    Inventory_CRS <- complete_core_Pbex[whichkeep]*complete_core_density[whichkeep]*complete_core_thickness[whichkeep]
-    Inventory_CRS_error <- complete_core_Pbex_err[whichkeep]*complete_core_density[whichkeep]*complete_core_thickness[whichkeep]
-    Inventory_CRS_error[is.na(Inventory_CRS_error)] <- 0
+    Activity_Bq_m2 <- complete_core_Pbex[whichkeep]*complete_core_density[whichkeep]*complete_core_thickness[whichkeep]
+    Activity_Bq_m2_error <- complete_core_Pbex_err[whichkeep]*complete_core_density[whichkeep]*complete_core_thickness[whichkeep]
+    Activity_Bq_m2_error[is.na(Activity_Bq_m2_error)] <- 0
     # Inventory: sum from depth to the bottom
-    for(i in 1:length(Inventory_CRS)) {
-      Inventory_CRS[i] <- sum(Inventory_CRS[i:length(Inventory_CRS)])
-      Inventory_CRS_error[i] <- sum(Inventory_CRS_error[i:length(Inventory_CRS_error)])
+    for(i in 1:length(Activity_Bq_m2)) {
+      Inventory_CRS[i] <- sum(Activity_Bq_m2[i:length(Activity_Bq_m2)])
+      Inventory_CRS_error[i] <- sum(Activity_Bq_m2_error[i:length(Activity_Bq_m2_error)])
     }
-    # Note that Inventory_CRS for CRS_comp is done later within the model
   }
 
   if(length(model)>=1) {
@@ -803,12 +802,15 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       # Find sedimentation rate at a given depth
       # Equation 23 in Sanchez-Cabeza and Ruiz-Fernandez (2012, Geochimica et Cosmochimica Acta)
       # for a depth i, si = delta(zi)/delta(ti)
-      sr_CIC <- sr_CIC_err <- NULL
-      for (i in 1:nrow(dt)) {
+      sr_CIC <- sr_CIC_err <- 0
+      for (i in 2:nrow(dt[!is.na(dt$Pbex),])) {
         sr_CIC <- c(sr_CIC,
-                    (0-dt$depth_avg[i]) / (coring_yr-m_CIC[i])
+                    ifelse((m_CIC[i-1]-m_CIC[i]) == 0, Inf,
+                           (dt$depth_avg[!is.na(dt$Pbex)][i-1]-dt$depth_avg[!is.na(dt$Pbex)][i]) / (m_CIC[i-1]-m_CIC[i]))
         )
 
+        # error MAR CIC : delt
+        # calcul erreur taux de sed CIC: delta(t)=t*[delta(T1)+delta(T2)]/(T1-T2)
         sr_CIC_err <- c(sr_CIC_err, 0)
       }
 
@@ -839,20 +841,26 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       # Equation 38 in Sanchez-Cabeza and Ruiz-Fernandez (2012, Geochimica et Cosmochimica Acta)
       sr_CRS <- sr_CRS_err <- NULL
       for (i in 1:length(m_CRS)) {
-        sr_CRS <- c(sr_CRS,
-                    #lambda * Tm_CRS[i] / complete_core_Pbex[whichkeep][i]
-                    # equation above = my understanding, equation below: pierre's answer
-                    lambda * Inventory_CRS[i] / complete_core_Pbex[whichkeep][i] /10
+        sr_temporary <- lambda * Inventory_CRS[i] / complete_core_Pbex[whichkeep][i] /10
+        sr_CRS <- c(sr_CRS, sr_temporary)
+        #Pour les calcul d'erreur MAR: racine{(deltaIventaire à la prof z/Inventaire à la profz)^2 +(delta activité à la prof z/activité à la prof z)^2}*MAR
+        sr_CRS_err <- c(sr_CRS_err,
+                        sqrt((Inventory_CRS_error[i] / Inventory_CRS[i])^2 + (Activity_Bq_m2_error[i]/Activity_Bq_m2[i])^2) * sr_temporary
         )
-        sr_CRS_err <- c(sr_CRS_err, 0)
+
       }
 
       # need to convert sediment rate if SAR
       if(!mass_depth) {
         # Equation to convert r(i) to s(i) p 13 in Sanchez-Cabeza and Ruiz-Fernandez (2012, Geochimica et Cosmochimica Acta)
-        # We use a factor of 1000 to convert the SI unit m/yr to mm/yr
-        sr_CRS = sr_CRS / complete_core_density[whichkeep] * 10
-        sr_CRS_err = sr_CRS_err / complete_core_density[whichkeep] * 10
+        # We use a factor of 1000 to convert to mm/yr
+        sar_CRS = sr_CRS / complete_core_density[whichkeep] * 10
+        # SAR_error = SAR * sqrt[(MAR_error/MAR)^2+0.07^2]
+        # Appleby (2001) suggest a 7% error on DBD, which is the 0.07 in the equation below
+        sr_CRS_err = sar_CRS * sqrt((sr_CRS_err / sr_CRS)^2 + 0.07^2)
+
+        sr_CRS <- sar_CRS
+        rm(sar_CRS)
       }
 
       # Save output
@@ -878,57 +886,76 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                        ifelse(i==1, 0, depth_forced_CRS[i-1]),       # depth_min
                                        depth_forced_CRS[i],                          # depth_max
                                        ifelse(i==1,
-                                              sum(Inventory_CRS[complete_core_depth<=depth_forced_CRS[i] & !is.na(complete_core_depth_2)]),
-                                              sum(Inventory_CRS[complete_core_depth>=depth_forced_CRS[i-1] & complete_core_depth<=depth_forced_CRS[i] & !is.na(complete_core_depth_2)]))
-                                       * exp((-lambda) * (coring_yr - ifelse(i==1, coring_yr, age_forced_CRS[i-1]))),
+                                              sum(Activity_Bq_m2[complete_core_depth[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])]),
+                                              sum(Activity_Bq_m2[complete_core_depth[whichkeep]>depth_forced_CRS[i-1] & complete_core_depth[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])])),
                                        ifelse(i==1,
-                                              sum(Inventory_CRS_error[complete_core_depth<=depth_forced_CRS[i] & !is.na(complete_core_depth_2)]),
-                                              sum(Inventory_CRS_error[complete_core_depth>=depth_forced_CRS[i-1] & complete_core_depth<=depth_forced_CRS[i] & !is.na(complete_core_depth_2)]))
-                                       * exp((-lambda) * (coring_yr - ifelse(i==1, coring_yr, age_forced_CRS[i-1])))
+                                              sum(Activity_Bq_m2_error[complete_core_depth[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])]),
+                                              sum(Activity_Bq_m2_error[complete_core_depth[whichkeep]>depth_forced_CRS[i-1] & complete_core_depth[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])]))
         )
       }
-      # Last period
+      # Last period, with unknown t2 (or t2 = infinity)
       # Equation 18 in Abril (2019)
       Incremental_inventory_CRS <-
         c(Incremental_inventory_CRS,
           age_forced_CRS[length(age_forced_CRS)], # age_max
-          NA,                                     # age_min
+          coring_yr - 150,                        # age_min - we assume that after 150 years there is no more activity
           depth_forced_CRS[length(depth_forced_CRS)], # depth_min
           max(dt$depth_bottom),                       # depth_max
-          sum(Inventory_CRS[complete_core_depth>=depth_forced_CRS[length(age_forced_CRS)] & !is.na(complete_core_depth_2)]),
-          sum(Inventory_CRS_error[complete_core_depth>=depth_forced_CRS[length(age_forced_CRS)] & !is.na(complete_core_depth_2)])
+          sum(Activity_Bq_m2[complete_core_depth[whichkeep]>depth_forced_CRS[length(age_forced_CRS)] & !is.na(complete_core_depth_2[whichkeep])]),
+          sum(Activity_Bq_m2_error[complete_core_depth[whichkeep]>depth_forced_CRS[length(age_forced_CRS)] & !is.na(complete_core_depth_2[whichkeep])])
         )
+
 
       # Final Incremental_inventory_CRS data
       Incremental_inventory_CRS <- as.data.frame(matrix(Incremental_inventory_CRS, ncol=6, byrow = T))
       colnames(Incremental_inventory_CRS) <- c("age_max", "age_min", "depth_top", "depth_bottom", "incremental_invent", "incremental_invent_error")
 
-      # Then, calculate the mean 210Pb supply rate (Bq/m2/yr)
+      # Then, calculate the Flux (Bq/m2/yr)
       # Equation 23 from Appleby 2001
       Incremental_inventory_CRS$mean_Pb_supply_rate <-
-        (lambda*Incremental_inventory_CRS$incremental_invent)/(exp((-lambda)*(coring_yr - Incremental_inventory_CRS$age_max))-exp((-lambda)*(coring_yr -Incremental_inventory_CRS$age_min)))
+        (lambda * Incremental_inventory_CRS$incremental_invent)/(exp((-lambda) * (coring_yr - Incremental_inventory_CRS$age_max)) - exp((-lambda) * (coring_yr - Incremental_inventory_CRS$age_min)))
 
 
-      # Equation 24 from Appleby 2001 [incomplete!!]
-      Tm_CRS_comp <- P_supply_rate_core <- NULL
-      for (i in 1:length(complete_core_depth)) {
-        tr <- Incremental_inventory_CRS$age_max[Incremental_inventory_CRS$depth_bottom >=  complete_core_depth[i] & Incremental_inventory_CRS$depth_top <= complete_core_depth[i]]
-        t1 <- coring_yr - tr
-        P_supply_rate <- Incremental_inventory_CRS$mean_Pb_supply_rate[Incremental_inventory_CRS$depth_top <=  complete_core_depth[i] & Incremental_inventory_CRS$depth_bottom > complete_core_depth[i]]
+
+
+      # Equations 19-20 in Abril (2019)
+      Tm_CRS_comp_Appleby <- Tm_CRS_comp_Abril <- P_supply_rate_core <- NULL
+      for (i in 1:length(complete_core_depth[whichkeep])) {
+        t1 <- Incremental_inventory_CRS$age_max[Incremental_inventory_CRS$depth_bottom >=  complete_core_depth[whichkeep][i] & Incremental_inventory_CRS$depth_top <= complete_core_depth[whichkeep][i]]
+        t2 <- Incremental_inventory_CRS$age_min[Incremental_inventory_CRS$depth_bottom >=  complete_core_depth[whichkeep][i] & Incremental_inventory_CRS$depth_top <= complete_core_depth[whichkeep][i]]
+        incremental_invent <- Incremental_inventory_CRS$incremental_invent[Incremental_inventory_CRS$depth_top <  complete_core_depth[whichkeep][i] & Incremental_inventory_CRS$depth_bottom >= complete_core_depth[whichkeep][i]]
+        P_supply_rate <- Incremental_inventory_CRS$mean_Pb_supply_rate[Incremental_inventory_CRS$depth_top <  complete_core_depth[whichkeep][i] & Incremental_inventory_CRS$depth_bottom >= complete_core_depth[whichkeep][i]]
+        imin <- min(which(complete_core_depth[whichkeep] >= Incremental_inventory_CRS$depth_top[Incremental_inventory_CRS$depth_top <=  complete_core_depth[whichkeep][i] & Incremental_inventory_CRS$depth_bottom > complete_core_depth[whichkeep][i]]))
+        imax <- max(which(complete_core_depth[whichkeep] <= Incremental_inventory_CRS$depth_bottom[Incremental_inventory_CRS$depth_top <=  complete_core_depth[whichkeep][i] & Incremental_inventory_CRS$depth_bottom > complete_core_depth[whichkeep][i]]))
         if(length(P_supply_rate) != 1) stop("\n P_supply_rate != 1\n   We did not find the value for mean 210Pb supply rate, to compute the CRS composite model.\n   Please contact the authors so we can assess whether it is a data or a code issue.\n")
-        if(!is.na(P_supply_rate)) { # normal case
+        if(P_supply_rate != Incremental_inventory_CRS$mean_Pb_supply_rate[nrow(Incremental_inventory_CRS)])
+        { # when t1 and t2 are known
+          # Equation 24 in Appleby 2001
+          Tm_CRS_comp_Appleby <- c(Tm_CRS_comp_Appleby,
+                                   (1/lambda) * log(
+                                     exp((-lambda) * (coring_yr-t2)) + lambda / P_supply_rate * sum(Activity_Bq_m2[i:imax])
+                                   )
+          )
+
           # Equation 19 in Abril (2019, Quaternary Geochronology)
-          Tm_CRS_comp <- c(Tm_CRS_comp,
-                           log(
-                             exp((-lambda) * t1) + (lambda / P_supply_rate) * sum(Inventory_CRS_comp[1:i]) * 10
-                           ) * (-1/lambda)
+          Tm_CRS_comp_Abril <- c(Tm_CRS_comp_Abril,
+                                 (1/lambda) * log(
+                                   P_supply_rate / (P_supply_rate - lambda * sum(Activity_Bq_m2[1:i]))
+                                 )
           )
         } else {
+          #Same equation for Appleby
+          Tm_CRS_comp_Appleby <- c(Tm_CRS_comp_Appleby,
+                                   (1/lambda) * log(
+                                     exp((-lambda) * (coring_yr-t2)) + lambda / P_supply_rate * sum(Activity_Bq_m2[i:imax])
+                                   )
+          )
+
           # Equation 20 in Abril (2019, Quaternary Geochronology)
-          Tm_CRS_comp <- c(Tm_CRS_comp,
-                           tr + 1/lambda * log(
-                             Emr / Em #
-                           )
+          Tm_CRS_comp_Abril <- c(Tm_CRS_comp_Abril,
+                                 (coring_yr-t1) + (1/lambda) * log(
+                                   incremental_invent / sum(Activity_Bq_m2[i:imax])
+                                 )
           )
         }
 
@@ -938,22 +965,30 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         P_supply_rate_core <- c(P_supply_rate_core, P_supply_rate)
       }
 
+      Tm_CRS_comp <- abs(Tm_CRS_comp_Abril)
+
       # calculation of Best Age and errors
       m_CRS_comp <- coring_yr - Tm_CRS_comp
       m_CRS_comp_low <- m_CRS_comp - Tm_CRS_comp_err
       m_CRS_comp_high <- m_CRS_comp + Tm_CRS_comp_err
 
-      # Calculate sedimentation rate at time t
+      # Calculate mass accumuation rate rate at time t,
       # Equation 25 from Appleby 2001
+      # Equation 4 in Putyrskaya et al, 2020, Journal of Environmental Radioactivity
       # Based on the relation C = P/r. I'm calling C, "C_Pb" below.
-      sr_CRS_comp <- P_supply_rate_core * exp((-lambda)*m_CRS_comp) / C_Pb
+      sr_CRS_comp <- P_supply_rate_core * exp((-lambda)*m_CRS_comp[-1]) / Activity_Bq_m2
+      sr_CRS_comp_err <- rep(0, length(sr_CRS_comp))
 
+      if(!mass_depth) {
+
+      }
 
       # Save output
       out_list$`CRS_comp model` <- data.frame("m_CRS_comp"      = m_CRS_comp,
                                               "m_CRS_comp_low"  = m_CRS_comp_low,
                                               "m_CRS_comp_high" = m_CRS_comp_high,
-                                              "sr_CRS_comp"     = sr_CRS_comp)
+                                              "sr_CRS_comp"     = sr_CRS_comp,
+                                              "sr_CRS_comp_err" = sr_CRS_comp_err)
     }
   }
 
@@ -1254,8 +1289,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         c(coring_yr, m_CRS),
         c(coring_yr, m_CRS_low),
         c(coring_yr, m_CRS_high),
-        c(coring_yr, sr_CRS),
-        c(coring_yr, sr_CRS_err)),
+        c(0, sr_CRS),
+        c(0, sr_CRS_err)),
       byrow = F, ncol=6))
     colnames(output_agemodel_CRS) <- c("depth", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "sr_CRS", "sr_CRS_err")
     output_agemodel_CRS_inter <- as.data.frame(seq(0, max(output_agemodel_CRS$depth, na.rm = T), stepout))
@@ -1300,13 +1335,20 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                     xout = new_y_CRS_comp_corr, rule = 2, ties = mean)$y
     }
 
-    output_agemodel_CRS_comp <- as.data.frame(matrix(c(0, complete_core_depth_top[order(complete_core_depth_top, decreasing = F)][whichkeep], c(coring_yr, m_CRS_comp), c(coring_yr, m_CRS_comp_low), c(coring_yr, m_CRS_comp_high)), byrow = F, ncol=4))
-    colnames(output_agemodel_CRS_comp) <- c("depth", "BestAD_CRS_comp", "MinAD_CRS_comp", "MaxAD_CRS_comp")
+    output_agemodel_CRS_comp <- as.data.frame(matrix(c(0, complete_core_depth_top[order(complete_core_depth_top, decreasing = F)][whichkeep],
+                                                       c(coring_yr, m_CRS_comp),
+                                                       c(coring_yr, m_CRS_comp_low),
+                                                       c(coring_yr, m_CRS_comp_high),
+                                                       c(0, sr_CRS_comp),
+                                                       c(0, sr_CRS_comp_err)), byrow = F, ncol=6))
+    colnames(output_agemodel_CRS_comp) <- c("depth", "BestAD_CRS_comp", "MinAD_CRS_comp", "MaxAD_CRS_comp", "sr_CRS_comp", "sr_CRS_comp_err")
     output_agemodel_CRS_comp_inter <- as.data.frame(seq(0, max(output_agemodel_CRS_comp$depth, na.rm = T), stepout))
     output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth, output_agemodel_CRS_comp$BestAD_CRS_comp, xout= seq(0, max(output_agemodel_CRS_comp$depth, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth, output_agemodel_CRS_comp$MinAD_CRS_comp, xout= seq(0, max(output_agemodel_CRS_comp$depth, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth, output_agemodel_CRS_comp$MaxAD_CRS_comp, xout= seq(0, max(output_agemodel_CRS_comp$depth, na.rm = T), stepout), ties = mean)$y)
-    colnames(output_agemodel_CRS_comp_inter) <- c("depth", "BestAD_CRS_comp", "MinAD_CRS_comp", "MaxAD_CRS_comp")
+    output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth, output_agemodel_CRS_comp$sr_CRS_comp, xout= seq(0, max(output_agemodel_CRS_comp$depth, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth, output_agemodel_CRS_comp$sr_CRS_comp_err, xout= seq(0, max(output_agemodel_CRS_comp$depth, na.rm = T), stepout), ties = mean)$y)
+    colnames(output_agemodel_CRS_comp_inter) <- c("depth", "BestAD_CRS_comp", "MinAD_CRS_comp", "MaxAD_CRS_comp", "sr_CRS_comp", "sr_CRS_comp_err")
     write.table(x = output_agemodel_CRS_comp[order(output_agemodel_CRS_comp$depth, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_comp.txt", sep = ""), col.names = T, row.names = F)
     write.table(x = output_agemodel_CRS_comp_inter[order(output_agemodel_CRS_comp_inter$depth, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_comp_interpolation.txt", sep = ""), col.names = T, row.names = F)
 
