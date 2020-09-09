@@ -76,7 +76,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                   input_depth_mm = T, ignore = c(), mass_depth = FALSE,
                   plotpdf = FALSE, preview = TRUE, plotphoto = FALSE, minphoto = c(), maxphoto = c(),
                   Pbcol = c("black", "midnightblue", "darkgreen"), inst_depositcol = grey(0.85),
-                  modelcol = c("black", "red", "darkorange", "#FFD700"),
+                  modelcol = c("black", "red", "darkorange", "#446455FF"),
                   historic_d = NA, historic_a = NA, historic_n = NA, historic_test = NA,
                   suppdescriptor = FALSE, descriptor_lab = c(), suppdescriptorcol = c("black", "purple"),
                   coring_yr = c(), plot_Am = FALSE, plot_Cs = FALSE, plot_Pb = TRUE,
@@ -622,7 +622,9 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                          paste(descriptor_lab, collapse = ", "),
                          varves,
                          paste(sedchange, collapse = ", "),
-                         SML)
+                         SML,
+                         ifelse(is.null(age_forced_CRS), NA, paste(age_forced_CRS, collapse = ", ")),
+                         ifelse(is.null(depth_forced_CRS), NA, paste(depth_forced_CRS, collapse = ", ")))
   this_code_history[this_code_history==""]=NA
   this_code_history<- as.data.frame(matrix(this_code_history, nrow=1))
   colnames(this_code_history) <- c("name", "coring_yr", "date_computation", "model_tested",
@@ -630,7 +632,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                    "inst_deposit", "ignore_depths",
                                    "historic_depth", "historic_age", "historic_name",
                                    "suppdescriptor", "descriptor_lab",
-                                   "varves", "sedchange", "SML")
+                                   "varves", "sedchange", "SML", "age_forced_CRS_composite", "depth_forced_CRS_composite")
   # First, check whether a file already exists
   if(length(list.files(paste(getwd(), "/Cores/", name, "/", sep=""), pattern="serac_model_history*", full.names=TRUE))==1) {
     # read previous file
@@ -1551,6 +1553,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                        "Nuclear_War_Test", paste(paste(NWT, collapse = "-"), " (", Hemisphere, ")", sep=""),
                        "First_Fallout", paste(FF, collapse = "-"),
                        "Surface_Mixed_Layer", paste(SML, collapse = ""),
+                       "Age_forced_for_CRS_composite", ifelse(!is.null(age_forced_CRS), paste(age_forced_CRS, collapse = ", "), "NA - CRS composite model was not selected"),
+                       "Depth_forced_for_CRS_composite", ifelse(!is.null(age_forced_CRS), paste(depth_forced_CRS, collapse = ", "), "NA - CRS composite model was not selected"),
                        "Instantaneous_deposit_up_and_low_limits", paste(inst_deposit, collapse = ", "),
                        "Ignore_up_and_low_limits", paste(inst_deposit, collapse = ", "),
                        "Supplementary_descriptor", paste(descriptor_lab, collapse = ", "),
