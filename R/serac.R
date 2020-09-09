@@ -929,11 +929,11 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                        ifelse(i==1, 0, depth_forced_CRS[i-1]),       # depth_min
                                        depth_forced_CRS[i],                          # depth_max
                                        ifelse(i==1,
-                                              sum(Activity_Bq_m2[complete_core_depth[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])]),
-                                              sum(Activity_Bq_m2[complete_core_depth[whichkeep]>depth_forced_CRS[i-1] & complete_core_depth[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])])),
+                                              sum(Activity_Bq_m2[complete_core_depth_bottom[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])]),
+                                              sum(Activity_Bq_m2[complete_core_depth_bottom[whichkeep]>depth_forced_CRS[i-1] & complete_core_depth_bottom[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])])),
                                        ifelse(i==1,
-                                              sum(Activity_Bq_m2_error[complete_core_depth[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])]),
-                                              sum(Activity_Bq_m2_error[complete_core_depth[whichkeep]>depth_forced_CRS[i-1] & complete_core_depth[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])]))
+                                              sum(Activity_Bq_m2_error[complete_core_depth_bottom[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])]),
+                                              sum(Activity_Bq_m2_error[complete_core_depth_bottom[whichkeep]>depth_forced_CRS[i-1] & complete_core_depth_bottom[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])]))
         )
       }
       # Last period, with unknown t2 (or t2 = infinity)
@@ -944,8 +944,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           coring_yr - 150,                        # age_min - we assume that after 150 years there is no more activity
           depth_forced_CRS[length(depth_forced_CRS)], # depth_min
           max(dt$depth_bottom),                       # depth_max
-          sum(Activity_Bq_m2[complete_core_depth[whichkeep]>depth_forced_CRS[length(age_forced_CRS)] & !is.na(complete_core_depth_2[whichkeep])]),
-          sum(Activity_Bq_m2_error[complete_core_depth[whichkeep]>depth_forced_CRS[length(age_forced_CRS)] & !is.na(complete_core_depth_2[whichkeep])])
+          sum(Activity_Bq_m2[complete_core_depth_bottom[whichkeep]>depth_forced_CRS[length(age_forced_CRS)] & !is.na(complete_core_depth_2[whichkeep])]),
+          sum(Activity_Bq_m2_error[complete_core_depth_bottom[whichkeep]>depth_forced_CRS[length(age_forced_CRS)] & !is.na(complete_core_depth_2[whichkeep])])
         )
 
 
@@ -958,18 +958,16 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       Incremental_inventory_CRS$mean_Pb_supply_rate <-
         (lambda * Incremental_inventory_CRS$incremental_invent)/(exp((-lambda) * (coring_yr - Incremental_inventory_CRS$age_max)) - exp((-lambda) * (coring_yr - Incremental_inventory_CRS$age_min)))
 
-
-
       # Calculate age t at mass depth m (t(m))
       # Equations 19-20 in Abril (2019)
       Tm_CRS_comp_Appleby <- Tm_CRS_comp_Abril <- P_supply_rate_core <- NULL
-      for (i in 1:length(complete_core_depth[whichkeep])) {
-        t1 <- Incremental_inventory_CRS$age_max[Incremental_inventory_CRS$depth_bottom >=  complete_core_depth[whichkeep][i] & Incremental_inventory_CRS$depth_top < complete_core_depth[whichkeep][i]]
+      for (i in 1:length(complete_core_depth_bottom[whichkeep])) {
+        t1 <- Incremental_inventory_CRS$age_max[Incremental_inventory_CRS$depth_bottom >=  complete_core_depth_bottom[whichkeep][i] & Incremental_inventory_CRS$depth_top < complete_core_depth_bottom[whichkeep][i]]
         t2 <- Incremental_inventory_CRS$age_min[Incremental_inventory_CRS$age_max == t1]
         incremental_invent <- Incremental_inventory_CRS$incremental_invent[Incremental_inventory_CRS$age_max == t1]
         P_supply_rate <- Incremental_inventory_CRS$mean_Pb_supply_rate[Incremental_inventory_CRS$age_max == t1]
-        imin <- min(which(complete_core_depth[whichkeep] >= Incremental_inventory_CRS$depth_top[Incremental_inventory_CRS$age_max == t1]))
-        imax <- max(which(complete_core_depth[whichkeep] <= Incremental_inventory_CRS$depth_bottom[Incremental_inventory_CRS$age_max == t1]))
+        imin <- min(which(complete_core_depth_bottom[whichkeep] >= Incremental_inventory_CRS$depth_top[Incremental_inventory_CRS$age_max == t1]))
+        imax <- max(which(complete_core_depth_bottom[whichkeep] <= Incremental_inventory_CRS$depth_bottom[Incremental_inventory_CRS$age_max == t1]))
         # Message below when P_supply_rate != 1
         if(length(P_supply_rate) != 1) stop("\n We couldn't correctly identify which flux to use for the CRS composite model.\n   We did not find the value for mean 210Pb supply rate, to compute the CRS composite model.\n   Please contact the authors so we can assess whether it is a data or a code issue.\n")
         if(P_supply_rate != Incremental_inventory_CRS$mean_Pb_supply_rate[nrow(Incremental_inventory_CRS)])
@@ -982,19 +980,12 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           )
 
           # Equation 19 in Abril (2019, Quaternary Geochronology)
-          # Tm_CRS_comp_Abril <- c(Tm_CRS_comp_Abril,
-          #                    (1/lambda) * log(
-          #                      P_supply_rate / (P_supply_rate - lambda * sum(Activity_Bq_m2[1:i]))
-          #                    )
-          #   )
-
-          # Attempt at modifying started 8/9/2020
-          # go back to 6 lines above if this doesn't work
           Tm_CRS_comp_Abril <- c(Tm_CRS_comp_Abril,
-                                 (coring_yr-t1) + (1/lambda) * log(
-                                   P_supply_rate / (P_supply_rate - lambda * sum(Activity_Bq_m2[imin:i]))
+                                 (1/lambda) * log(
+                                   P_supply_rate / (P_supply_rate - lambda * sum(Activity_Bq_m2[1:i]))
                                  )
           )
+
 
         } else {
           #Same equation for Appleby
@@ -1018,13 +1009,57 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         P_supply_rate_core <- c(P_supply_rate_core, P_supply_rate)
       }
 
-      Tm_CRS_comp <- abs(Tm_CRS_comp_Abril)
+      Tm_CRS_comp <- abs(c(Tm_CRS_comp_Appleby[1:(imin-1)], Tm_CRS_comp_Abril[imin:imax]))
+      #Tm_CRS_comp <- abs(Tm_CRS_comp_Abril)
       Tm_CRS_comp_err <- rep(0, length(Tm_CRS_comp))
 
       # calculation of Best Age and errors
       m_CRS_comp <- coring_yr - Tm_CRS_comp
       m_CRS_comp_low <- m_CRS_comp - Tm_CRS_comp_err
       m_CRS_comp_high <- m_CRS_comp + Tm_CRS_comp_err
+
+      # Recommend potential better depth_forced, so the model goes through the known ages
+      CRS_comp_period <- NULL
+      for(i in seq_along(complete_core_depth_bottom[whichkeep])) {
+        CRS_comp_period <- c(CRS_comp_period,
+                             paste( "Period", which(Incremental_inventory_CRS$depth_top < complete_core_depth_bottom[whichkeep][i]
+                                                    & Incremental_inventory_CRS$depth_bottom >= complete_core_depth_bottom[whichkeep][i]) )
+        )
+      }
+
+      CRS_comp_period <- data.frame(
+        period = CRS_comp_period,
+        depth_top = complete_core_depth_top[whichkeep],
+        depth_bottom = complete_core_depth_bottom[whichkeep],
+        depth  = complete_core_depth[whichkeep],
+        age    = m_CRS_comp
+      )
+
+      if(any(!depth_forced_CRS %in% complete_core_depth[whichkeep])) {
+        message("\n General message about visualisation of the CRS composite model:\n")
+        message_CRS_comp_period <- NULL
+        for(i in seq_along(depth_forced_CRS)) {
+          if(!depth_forced_CRS[i] %in% complete_core_depth[whichkeep]) {
+            message(paste0(
+              " Age forced = ", age_forced_CRS[i], ": \n",
+              "      The depth you chose (", depth_forced_CRS[i]," mm) is not the mid-section of any sample. You can \n      choose to leave the model as it is, or change the value to the nearest \n      mid-section depth (i.e., ",
+              paste(CRS_comp_period$depth[depth_forced_CRS[i] >= CRS_comp_period$depth_top & depth_forced_CRS[i] <= CRS_comp_period$depth_bottom], sep = "", collapse = ", "),
+              ") to see the model pass by ", age_forced_CRS[i]," exactly.\n"
+            ))
+            message_CRS_comp_period <-
+              c(message_CRS_comp_period,
+                CRS_comp_period$depth[depth_forced_CRS[i] >= CRS_comp_period$depth_top & depth_forced_CRS[i] <= CRS_comp_period$depth_bottom][1])
+          } else {
+            message_CRS_comp_period <- c(message_CRS_comp_period, depth_forced_CRS[i])
+          }
+        }
+        message(paste0(" => In the code, replace depth_forced_CRS = c(",
+                       paste(depth_forced_CRS, sep="", collapse= ", "),
+                       ") \n                      by depth_forced_CRS = c(",
+                       paste(message_CRS_comp_period, sep="", collapse= ", "), ")\n"))
+      }
+
+      depth_forced_CRS <- c(74.9,depth_forced_CRS[2:3])
 
       # Calculate mass accumuation rate rate at time t,
       # Equation 25 from Appleby 2001
@@ -1052,11 +1087,13 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       }
 
       # Save output
-      out_list$`CRS_comp model` <- data.frame("m_CRS_comp"      = m_CRS_comp,
-                                              "m_CRS_comp_low"  = m_CRS_comp_low,
-                                              "m_CRS_comp_high" = m_CRS_comp_high,
-                                              "sr_CRS_comp"     = sr_CRS_comp,
-                                              "sr_CRS_comp_err" = sr_CRS_comp_err)
+      out_list$`CRS composite model` <- data.frame(
+        "depth_mm"        = complete_core_depth_bottom[whichkeep],
+        "m_CRS_comp"      = m_CRS_comp,
+        "m_CRS_comp_low"  = m_CRS_comp_low,
+        "m_CRS_comp_high" = m_CRS_comp_high,
+        "sr_CRS_comp"     = sr_CRS_comp,
+        "sr_CRS_comp_err" = sr_CRS_comp_err)
     }
   }
 
@@ -2496,6 +2533,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       } else {
         depth_CRS_comp_plot = -c(complete_core_depth[whichkeep])
         if(length(depth_CRS_comp_plot) != length(m_CRS_comp)) depth_CRS_comp_plot = -c(0,complete_core_depth[whichkeep])
+
         lines(-m_CRS_comp, depth_CRS_comp_plot, col=modelcol[4], lty=2, lwd=.5)
         pol_x <- c(-m_CRS_comp_low, rev(-m_CRS_comp_high))
         pol_y <- c(depth_CRS_comp_plot, rev(depth_CRS_comp_plot))
