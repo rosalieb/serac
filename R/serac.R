@@ -76,7 +76,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                   input_depth_mm = T, ignore = c(), mass_depth = FALSE,
                   plotpdf = FALSE, preview = TRUE, plotphoto = FALSE, minphoto = c(), maxphoto = c(),
                   Pbcol = c("black", "midnightblue", "darkgreen"), inst_depositcol = grey(0.85),
-                  modelcol = c("black", "red", "darkorange", "forestgreen"),
+                  modelcol = c("black", "forestgreen", "red", "darkorange"),
                   historic_d = NA, historic_a = NA, historic_n = NA, historic_test = NA,
                   suppdescriptor = FALSE, descriptor_lab = c(), suppdescriptorcol = c("black", "purple"),
                   coring_yr = c(), plot_Am = FALSE, plot_Cs = FALSE, plot_Pb = TRUE,
