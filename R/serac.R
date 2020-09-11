@@ -813,7 +813,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       sr_CIC <- sr_CIC_err <- 0
       for (i in 2:nrow(dt[!is.na(dt$Pbex),])) {
         mar_CIC <-  ifelse((m_CIC[i-1]-m_CIC[i]) == 0, Inf,
-                           (dt$depth_avg[!is.na(dt$Pbex)][i-1]-dt$depth_avg[!is.na(dt$Pbex)][i]) / (m_CIC[i-1]-m_CIC[i]))
+                           (dt$depth_avg[!is.na(dt$Pbex)][i-1]-dt$depth_avg[!is.na(dt$Pbex)][i]) / (Tm_CIC[i-1]-Tm_CIC[i]))
         sr_CIC <- c(sr_CIC, mar_CIC)
 
         # error MAR CIC : delta(MAR)=MAR*sqrt(delta(T1)^2+delta(T2)^2)/(T2-T1)
@@ -856,11 +856,20 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       }
 
       # Save output
-      out_list$`CIC model` <- data.frame("m_CIC"      = m_CIC,
-                                         "m_CIC_low"  = m_CIC_low,
-                                         "m_CIC_high" = m_CIC_high,
-                                         "sr_CIC"     = sr_CIC,
-                                         "sr_CIC_err" = sr_CIC_err)
+      if(!mass_depth) {
+        out_list$`CIC model` <- data.frame("m_CIC"      = m_CIC,
+                                           "m_CIC_low"  = m_CIC_low,
+                                           "m_CIC_high" = m_CIC_high,
+                                           "SAR_CIC"     = sr_CIC,
+                                           "SAR_CIC_err" = sr_CIC_err)
+      } else {
+        out_list$`CIC model` <- data.frame("m_CIC"      = m_CIC,
+                                           "m_CIC_low"  = m_CIC_low,
+                                           "m_CIC_high" = m_CIC_high,
+                                           "MAR_CIC"     = sr_CIC,
+                                           "MAR_CIC_err" = sr_CIC_err)
+      }
+
     }
 
     if(any(model=="CRS")) {
@@ -911,11 +920,19 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       }
 
       # Save output
-      out_list$`CRS model` <- data.frame("m_CRS"      = m_CRS,
-                                         "m_CRS_low"  = m_CRS_low,
-                                         "m_CRS_high" = m_CRS_high,
-                                         "sr_CRS"     = sr_CRS,
-                                         "sr_CRS_err" = sr_CRS_err)
+      if(!mass_depth) {
+        out_list$`CRS model` <- data.frame("m_CRS"      = m_CRS,
+                                           "m_CRS_low"  = m_CRS_low,
+                                           "m_CRS_high" = m_CRS_high,
+                                           "SAR_CRS"     = sr_CRS,
+                                           "SAR_CRS_err" = sr_CRS_err)
+      } else {
+        out_list$`CRS model` <- data.frame("m_CRS"      = m_CRS,
+                                           "m_CRS_low"  = m_CRS_low,
+                                           "m_CRS_high" = m_CRS_high,
+                                           "MAR_CRS"     = sr_CRS,
+                                           "MAR_CRS_err" = sr_CRS_err)
+      }
     }
 
     if(any(model=="CRS_comp")) {
@@ -1091,13 +1108,23 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       }
 
       # Save output
-      out_list$`CRS composite model` <- data.frame(
-        "depth_mm"        = complete_core_depth_bottom[whichkeep],
-        "m_CRS_comp"      = m_CRS_comp,
-        "m_CRS_comp_low"  = m_CRS_comp_low,
-        "m_CRS_comp_high" = m_CRS_comp_high,
-        "sr_CRS_comp"     = sr_CRS_comp,
-        "sr_CRS_comp_err" = sr_CRS_comp_err)
+      if(!mass_depth) {
+        out_list$`CRS composite model` <- data.frame(
+          "depth_mm"        = complete_core_depth_bottom[whichkeep],
+          "m_CRS_comp"      = m_CRS_comp,
+          "m_CRS_comp_low"  = m_CRS_comp_low,
+          "m_CRS_comp_high" = m_CRS_comp_high,
+          "SAR_CRS_comp"     = sr_CRS_comp,
+          "SAR_CRS_comp_err" = sr_CRS_comp_err)
+      } else {
+        out_list$`CRS composite model` <- data.frame(
+          "depth_mm"        = complete_core_depth_bottom[whichkeep],
+          "m_CRS_comp"      = m_CRS_comp,
+          "m_CRS_comp_low"  = m_CRS_comp_low,
+          "m_CRS_comp_high" = m_CRS_comp_high,
+          "MAR_CRS_comp"     = sr_CRS_comp,
+          "MAR_CRS_comp_err" = sr_CRS_comp_err)
+      }
     }
   }
 
@@ -1300,39 +1327,75 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter, approx(x= temporary$x, temporary$y, xout= seq(0, max(output_agemodel_CFCS$depth, na.rm = T), stepout), ties = mean)$y)
 
     colnames(output_agemodel_CFCS_inter) <- c("depth_avg", "BestAD", "MinAD", "MaxAD")
-    write.table(x = output_agemodel_CFCS[order(output_agemodel_CFCS$depth, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CFCS.txt", sep = ""), col.names = T, row.names = F)
-    write.table(x = output_agemodel_CFCS_inter[order(output_agemodel_CFCS_inter$depth_avg, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CFCS_interpolation.txt", sep = ""), col.names = T, row.names = F)
 
-    # Add a column with the sedimentation rate
-    CFCS_sr <- CFCS_sr_err <- NULL
-    for(i in 1:nrow(output_agemodel_CFCS_inter)) {
-      CFCS_sr <- c(CFCS_sr,
-                   ifelse(max(sedchange)==0, sr_sed1, ifelse(
-                     length(sedchange)>=1 & output_agemodel_CFCS_inter$depth_avg[i] < sedchange[1], sr_sed1,
-                     ifelse(length(sedchange)==1 & output_agemodel_CFCS_inter$depth_avg[i] >= sedchange, sr_sed2,
-                            ifelse(length(sedchange)>1 & output_agemodel_CFCS_inter$depth_avg[i] < sedchange[2], sr_sed2, sr_sed3
-                            ))))
-      )
-      CFCS_sr_err <- c(CFCS_sr_err,
-                       ifelse(max(sedchange)==0, sr_sed1_err, ifelse(
-                         length(sedchange)>=1 & output_agemodel_CFCS_inter$depth_avg[i] < sedchange[1], sr_sed1_err,
-                         ifelse(length(sedchange)==1 & output_agemodel_CFCS_inter$depth_avg[i] >= sedchange, sr_sed2_err,
-                                ifelse(length(sedchange)>1 & output_agemodel_CFCS_inter$depth_avg[i] < sedchange[2], sr_sed2_err, sr_sed3_err
-                                ))))
-      )
+    # Add a column with the sedimentation rate in non-interpolated file
+    {
+      CFCS_sr <- CFCS_sr_err <- NULL
+      for(i in 1:nrow(output_agemodel_CFCS)) {
+        CFCS_sr <- c(CFCS_sr,
+                     ifelse(max(sedchange)==0, sr_sed1, ifelse(
+                       length(sedchange)>=1 & output_agemodel_CFCS$depth_avg[i] < sedchange[1], sr_sed1,
+                       ifelse(length(sedchange)==1 & output_agemodel_CFCS$depth_avg[i] >= sedchange, sr_sed2,
+                              ifelse(length(sedchange)>1 & output_agemodel_CFCS$depth_avg[i] < sedchange[2], sr_sed2, sr_sed3
+                              ))))
+        )
+        CFCS_sr_err <- c(CFCS_sr_err,
+                         ifelse(max(sedchange)==0, sr_sed1_err, ifelse(
+                           length(sedchange)>=1 & output_agemodel_CFCS$depth_avg[i] < sedchange[1], sr_sed1_err,
+                           ifelse(length(sedchange)==1 & output_agemodel_CFCS$depth_avg[i] >= sedchange, sr_sed2_err,
+                                  ifelse(length(sedchange)>1 & output_agemodel_CFCS$depth_avg[i] < sedchange[2], sr_sed2_err, sr_sed3_err
+                                  ))))
+        )
+      }
+
+
+      if(!mass_depth) {
+        output_agemodel_CFCS$SAR_mm.yr.1 <- CFCS_sr
+        output_agemodel_CFCS$SAR_mm.yr.1_err <- CFCS_sr_err
+      } else {
+        output_agemodel_CFCS$MAR_cm2.g.1 <- CFCS_sr
+        output_agemodel_CFCS$MAR_cm2.g.1_err <- CFCS_sr_err
+      }
     }
 
+    # Add a column with the sedimentation rate in interpolated file
+    {
+      CFCS_sr <- CFCS_sr_err <- NULL
+      for(i in 1:nrow(output_agemodel_CFCS_inter)) {
+        CFCS_sr <- c(CFCS_sr,
+                     ifelse(max(sedchange)==0, sr_sed1, ifelse(
+                       length(sedchange)>=1 & output_agemodel_CFCS_inter$depth_avg[i] < sedchange[1], sr_sed1,
+                       ifelse(length(sedchange)==1 & output_agemodel_CFCS_inter$depth_avg[i] >= sedchange, sr_sed2,
+                              ifelse(length(sedchange)>1 & output_agemodel_CFCS_inter$depth_avg[i] < sedchange[2], sr_sed2, sr_sed3
+                              ))))
+        )
+        CFCS_sr_err <- c(CFCS_sr_err,
+                         ifelse(max(sedchange)==0, sr_sed1_err, ifelse(
+                           length(sedchange)>=1 & output_agemodel_CFCS_inter$depth_avg[i] < sedchange[1], sr_sed1_err,
+                           ifelse(length(sedchange)==1 & output_agemodel_CFCS_inter$depth_avg[i] >= sedchange, sr_sed2_err,
+                                  ifelse(length(sedchange)>1 & output_agemodel_CFCS_inter$depth_avg[i] < sedchange[2], sr_sed2_err, sr_sed3_err
+                                  ))))
+        )
+      }
 
-    if(!mass_depth) {
-      output_agemodel_CFCS_inter$SAR_mm.yr.1 <- CFCS_sr
-      output_agemodel_CFCS_inter$SAR_mm.yr.1_err <- CFCS_sr_err
-    } else {
-      output_agemodel_CFCS_inter$MAR_cm2.g.1 <- CFCS_sr
-      output_agemodel_CFCS_inter$MAR_cm2.g.1_err <- CFCS_sr_err
+
+      if(!mass_depth) {
+        output_agemodel_CFCS_inter$SAR_mm.yr.1 <- CFCS_sr
+        output_agemodel_CFCS_inter$SAR_mm.yr.1_err <- CFCS_sr_err
+      } else {
+        output_agemodel_CFCS_inter$MAR_cm2.g.1 <- CFCS_sr
+        output_agemodel_CFCS_inter$MAR_cm2.g.1_err <- CFCS_sr_err
+      }
     }
 
     # Save output in the list
+    out_list$'CFCS age-depth model' <- output_agemodel_CFCS
     out_list$'CFCS age-depth model interpolated' <- output_agemodel_CFCS_inter
+
+    # Save output in file
+    write.table(x = output_agemodel_CFCS[order(output_agemodel_CFCS$depth, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CFCS.txt", sep = ""), col.names = T, row.names = F)
+    write.table(x = output_agemodel_CFCS_inter[order(output_agemodel_CFCS_inter$depth_avg, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CFCS_interpolation.txt", sep = ""), col.names = T, row.names = F)
+
 
     # Parameters for legend
     mylegend <- c(mylegend, "CFCS")
