@@ -964,8 +964,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       # Calculate age t at mass depth m (t(m))
       # Equations 19-20 in Abril (2019)
       Tm_CRS_comp_Appleby <- Tm_CRS_comp_Abril <- P_supply_rate_core <- NULL
-      #for (i in 1:length(complete_core_depth_bottom[whichkeep])) {
-      for (i in 29:49) {
+      for (i in 1:length(complete_core_depth_bottom[whichkeep])) {
         t1 <- Incremental_inventory_CRS$age_max[Incremental_inventory_CRS$depth_bottom >=  complete_core_depth_bottom[whichkeep][i] & Incremental_inventory_CRS$depth_top < complete_core_depth_bottom[whichkeep][i]]
         t2 <- Incremental_inventory_CRS$age_min[Incremental_inventory_CRS$age_max == t1]
         incremental_invent <- Incremental_inventory_CRS$incremental_invent[Incremental_inventory_CRS$age_max == t1]
