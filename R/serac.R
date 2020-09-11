@@ -5,7 +5,7 @@
 #' @export
 #' @param name Name of the core, given using quotes. Defaults to the core provided with serac. Use preferably the published name of the core for traceability.
 #' @param coring_yr Year of coring.
-#' @param model Select 1 to 4 items between c("CFCS", "CIC", "CRS", "CRS_comp"). If several models are selected, they will all be plotted together in the last window.
+#' @param model Select 1 to 4 item between c("CFCS", "CIC", "CRS", "CRS_comp"). If several models are selected, they will all be plotted together in the last window.
 #' @param Cher If 137Cs measurement were done, where do you detect the Chernobyl peak? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the 1986 Chernobyl event. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty. Note that the two depths needs to represent a sample, or more than a sample.
 #' @param NWT If 137Cs measurement were done, where do you detect the Nuclear Weapon Test peak? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the 1960s Nuclear Weapon Test event. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty. Note that the two depths needs to represent a sample, or more than a sample.
 #' @param Hemisphere Chose between North Hemisphere "NH" and South Hemisphere "SH" depending on the location of your system. This argument is required if you chose to plot NWT.
@@ -663,8 +663,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     # Inventory: sum from depth to the bottom
     Inventory_CRS <- Inventory_CRS_error <- rep(NA, length(Activity_Bq_m2))
     for(i in 1:length(Activity_Bq_m2)) {
-      Inventory_CRS[i] <- sum(Activity_Bq_m2[i:length(Activity_Bq_m2)])
-      Inventory_CRS_error[i] <- sum(Activity_Bq_m2_error[i:length(Activity_Bq_m2_error)])
+      Inventory_CRS[i] <- sum(Activity_Bq_m2[i:length(Activity_Bq_m2)], na.rm = T)
+      Inventory_CRS_error[i] <- sum(Activity_Bq_m2_error[i:length(Activity_Bq_m2_error)], na.rm = T)
     }
   }
 
@@ -931,11 +931,11 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                        ifelse(i==1, 0, depth_forced_CRS[i-1]),       # depth_min
                                        depth_forced_CRS[i],                          # depth_max
                                        ifelse(i==1,
-                                              sum(Activity_Bq_m2[complete_core_depth_bottom[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])]),
-                                              sum(Activity_Bq_m2[complete_core_depth_bottom[whichkeep]>depth_forced_CRS[i-1] & complete_core_depth_bottom[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])])),
+                                              sum(Activity_Bq_m2[complete_core_depth_bottom[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])], na.rm = T),
+                                              sum(Activity_Bq_m2[complete_core_depth_bottom[whichkeep]>depth_forced_CRS[i-1] & complete_core_depth_bottom[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])], na.rm = T)),
                                        ifelse(i==1,
-                                              sum(Activity_Bq_m2_error[complete_core_depth_bottom[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])]),
-                                              sum(Activity_Bq_m2_error[complete_core_depth_bottom[whichkeep]>depth_forced_CRS[i-1] & complete_core_depth_bottom[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])]))
+                                              sum(Activity_Bq_m2_error[complete_core_depth_bottom[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])], na.rm = T),
+                                              sum(Activity_Bq_m2_error[complete_core_depth_bottom[whichkeep]>depth_forced_CRS[i-1] & complete_core_depth_bottom[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])], na.rm = T))
         )
       }
       # Last period, with unknown t2 (or t2 = infinity)
@@ -946,8 +946,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           coring_yr - 150,                        # age_min - we assume that after 150 years there is no more activity
           depth_forced_CRS[length(depth_forced_CRS)], # depth_min
           max(dt$depth_bottom),                       # depth_max
-          sum(Activity_Bq_m2[complete_core_depth_bottom[whichkeep]>depth_forced_CRS[length(age_forced_CRS)] & !is.na(complete_core_depth_2[whichkeep])]),
-          sum(Activity_Bq_m2_error[complete_core_depth_bottom[whichkeep]>depth_forced_CRS[length(age_forced_CRS)] & !is.na(complete_core_depth_2[whichkeep])])
+          sum(Activity_Bq_m2[complete_core_depth_bottom[whichkeep]>depth_forced_CRS[length(age_forced_CRS)] & !is.na(complete_core_depth_2[whichkeep])], na.rm = T),
+          sum(Activity_Bq_m2_error[complete_core_depth_bottom[whichkeep]>depth_forced_CRS[length(age_forced_CRS)] & !is.na(complete_core_depth_2[whichkeep])], na.rm = T)
         )
 
 
