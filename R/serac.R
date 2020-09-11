@@ -1334,16 +1334,16 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       for(i in 1:nrow(output_agemodel_CFCS)) {
         CFCS_sr <- c(CFCS_sr,
                      ifelse(max(sedchange)==0, sr_sed1, ifelse(
-                       length(sedchange)>=1 & output_agemodel_CFCS$depth_avg[i] < sedchange[1], sr_sed1,
-                       ifelse(length(sedchange)==1 & output_agemodel_CFCS$depth_avg[i] >= sedchange, sr_sed2,
-                              ifelse(length(sedchange)>1 & output_agemodel_CFCS$depth_avg[i] < sedchange[2], sr_sed2, sr_sed3
+                       length(sedchange)>=1 & output_agemodel_CFCS$depth[i] < sedchange[1], sr_sed1,
+                       ifelse(length(sedchange)==1 & output_agemodel_CFCS$depth[i] >= sedchange, sr_sed2,
+                              ifelse(length(sedchange)>1 & output_agemodel_CFCS$depth[i] < sedchange[2], sr_sed2, sr_sed3
                               ))))
         )
         CFCS_sr_err <- c(CFCS_sr_err,
                          ifelse(max(sedchange)==0, sr_sed1_err, ifelse(
-                           length(sedchange)>=1 & output_agemodel_CFCS$depth_avg[i] < sedchange[1], sr_sed1_err,
-                           ifelse(length(sedchange)==1 & output_agemodel_CFCS$depth_avg[i] >= sedchange, sr_sed2_err,
-                                  ifelse(length(sedchange)>1 & output_agemodel_CFCS$depth_avg[i] < sedchange[2], sr_sed2_err, sr_sed3_err
+                           length(sedchange)>=1 & output_agemodel_CFCS$depth[i] < sedchange[1], sr_sed1_err,
+                           ifelse(length(sedchange)==1 & output_agemodel_CFCS$depth[i] >= sedchange, sr_sed2_err,
+                                  ifelse(length(sedchange)>1 & output_agemodel_CFCS$depth[i] < sedchange[2], sr_sed2_err, sr_sed3_err
                                   ))))
         )
       }
