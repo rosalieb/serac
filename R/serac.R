@@ -977,14 +977,14 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           # Equation 24 in Appleby 2001
           Tm_CRS_comp_Appleby <- c(Tm_CRS_comp_Appleby,
                                    (1/lambda) * log(
-                                     exp((-lambda) * (coring_yr-t2)) + lambda / P_supply_rate * sum(Activity_Bq_m2[i:imax])
+                                     exp((-lambda) * (coring_yr-t2)) + lambda / P_supply_rate * sum(Activity_Bq_m2[i:imax], na.rm = T)
                                    )
           )
 
           # Equation 19 in Abril (2019, Quaternary Geochronology)
           Tm_CRS_comp_Abril <- c(Tm_CRS_comp_Abril,
                                  (1/lambda) * log(
-                                   P_supply_rate / (P_supply_rate - lambda * sum(Activity_Bq_m2[1:i]))
+                                   P_supply_rate / (P_supply_rate - lambda * sum(Activity_Bq_m2[1:i], na.rm = T))
                                  )
           )
 
@@ -993,14 +993,14 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           #Same equation for Appleby
           Tm_CRS_comp_Appleby <- c(Tm_CRS_comp_Appleby,
                                    (1/lambda) * log(
-                                     exp((-lambda) * (coring_yr-t2)) + lambda / P_supply_rate * sum(Activity_Bq_m2[i:imax])
+                                     exp((-lambda) * (coring_yr-t2)) + lambda / P_supply_rate * sum(Activity_Bq_m2[i:imax], na.rm = T)
                                    )
           )
 
           # Equation 20 in Abril (2019, Quaternary Geochronology)
           Tm_CRS_comp_Abril <- c(Tm_CRS_comp_Abril,
                                  (coring_yr-t1) + (1/lambda) * log(
-                                   incremental_invent / sum(Activity_Bq_m2[i:imax])
+                                   incremental_invent / sum(Activity_Bq_m2[i:imax], na.rm = T)
                                  )
           )
         }
