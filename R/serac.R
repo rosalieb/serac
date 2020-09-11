@@ -668,6 +668,9 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     }
   }
 
+  # error message
+  if(rev(dt$Pbex)[1] >= dt$Pbex[1]/16 & any(model %in% c("CRS", "CRS_comp"))) packageStartupMessage("\n Warning, it seems that 210Pb_excess has not reached equilibrium. \n Make sure the conditions of application for CRS model are fulfilled.")
+
   if(length(model)>=1) {
     # Write the result of the model
     # Calculate sedimentation rate
@@ -861,7 +864,6 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     }
 
     if(any(model=="CRS")) {
-      if(rev(dt$Pbex)[1] >= dt$Pbex[1]/16) packageStartupMessage("\n Warning, it seems that 210Pb_excess has not reached equilibrium. \n Make sure the conditions of application for CRS model are fulfilled.")
 
       # Equation 36 in Sanchez-Cabeza and Ruiz-Fernandez (2012, Geochimica et Cosmochimica Acta)
       Tm_CRS <- 1/lambda*log(Inventory_CRS[1]/Inventory_CRS)
@@ -917,7 +919,6 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     }
 
     if(any(model=="CRS_comp")) {
-      if(rev(dt$Pbex)[1] >= dt$Pbex[1]/16) packageStartupMessage("\n Warning, it seems that 210Pb_excess has not reached equilibrium. \n Make sure the conditions of application for CRS model are fulfilled.")
 
       # Use Inventory_CRS calculated earlier
       # Inventory: sum from depth to the bottom
@@ -963,7 +964,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       # Calculate age t at mass depth m (t(m))
       # Equations 19-20 in Abril (2019)
       Tm_CRS_comp_Appleby <- Tm_CRS_comp_Abril <- P_supply_rate_core <- NULL
-      for (i in 1:length(complete_core_depth_bottom[whichkeep])) {
+      #for (i in 1:length(complete_core_depth_bottom[whichkeep])) {
+      for (i in 29:49) {
         t1 <- Incremental_inventory_CRS$age_max[Incremental_inventory_CRS$depth_bottom >=  complete_core_depth_bottom[whichkeep][i] & Incremental_inventory_CRS$depth_top < complete_core_depth_bottom[whichkeep][i]]
         t2 <- Incremental_inventory_CRS$age_min[Incremental_inventory_CRS$age_max == t1]
         incremental_invent <- Incremental_inventory_CRS$incremental_invent[Incremental_inventory_CRS$age_max == t1]
@@ -982,10 +984,11 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           )
 
           # Equation 19 in Abril (2019, Quaternary Geochronology)
-          Tm_CRS_comp_Abril <- c(Tm_CRS_comp_Abril,
-                                 (1/lambda) * log(
-                                   P_supply_rate / (P_supply_rate - lambda * sum(Activity_Bq_m2[1:i], na.rm = T))
-                                 )
+          Tm_CRS_comp_Abril <- c(Tm_CRS_comp_Abril, NA
+                                 # # Not including the equation below because it creates NA when Pb remains high on the first section.
+                                 # (1/lambda) * log(
+                                 #   P_supply_rate / (P_supply_rate - lambda * sum(Activity_Bq_m2[1:i], na.rm = T))
+                                 # )
           )
 
 
