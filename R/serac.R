@@ -5,7 +5,7 @@
 #' @export
 #' @param name Name of the core, given using quotes. Defaults to the core provided with serac. Use preferably the published name of the core for traceability.
 #' @param coring_yr Year of coring.
-#' @param model Select 1 to 4 item between c("CFCS", "CIC", "CRS", "CRS_comp"). If several models are selected, they will all be plotted together in the last window.
+#' @param model Select 1 to 4 items between c("CFCS", "CIC", "CRS", "CRS_comp"). If several models are selected, they will all be plotted together in the last window.
 #' @param Cher If 137Cs measurement were done, where do you detect the Chernobyl peak? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the 1986 Chernobyl event. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty. Note that the two depths needs to represent a sample, or more than a sample.
 #' @param NWT If 137Cs measurement were done, where do you detect the Nuclear Weapon Test peak? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the 1960s Nuclear Weapon Test event. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty. Note that the two depths needs to represent a sample, or more than a sample.
 #' @param Hemisphere Chose between North Hemisphere "NH" and South Hemisphere "SH" depending on the location of your system. This argument is required if you chose to plot NWT.
@@ -76,7 +76,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                   input_depth_mm = T, ignore = c(), mass_depth = FALSE,
                   plotpdf = FALSE, preview = TRUE, plotphoto = FALSE, minphoto = c(), maxphoto = c(),
                   Pbcol = c("black", "midnightblue", "darkgreen"), inst_depositcol = grey(0.85),
-                  modelcol = c("black", "forestgreen", "red", "darkorange"),
+                  modelcol = c("black", "#DDA0DD", "red", "darkorange"),
                   historic_d = NA, historic_a = NA, historic_n = NA, historic_test = NA,
                   suppdescriptor = FALSE, descriptor_lab = c(), suppdescriptorcol = c("black", "purple"),
                   coring_yr = c(), plot_Am = FALSE, plot_Cs = FALSE, plot_Pb = TRUE,
