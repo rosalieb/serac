@@ -264,7 +264,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     test1 <- c(test1, dt$depth_top[i]-dt$depth_bottom[i-1])
   }
   if(!is.null(dt$density) && !all(test1==0)) {
-    packageStartupMessage(paste0("\n Warning, density is not given continuously for the whole core.\n Inventories, CRS model, and mass accumulation rate should be\n interpreted very carefully. Alternatively, enter the density\n for the whole core.\n Density is missing for ", length(test1[test1!=0]), " layer(s) missing at: "))
+    packageStartupMessage(paste0("\n Warning, density is not given continuously for the whole core.\n Inventories, CRS model, and mass accumulation rate should be\n interpreted very carefully. Alternatively, enter the density\n for the whole core.\n Density is missing for ", length(test1[test1!=0]), " layer(s): "))
     packageStartupMessage(paste0("     - ", dt$depth_bottom[which(test1>0)], "-", dt$depth_top[which(test1>0)+1], " mm \n"))
   }
 
