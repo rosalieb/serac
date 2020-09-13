@@ -822,18 +822,18 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         )
       }
 
-      # convert MAR to SAR
-      if(!mass_depth) {
-        sar_CIC <- NULL
+      # convert SAR to MAR
+      if(mass_depth) {
+        mar_CIC <- NULL
         for (j in seq_along(sr_CIC)) {
           if(sr_CIC[i] != Inf) {
-            sar_CIC <- c(sar_CIC,
+            mar_CIC <- c(mar_CIC,
                          sr_CIC[i] / complete_core_density[whichkeep][i] * 10)
           } else {
-            sar_CIC <- c(sar_CIC, Inf)
+            mar_CIC <- c(mar_CIC, Inf)
           }
         }
-        sr_CIC <- sar_CIC
+        sr_CIC <- mar_CIC
 
         # Computation error SAR, CIC model
         # delta(SAR)=SAR*sqrt(delta(T1)^2+delta(T2)^2)/(T2-T1)
@@ -899,17 +899,15 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
       }
 
-      # need to convert sediment rate if SAR
-      if(!mass_depth) {
-        # Equation to convert r(i) to s(i) p 13 in Sanchez-Cabeza and Ruiz-Fernandez (2012, Geochimica et Cosmochimica Acta)
-        # We use a factor of 1000 to convert to mm/yr
-        sar_CRS = sr_CRS / complete_core_density[whichkeep] * 10
+      # need to convert sediment rate if MAR
+      if(mass_depth) {
+        mar_CRS = sr_CRS / complete_core_density[whichkeep] * 10
         # SAR_error = SAR * sqrt[(MAR_error/MAR)^2+0.07^2]
         # Appleby (2001) suggest a 7% error on DBD, which is the 0.07 in the equation below
-        sr_CRS_err = sar_CRS * sqrt((sr_CRS_err / sr_CRS)^2 + 0.07^2)
+        sr_CRS_err = mar_CRS * sqrt((sr_CRS_err / sr_CRS)^2 + 0.07^2)
 
-        sr_CRS <- sar_CRS
-        rm(sar_CRS)
+        sr_CRS <- mar_CRS
+        rm(mar_CRS)
       }
 
       # Print message
@@ -1096,7 +1094,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       }
       sr_CRS_comp_err <- rep(0, length(sr_CRS_comp))
 
-      if(!mass_depth) {
+      if(mass_depth) {
 
       }
 
