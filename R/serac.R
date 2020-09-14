@@ -811,18 +811,19 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       # Equation 23 in Sanchez-Cabeza and Ruiz-Fernandez (2012, Geochimica et Cosmochimica Acta)
       # for a depth i, si = delta(zi)/delta(ti)
       sr_CIC <- sr_CIC_err <- 0
+      # if SAR
       for (i in 2:nrow(dt[!is.na(dt$Pbex),])) {
-        mar_CIC <-  ifelse((m_CIC[i-1]-m_CIC[i]) == 0, Inf,
-                           (dt$depth_avg[!is.na(dt$Pbex)][i-1]-dt$depth_avg[!is.na(dt$Pbex)][i]) / (Tm_CIC[i-1]-Tm_CIC[i]))
-        sr_CIC <- c(sr_CIC, mar_CIC)
+        sar_CIC <-  ifelse((m_CIC[i-1]-m_CIC[i]) == 0, Inf,
+                           (dt$depth_avg[!is.na(dt$Pbex)][i-1]-dt$depth_avg[!is.na(dt$Pbex)][i]) / (Tm_CIC[i] - Tm_CIC[i-1]))
+        sr_CIC <- c(sr_CIC, sar_CIC)
 
-        # error MAR CIC : delta(MAR)=MAR*sqrt(delta(T1)^2+delta(T2)^2)/(T2-T1)
+        # error SAR CIC : delta(SAR)=SAR*sqrt(delta(T1)^2+delta(T2)^2)/(T2-T1)
         sr_CIC_err <- c(sr_CIC_err,
-                        mar_CIC * sqrt((Tm_CIC_err[i-1])^2 + (Tm_CIC_err[i])^2)/(Tm_CIC[i]-Tm_CIC[i-1])
+                        sar_CIC * sqrt((Tm_CIC_err[i-1])^2 + (Tm_CIC_err[i])^2)/(Tm_CIC[i]-Tm_CIC[i-1])
         )
       }
 
-      # convert SAR to MAR
+      # if MAR
       if(mass_depth) {
         mar_CIC <- NULL
         for (j in seq_along(sr_CIC)) {
@@ -900,7 +901,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       }
 
       # need to convert sediment rate if MAR
-      if(mass_depth) {
+      if(!mass_depth) {
         mar_CRS = sr_CRS / complete_core_density[whichkeep] * 10
         # SAR_error = SAR * sqrt[(MAR_error/MAR)^2+0.07^2]
         # Appleby (2001) suggest a 7% error on DBD, which is the 0.07 in the equation below
@@ -1378,11 +1379,11 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
 
       if(!mass_depth) {
-        output_agemodel_CFCS_inter$SAR_mm.yr.1 <- CFCS_sr
-        output_agemodel_CFCS_inter$SAR_mm.yr.1_err <- CFCS_sr_err
+        output_agemodel_CFCS_inter$SAR_mm.yr.1 <- abs(CFCS_sr)
+        output_agemodel_CFCS_inter$SAR_mm.yr.1_err <- abs(CFCS_sr_err)
       } else {
-        output_agemodel_CFCS_inter$MAR_cm2.g.1 <- CFCS_sr
-        output_agemodel_CFCS_inter$MAR_cm2.g.1_err <- CFCS_sr_err
+        output_agemodel_CFCS_inter$MAR_cm2.g.1 <- abs(CFCS_sr)
+        output_agemodel_CFCS_inter$MAR_cm2.g.1_err <- abs(CFCS_sr_err)
       }
     }
 
@@ -1462,14 +1463,22 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       c(0, sr_CRS),
       c(0, sr_CRS_err)),
       byrow = F, ncol=6))
-    colnames(output_agemodel_CRS) <- c("depth", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "sr_CRS", "sr_CRS_err")
+    if(!mass_depth) {
+      colnames(output_agemodel_CRS) <- c("depth", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "SAR_CRS", "SAR_CRS_err")
+    } else {
+      colnames(output_agemodel_CRS) <- c("depth", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "MAR_CRS", "MAR_CRS_err")
+    }
     output_agemodel_CRS_inter <- as.data.frame(seq(0, max(output_agemodel_CRS$depth, na.rm = T), stepout))
     output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth, output_agemodel_CRS$BestAD_CRS, xout= seq(0, max(output_agemodel_CRS$depth, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth, output_agemodel_CRS$MinAD_CRS, xout= seq(0, max(output_agemodel_CRS$depth, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth, output_agemodel_CRS$MaxAD_CRS, xout= seq(0, max(output_agemodel_CRS$depth, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth, output_agemodel_CRS$sr_CRS, xout= seq(0, max(output_agemodel_CRS$depth, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth, output_agemodel_CRS$sr_CRS_err, xout= seq(0, max(output_agemodel_CRS$depth, na.rm = T), stepout), ties = mean)$y)
-    colnames(output_agemodel_CRS_inter) <- c("depth", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "sr_CRS", "sr_CRS_err")
+    if(!mass_depth) {
+      colnames(output_agemodel_CRS_inter) <- c("depth", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "SAR_CRS", "SAR_CRS_err")
+    } else {
+      colnames(output_agemodel_CRS_inter) <- c("depth", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "MAR_CRS", "MAR_CRS_err")
+    }
     write.table(x = output_agemodel_CRS[order(output_agemodel_CRS$depth, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS.txt", sep = ""), col.names = T, row.names = F)
     write.table(x = output_agemodel_CRS_inter[order(output_agemodel_CRS_inter$depth, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_interpolation.txt", sep = ""), col.names = T, row.names = F)
 
@@ -1512,14 +1521,22 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                                        c(0, sr_CRS_comp),
                                                        c(0, sr_CRS_comp_err)
     ), byrow = F, ncol=6))
-    colnames(output_agemodel_CRS_comp) <- c("depth", "BestAD_CRS_comp", "MinAD_CRS_comp", "MaxAD_CRS_comp", "sr_CRS_comp", "sr_CRS_comp_err")
+    if(!mass_depth) {
+      colnames(output_agemodel_CRS_comp) <- c("depth", "BestAD_CRS_comp", "MinAD_CRS_comp", "MaxAD_CRS_comp", "SAR_CRS_comp", "SAR_CRS_comp_err")
+    } else {
+      colnames(output_agemodel_CRS_comp) <- c("depth", "BestAD_CRS_comp", "MinAD_CRS_comp", "MaxAD_CRS_comp", "MAR_CRS_comp", "MAR_CRS_comp_err")
+    }
     output_agemodel_CRS_comp_inter <- as.data.frame(seq(0, max(output_agemodel_CRS_comp$depth, na.rm = T), stepout))
     output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth, output_agemodel_CRS_comp$BestAD_CRS_comp, xout= seq(0, max(output_agemodel_CRS_comp$depth, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth, output_agemodel_CRS_comp$MinAD_CRS_comp, xout= seq(0, max(output_agemodel_CRS_comp$depth, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth, output_agemodel_CRS_comp$MaxAD_CRS_comp, xout= seq(0, max(output_agemodel_CRS_comp$depth, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth, output_agemodel_CRS_comp$sr_CRS_comp, xout= seq(0, max(output_agemodel_CRS_comp$depth, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth, output_agemodel_CRS_comp$sr_CRS_comp_err, xout= seq(0, max(output_agemodel_CRS_comp$depth, na.rm = T), stepout), ties = mean)$y)
-    colnames(output_agemodel_CRS_comp_inter) <- c("depth", "BestAD_CRS_comp", "MinAD_CRS_comp", "MaxAD_CRS_comp", "sr_CRS_comp", "sr_CRS_comp_err")
+    if(!mass_depth) {
+      colnames(output_agemodel_CRS_comp_inter) <- c("depth", "BestAD_CRS_comp", "MinAD_CRS_comp", "MaxAD_CRS_comp", "SAR_CRS_comp", "SAR_CRS_comp_err")
+    } else {
+      colnames(output_agemodel_CRS_comp_inter) <- c("depth", "BestAD_CRS_comp", "MinAD_CRS_comp", "MaxAD_CRS_comp", "MAR_CRS_comp", "MAR_CRS_comp_err")
+    }
     write.table(x = output_agemodel_CRS_comp[order(output_agemodel_CRS_comp$depth, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_comp.txt", sep = ""), col.names = T, row.names = F)
     write.table(x = output_agemodel_CRS_comp_inter[order(output_agemodel_CRS_comp_inter$depth, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_comp_interpolation.txt", sep = ""), col.names = T, row.names = F)
 
