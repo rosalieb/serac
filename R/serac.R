@@ -829,7 +829,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         for (j in seq_along(sr_CIC)) {
           if(sr_CIC[i] != Inf) {
             mar_CIC <- c(mar_CIC,
-                         sr_CIC[i] / complete_core_density[whichkeep][i] * 10)
+                         sr_CIC[i] / (complete_core_density[whichkeep][i] * 10))
           } else {
             mar_CIC <- c(mar_CIC, Inf)
           }
@@ -891,7 +891,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       # Equation 38 in Sanchez-Cabeza and Ruiz-Fernandez (2012, Geochimica et Cosmochimica Acta)
       sr_CRS <- sr_CRS_err <- NULL
       for (i in 1:length(m_CRS)) {
-        sr_temporary <- lambda * Inventory_CRS[i] / complete_core_Pbex[whichkeep][i] /10
+        sr_temporary <- lambda * Inventory_CRS[i] / complete_core_Pbex[whichkeep][i] #/10
         sr_CRS <- c(sr_CRS, sr_temporary)
         #Pour les calcul d'erreur MAR: racine{(deltaIventaire à la prof z/Inventaire à la profz)^2 +(delta activité à la prof z/activité à la prof z)^2}*MAR
         sr_CRS_err <- c(sr_CRS_err,
@@ -901,8 +901,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       }
 
       # need to convert sediment rate if MAR
-      if(!mass_depth) {
-        mar_CRS = sr_CRS / complete_core_density[whichkeep] * 10
+      if(mass_depth) {
+        mar_CRS = sr_CRS / (complete_core_density[whichkeep] * 10)
         # SAR_error = SAR * sqrt[(MAR_error/MAR)^2+0.07^2]
         # Appleby (2001) suggest a 7% error on DBD, which is the 0.07 in the equation below
         sr_CRS_err = mar_CRS * sqrt((sr_CRS_err / sr_CRS)^2 + 0.07^2)
@@ -1088,7 +1088,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       sr_CRS_comp <- rep(NA, length(m_CRS_comp))
       for (i in seq_along(sr_CRS_comp)) {
         if(!is.na(Activity_Bq_m2[i])) {
-          sr_CRS_comp[i] <- P_supply_rate_core[i] * exp((-lambda)*m_CRS_comp[i]) / Activity_Bq_m2[i]
+          #sr[i] = P_supply_rate_core[i] * exp((-lambda)*t) / Activity_Bq_m2[i]
+          sr_CRS_comp[i] <- P_supply_rate_core[i] * exp((-lambda)*(coring_yr - m_CRS_comp[i])) / Activity_Bq_m2[i]
         } else {
           sr_CRS_comp[i] <- Inf
         }
@@ -1096,7 +1097,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       sr_CRS_comp_err <- rep(0, length(sr_CRS_comp))
 
       if(mass_depth) {
-
+        #MAR = SAR/(DBD*10)
+        sr_CRS_comp = sr_CRS_comp / (complete_core_density[whichkeep] * 10)
       }
 
       # Print message
