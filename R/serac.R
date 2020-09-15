@@ -852,17 +852,19 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
       # Save output
       if(!mass_depth) {
-        out_list$`CIC model` <- data.frame("m_CIC"      = m_CIC,
+        out_list$`CIC model` <- data.frame("depth_avg"  = dt$depth_avg[!is.na(dt$Pbex)],
+                                           "m_CIC"      = m_CIC,
                                            "m_CIC_low"  = m_CIC_low,
                                            "m_CIC_high" = m_CIC_high,
-                                           "SAR_CIC"     = sr_CIC,
-                                           "SAR_CIC_err" = sr_CIC_err)
+                                           "SAR_CIC_mm_yr"     = sr_CIC,
+                                           "SAR_CIC_err_mm_yr" = sr_CIC_err)
       } else {
-        out_list$`CIC model` <- data.frame("m_CIC"      = m_CIC,
+        out_list$`CIC model` <- data.frame("depth_avg"  = dt$depth_avg[!is.na(dt$Pbex)],
+                                           "m_CIC"      = m_CIC,
                                            "m_CIC_low"  = m_CIC_low,
                                            "m_CIC_high" = m_CIC_high,
-                                           "MAR_CIC"     = sr_CIC,
-                                           "MAR_CIC_err" = sr_CIC_err)
+                                           "MAR_CIC_g_mm3_yr"     = sr_CIC,
+                                           "MAR_CIC_err_g_mm3_yr" = sr_CIC_err)
       }
 
     }
@@ -914,17 +916,19 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
       # Save output
       if(!mass_depth) {
-        out_list$`CRS model` <- data.frame("m_CRS"      = m_CRS,
+        out_list$`CRS model` <- data.frame("depth_avg_mm"  = dt$depth_avg[!is.na(dt$Pbex)],
+                                           "m_CRS"      = m_CRS,
                                            "m_CRS_low"  = m_CRS_low,
                                            "m_CRS_high" = m_CRS_high,
-                                           "SAR_CRS"     = sr_CRS,
-                                           "SAR_CRS_err" = sr_CRS_err)
+                                           "SAR_CRS_mm_yr"     = sr_CRS,
+                                           "SAR_CRS_err_mm_yr" = sr_CRS_err)
       } else {
-        out_list$`CRS model` <- data.frame("m_CRS"      = m_CRS,
+        out_list$`CRS model` <- data.frame("depth_avg_mm"  = dt$depth_avg[!is.na(dt$Pbex)],
+                                           "m_CRS"      = m_CRS,
                                            "m_CRS_low"  = m_CRS_low,
                                            "m_CRS_high" = m_CRS_high,
-                                           "MAR_CRS"     = sr_CRS,
-                                           "MAR_CRS_err" = sr_CRS_err)
+                                           "MAR_CRS_g_mm3_yr"     = sr_CRS,
+                                           "MAR_CRS_err_g_mm3_yr" = sr_CRS_err)
       }
     }
 
@@ -1145,20 +1149,20 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       # Save output
       if(!mass_depth) {
         out_list$`CRS composite model` <- data.frame(
-          "depth_mm"        = complete_core_depth_bottom[whichkeep],
+          "depth_avg_mm"        = complete_core_depth[whichkeep],
           "m_CRS_comp"      = m_CRS_comp,
           "m_CRS_comp_low"  = m_CRS_comp_low,
           "m_CRS_comp_high" = m_CRS_comp_high,
-          "SAR_CRS_comp"     = sr_CRS_comp,
-          "SAR_CRS_comp_err" = sr_CRS_comp_err)
+          "SAR_CRS_comp_mm_yr"     = sr_CRS_comp,
+          "SAR_CRS_comp_err_mm_yr" = sr_CRS_comp_err)
       } else {
         out_list$`CRS composite model` <- data.frame(
-          "depth_mm"        = complete_core_depth_bottom[whichkeep],
+          "depth_avg_mm"        = complete_core_depth[whichkeep],
           "m_CRS_comp"      = m_CRS_comp,
           "m_CRS_comp_low"  = m_CRS_comp_low,
           "m_CRS_comp_high" = m_CRS_comp_high,
-          "MAR_CRS_comp"     = sr_CRS_comp,
-          "MAR_CRS_comp_err" = sr_CRS_comp_err)
+          "MAR_CRS_comp_g_mm3_yr"     = sr_CRS_comp,
+          "MAR_CRS_comp_err_g_mm3_yr" = sr_CRS_comp_err)
       }
     }
   }
