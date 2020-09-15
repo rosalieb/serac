@@ -811,43 +811,37 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       # Equation 23 in Sanchez-Cabeza and Ruiz-Fernandez (2012, Geochimica et Cosmochimica Acta)
       # for a depth i, si = delta(zi)/delta(ti)
       sr_CIC <- sr_CIC_err <- 0
-      # if SAR
+      # if MAR
       for (i in 2:nrow(dt[!is.na(dt$Pbex),])) {
-        sar_CIC <-  ifelse((m_CIC[i-1]-m_CIC[i]) == 0, Inf,
+        mar_CIC <-  ifelse((m_CIC[i-1]-m_CIC[i]) == 0, Inf,
                            (dt$depth_avg[!is.na(dt$Pbex)][i-1]-dt$depth_avg[!is.na(dt$Pbex)][i]) / (Tm_CIC[i] - Tm_CIC[i-1]))
-        sr_CIC <- c(sr_CIC, sar_CIC)
+        sr_CIC <- c(sr_CIC, mar_CIC)
 
-        # error SAR CIC : delta(SAR)=SAR*sqrt(delta(T1)^2+delta(T2)^2)/(T2-T1)
+        # error MAR CIC : delta(MAR)=MAR*sqrt(delta(T1)^2+delta(T2)^2)/(T2-T1)
         sr_CIC_err <- c(sr_CIC_err,
-                        sar_CIC * sqrt((Tm_CIC_err[i-1])^2 + (Tm_CIC_err[i])^2)/(Tm_CIC[i]-Tm_CIC[i-1])
+                        mar_CIC * sqrt((Tm_CIC_err[i-1])^2 + (Tm_CIC_err[i])^2)/(Tm_CIC[i]-Tm_CIC[i-1])
         )
       }
 
-      # if MAR
-      if(mass_depth) {
-        mar_CIC <- NULL
+      # if SAR
+      if(!mass_depth) {
+        sar_CIC <- SAR_CIC_err <-  NULL
         for (j in seq_along(sr_CIC)) {
           if(sr_CIC[i] != Inf) {
-            mar_CIC <- c(mar_CIC,
-                         sr_CIC[i] / (complete_core_density[whichkeep][i] * 10))
+            sar_CIC <- c(sar_CIC,
+                         sr_CIC[i] * 1000 / complete_core_density[whichkeep][i])
+            SAR_CIC_err <- c(SAR_CIC_err,
+                             sar_CIC[i] * sr_CIC_err[i] / sr_CIC[i])
           } else {
-            mar_CIC <- c(mar_CIC, Inf)
+            sar_CIC <- c(sar_CIC, Inf)
+            SAR_CIC_err <- c(SAR_CIC_err, Inf)
           }
         }
-        sr_CIC <- mar_CIC
-
-        # Computation error SAR, CIC model
-        # delta(SAR)=SAR*sqrt(delta(T1)^2+delta(T2)^2)/(T2-T1)
-        sr_CIC_err <- 0
-        for (i in 2:nrow(dt[!is.na(dt$Pbex),])) {
-          if(sr_CIC[i] != Inf) {
-            sr_CIC_err <- c(sr_CIC_err,
-                            sr_CIC[i] * sqrt((Tm_CIC_err[i-1])^2 + (Tm_CIC_err[i])^2)/(Tm_CIC[i]-Tm_CIC[i-1]))
-          } else {
-            sr_CIC_err <- c(sr_CIC_err, Inf)
-          }
-        }
+        sr_CIC <- sar_CIC
+        sr_CIC_err <- SAR_CIC_err
       }
+
+
 
       # Print message
       if(!mass_depth) {
@@ -900,15 +894,15 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
       }
 
-      # need to convert sediment rate if MAR
-      if(mass_depth) {
-        mar_CRS = sr_CRS / (complete_core_density[whichkeep] * 10)
+      # need to convert sediment rate if SAR
+      if(!mass_depth) {
+        sar_CRS = sr_CRS * 1000 / complete_core_density[whichkeep]
         # SAR_error = SAR * sqrt[(MAR_error/MAR)^2+0.07^2]
         # Appleby (2001) suggest a 7% error on DBD, which is the 0.07 in the equation below
-        sr_CRS_err = mar_CRS * sqrt((sr_CRS_err / sr_CRS)^2 + 0.07^2)
+        sr_CRS_err = sar_CRS * sqrt((sr_CRS_err / sr_CRS)^2 + 0.07^2)
 
-        sr_CRS <- mar_CRS
-        rm(mar_CRS)
+        sr_CRS <- sar_CRS
+        rm(sar_CRS)
       }
 
       # Print message
@@ -1023,16 +1017,16 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           #     [1/(exp(-lambda*t2) + lambda * Az-2 / P_supply_rate2)]
           Tm_CRS_comp_Appleby_error <- c(Tm_CRS_comp_Appleby_error,
                                          lambda_err * (-1 / (lambda^2) * log(
-                                           exp((-lambda) * (coring_yr - t2)) +
+                                           exp((-lambda) * (t1 - t2)) +
                                              lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate
                                          ) +
-                                           1 / lambda * 1 / exp((-lambda) * (coring_yr - t2) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate) *
-                                           (coring_yr - t2) * (exp((-lambda) * (coring_yr - t2)) + sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate)) +
+                                           1 / lambda * 1 / exp((-lambda) * (t1 - t2) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate) *
+                                           (t1 - t2) * (exp((-lambda) * (t1 - t2)) + sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate)) +
                                            sum(Activity_Bq_m2_error[i:imax], na.rm = T) * 1 / lambda * lambda / P_supply_rate *
-                                           (1/exp((-lambda) * (coring_yr - t2)) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate) +
+                                           (1/exp((-lambda) * (t1 - t2)) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate) +
                                            P_supply_rate_err * 1 / lambda *
                                            ((-lambda) * sum(Activity_Bq_m2[i:imax], na.rm = T) / (P_supply_rate^2)) *
-                                           (1 / exp((-lambda) * (coring_yr - t2)) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate)
+                                           (1 / exp((-lambda) * (t1 - t2)) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate)
           )
 
 
