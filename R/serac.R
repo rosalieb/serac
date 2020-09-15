@@ -891,7 +891,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       # Equation 38 in Sanchez-Cabeza and Ruiz-Fernandez (2012, Geochimica et Cosmochimica Acta)
       sr_CRS <- sr_CRS_err <- NULL
       for (i in 1:length(m_CRS)) {
-        sr_temporary <- lambda * Inventory_CRS[i] / complete_core_Pbex[whichkeep][i] #/10
+        sr_temporary <- lambda * Inventory_CRS[i] / complete_core_Pbex[whichkeep][i] / 10
         sr_CRS <- c(sr_CRS, sr_temporary)
         #Pour les calcul d'erreur MAR: racine{(deltaIventaire à la prof z/Inventaire à la profz)^2 +(delta activité à la prof z/activité à la prof z)^2}*MAR
         sr_CRS_err <- c(sr_CRS_err,
@@ -977,14 +977,25 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       Incremental_inventory_CRS$mean_Pb_supply_rate <-
         (lambda * Incremental_inventory_CRS$incremental_invent)/(exp((-lambda) * (coring_yr - Incremental_inventory_CRS$age_max)) - exp((-lambda) * (coring_yr - Incremental_inventory_CRS$age_min)))
 
+      # error on the flux
+      # Err_lambda*[A1-2*(exp(-lambda*t1)-exp(-lambda*t2))-A1-2*lambda*(-t1*exp(-lambda*t1)+t2*exp(-lambda*t2))]/
+      #           [(exp(-lambda*t1)-exp(-lambda*t2))^2] +
+      #           (Err_A1-2*lambda)/( exp(-lambda*t1)-exp(-lambda*t2))
+      Incremental_inventory_CRS$mean_Pb_supply_rate_error <-
+        lambda_err * (Incremental_inventory_CRS$incremental_invent * exp((-lambda) * (coring_yr - Incremental_inventory_CRS$age_max)) - exp((-lambda) * (coring_yr - Incremental_inventory_CRS$age_min))) /
+        ((exp((-lambda) * (coring_yr - Incremental_inventory_CRS$age_max)) - exp((-lambda) * (coring_yr - Incremental_inventory_CRS$age_min)))^2) +
+        (Incremental_inventory_CRS$incremental_invent_error * lambda) / (exp((-lambda) * (coring_yr - Incremental_inventory_CRS$age_max)) - exp((-lambda) * (coring_yr - Incremental_inventory_CRS$age_min)))
+
+
       # Calculate age t at mass depth m (t(m))
       # Equations 19-20 in Abril (2019)
-      Tm_CRS_comp_Appleby <- Tm_CRS_comp_Abril <- P_supply_rate_core <- NULL
+      Tm_CRS_comp_Appleby <- Tm_CRS_comp_Abril <- P_supply_rate_core <- Tm_CRS_comp_Appleby_error <- NULL
       for (i in 1:length(complete_core_depth_bottom[whichkeep])) {
         t1 <- Incremental_inventory_CRS$age_max[Incremental_inventory_CRS$depth_bottom >=  complete_core_depth_bottom[whichkeep][i] & Incremental_inventory_CRS$depth_top < complete_core_depth_bottom[whichkeep][i]]
         t2 <- Incremental_inventory_CRS$age_min[Incremental_inventory_CRS$age_max == t1]
         incremental_invent <- Incremental_inventory_CRS$incremental_invent[Incremental_inventory_CRS$age_max == t1]
         P_supply_rate <- Incremental_inventory_CRS$mean_Pb_supply_rate[Incremental_inventory_CRS$age_max == t1]
+        P_supply_rate_err <- Incremental_inventory_CRS$mean_Pb_supply_rate_error[Incremental_inventory_CRS$age_max == t1]
         imin <- min(which(complete_core_depth_bottom[whichkeep] >= Incremental_inventory_CRS$depth_top[Incremental_inventory_CRS$age_max == t1]))
         imax <- max(which(complete_core_depth_bottom[whichkeep] <= Incremental_inventory_CRS$depth_bottom[Incremental_inventory_CRS$age_max == t1]))
         # Message below when P_supply_rate != 1
@@ -997,6 +1008,33 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                      exp((-lambda) * (coring_yr-t2)) + lambda / P_supply_rate * sum(Activity_Bq_m2[i:imax], na.rm = T)
                                    )
           )
+
+          # Error
+          # Err_tz = Err_lambda* (-1/(lambda)^2 * ln[
+          #     exp(-lambda*t2) +
+          #     lambda*Az-2*lambda/ P_supply_rate2
+          #     ] +
+          #     1/lambda * 1/exp(-lambda*t2 + lambda*Az-2/ P_supply_rate2) *
+          #     t2*[exp(-lambda*t2) + Az-2/P_supply_rate2]) +
+          #     Err_Az-2 * 1/lambda * lambda/ P_supply_rate2 *
+          #     [1/(exp(-lambda*t2) + lambda * Az-2 / P_supply_rate2)] +
+          #     Err_ P_supply_rate2 * 1/lambda *
+          #     (-lambda*Az-2/( P_supply_rate2)^2) *
+          #     [1/(exp(-lambda*t2) + lambda * Az-2 / P_supply_rate2)]
+          Tm_CRS_comp_Appleby_error <- c(Tm_CRS_comp_Appleby_error,
+                                         lambda_err * (-1 / (lambda^2) * log(
+                                           exp((-lambda) * (coring_yr - t2)) +
+                                             lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate
+                                         ) +
+                                           1 / lambda * 1 / exp((-lambda) * (coring_yr - t2) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate) *
+                                           (coring_yr - t2) * (exp((-lambda) * (coring_yr - t2)) + sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate)) +
+                                           sum(Activity_Bq_m2_error[i:imax], na.rm = T) * 1 / lambda * lambda / P_supply_rate *
+                                           (1/exp((-lambda) * (coring_yr - t2)) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate) +
+                                           P_supply_rate_err * 1 / lambda *
+                                           ((-lambda) * sum(Activity_Bq_m2[i:imax], na.rm = T) / (P_supply_rate^2)) *
+                                           (1 / exp((-lambda) * (coring_yr - t2)) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate)
+          )
+
 
           # Equation 19 in Abril (2019, Quaternary Geochronology)
           Tm_CRS_comp_Abril <- c(Tm_CRS_comp_Abril, NA
@@ -1021,6 +1059,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                    incremental_invent / sum(Activity_Bq_m2[i:imax], na.rm = T)
                                  )
           )
+
+          Tm_CRS_comp_Appleby_error <- c(Tm_CRS_comp_Appleby_error, 0)
         }
 
         # calculation age error: delta(tx)=1/lambda*((0.00017*t)^2+(delta(I0)/I0)^2+(1-2*Ix/Io)*(delta(Ix)/Ix)^2)^(0.5)
@@ -1031,7 +1071,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
       Tm_CRS_comp <- abs(c(Tm_CRS_comp_Appleby[1:(imin-1)], Tm_CRS_comp_Abril[imin:imax]))
       #Tm_CRS_comp <- abs(Tm_CRS_comp_Abril)
-      Tm_CRS_comp_err <- rep(0, length(Tm_CRS_comp))
+      Tm_CRS_comp_err <- abs(Tm_CRS_comp_Appleby_error)
 
       # calculation of Best Age and errors
       m_CRS_comp <- coring_yr - Tm_CRS_comp
@@ -1414,14 +1454,22 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       c(0, sr_CIC),
       c(0, sr_CIC_err)),
       byrow = F, ncol=6))
-    colnames(output_agemodel_CIC) <- c("depth_avg", "BestAD_CIC", "MinAD_CIC", "MaxAD_CIC", "sr_CIC", "sr_CIC_err")
+    if(!mass_depth) {
+      colnames(output_agemodel_CIC) <- c("depth_avg", "BestAD_CIC", "MinAD_CIC", "MaxAD_CIC", "SAR_CIC", "SAR_CIC_err")
+    } else {
+      colnames(output_agemodel_CIC) <- c("depth_avg", "BestAD_CIC", "MinAD_CIC", "MaxAD_CIC", "MAR_CIC", "MAR_CIC_err")
+    }
     output_agemodel_CIC_inter <- as.data.frame(seq(0, max(output_agemodel_CIC$depth_avg, na.rm = T), stepout))
     output_agemodel_CIC_inter <- cbind(output_agemodel_CIC_inter, approx(x= output_agemodel_CIC$depth_avg, output_agemodel_CIC$BestAD_CIC, xout= seq(0, max(output_agemodel_CIC$depth_avg, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CIC_inter <- cbind(output_agemodel_CIC_inter, approx(x= output_agemodel_CIC$depth_avg, output_agemodel_CIC$MinAD_CIC, xout= seq(0, max(output_agemodel_CIC$depth_avg, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CIC_inter <- cbind(output_agemodel_CIC_inter, approx(x= output_agemodel_CIC$depth_avg, output_agemodel_CIC$MaxAD_CIC, xout= seq(0, max(output_agemodel_CIC$depth_avg, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CIC_inter <- cbind(output_agemodel_CIC_inter, approx(x= output_agemodel_CIC$depth_avg, output_agemodel_CIC$sr_CIC, xout= seq(0, max(output_agemodel_CIC$depth_avg, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CIC_inter <- cbind(output_agemodel_CIC_inter, approx(x= output_agemodel_CIC$depth_avg, output_agemodel_CIC$sr_CIC_err, xout= seq(0, max(output_agemodel_CIC$depth_avg, na.rm = T), stepout), ties = mean)$y)
-    colnames(output_agemodel_CIC_inter) <- c("depth_avg", "BestAD_CIC", "MinAD_CIC", "MaxAD_CIC", "sr_CIC", "sr_CIC_err")
+    if(!mass_depth) {
+      colnames(output_agemodel_CIC_inter) <- c("depth_avg", "BestAD_CIC", "MinAD_CIC", "MaxAD_CIC", "SAR_CIC", "SAR_CIC_err")
+    } else {
+      colnames(output_agemodel_CIC_inter) <- c("depth_avg", "BestAD_CIC", "MinAD_CIC", "MaxAD_CIC", "MAR_CIC", "MAR_CIC_err")
+    }
     write.table(x = output_agemodel_CIC[order(output_agemodel_CIC$depth_avg, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CIC.txt", sep = ""), col.names = T, row.names = F)
     write.table(x = output_agemodel_CIC_inter[order(output_agemodel_CIC_inter$depth_avg, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CIC_interpolation.txt", sep = ""), col.names = T, row.names = F)
 
