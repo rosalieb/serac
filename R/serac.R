@@ -1304,8 +1304,10 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     }
     output_agemodel_CFCS <- as.data.frame(output_agemodel_CFCS)
     colnames(output_agemodel_CFCS) <- c("depth", "BestAD", "MinAD", "MaxAD")
-    if(mass_depth) output_agemodel_CFCS$mass_depth_g.mm.2 <- depth_avg_to_date_allscales
-    output_agemodel_CFCS <- output_agemodel_CFCS[, c("depth", "mass_depth_g.mm.2", "BestAD", "MinAD", "MaxAD")]
+    if(mass_depth) {
+      output_agemodel_CFCS$mass_depth_g.mm.2 <- depth_avg_to_date_allscales
+      output_agemodel_CFCS <- output_agemodel_CFCS[, c("depth", "mass_depth_g.mm.2", "BestAD", "MinAD", "MaxAD")]
+    }
     output_agemodel_CFCS <- output_agemodel_CFCS[!duplicated(output_agemodel_CFCS[, 1]), ]
 
     # Warning message if r2 of sr_sed1> r2 of sr_sed2
