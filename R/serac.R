@@ -892,7 +892,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       # Equation 38 in Sanchez-Cabeza and Ruiz-Fernandez (2012, Geochimica et Cosmochimica Acta)
       sr_CRS <- sr_CRS_err <- NULL
       for (i in 1:length(m_CRS)) {
-        sr_temporary <- lambda * Inventory_CRS[i] / complete_core_Pbex[whichkeep][i] / 1000
+        sr_temporary <- lambda * Inventory_CRS[i] / complete_core_Pbex[whichkeep][i] *10
         sr_CRS <- c(sr_CRS, sr_temporary)
         #Pour les calcul d'erreur MAR: racine{(deltaIventaire à la prof z/Inventaire à la profz)^2 +(delta activité à la prof z/activité à la prof z)^2}*MAR
         sr_CRS_err <- c(sr_CRS_err,
@@ -903,7 +903,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
       # need to convert sediment rate if SAR
       if(!mass_depth) {
-        sar_CRS = sr_CRS * 1000 / complete_core_density[whichkeep]
+        sar_CRS = sr_CRS * 1000 * 10000 / complete_core_density[whichkeep]
         # SAR_error = SAR * sqrt[(MAR_error/MAR)^2+0.07^2]
         # Appleby (2001) suggest a 7% error on DBD, which is the 0.07 in the equation below
         sr_CRS_err = sar_CRS * sqrt((sr_CRS_err / sr_CRS)^2 + 0.07^2)
