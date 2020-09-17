@@ -811,35 +811,38 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       # Equation 23 in Sanchez-Cabeza and Ruiz-Fernandez (2012, Geochimica et Cosmochimica Acta)
       # for a depth i, si = delta(zi)/delta(ti)
       sr_CIC <- sr_CIC_err <- 0
-      # if MAR
+      # if SAR
       for (i in 2:nrow(dt[!is.na(dt$Pbex),])) {
-        mar_CIC <-  ifelse((m_CIC[i-1]-m_CIC[i]) == 0, Inf,
+        sar_CIC <-  ifelse((m_CIC[i-1]-m_CIC[i]) == 0, Inf,
                            (dt$depth_avg[!is.na(dt$Pbex)][i-1]-dt$depth_avg[!is.na(dt$Pbex)][i]) / (Tm_CIC[i] - Tm_CIC[i-1]))
-        sr_CIC <- c(sr_CIC, mar_CIC)
+        sr_CIC <- c(sr_CIC, sar_CIC)
 
         # error MAR CIC : delta(MAR)=MAR*sqrt(delta(T1)^2+delta(T2)^2)/(T2-T1)
         sr_CIC_err <- c(sr_CIC_err,
-                        mar_CIC * sqrt((Tm_CIC_err[i-1])^2 + (Tm_CIC_err[i])^2)/(Tm_CIC[i]-Tm_CIC[i-1])
+                        sar_CIC * sqrt((Tm_CIC_err[i-1])^2 + (Tm_CIC_err[i])^2)/(Tm_CIC[i]-Tm_CIC[i-1])
         )
       }
 
-      # if SAR
-      if(!mass_depth) {
-        sar_CIC <- SAR_CIC_err <-  NULL
+      # if MAR
+      if(mass_depth) {
+        mar_CIC <- MAR_CIC_err <-  NULL
         for (j in seq_along(sr_CIC)) {
           if(sr_CIC[i] != Inf) {
-            sar_CIC <- c(sar_CIC,
-                         sr_CIC[i] * 1000 / complete_core_density[whichkeep][i])
+            mar_CIC <- c(mar_CIC,
+                         sr_CIC[i] / 1000 * complete_core_density[whichkeep][i])
             # Appleby (2001) suggest a 7% error on DBD, which is the 0.07 in the equation below
-            SAR_CIC_err <- c(SAR_CIC_err,
-                             sar_CIC[i] * sqrt((sr_CIC_err[i] / sr_CIC[i])^2 + 0.07^2))
+            # delta(MAR)=MAR*racine(delta(T1)^2+delta(T2)^2)/(T2-T1)
+            MAR_CIC_err <- c(MAR_CIC_err,
+                             mar_CIC[i] * sqrt((Tm_CIC_err[i-1])^2 + (Tm_CIC_err[i])^2)/(Tm_CIC[i]-Tm_CIC[i-1])
+            )
+
           } else {
-            sar_CIC <- c(sar_CIC, Inf)
-            SAR_CIC_err <- c(SAR_CIC_err, Inf)
+            mar_CIC <- c(mar_CIC, Inf)
+            MAR_CIC_err <- c(MAR_CIC_err, Inf)
           }
         }
-        sr_CIC <- sar_CIC
-        sr_CIC_err <- SAR_CIC_err
+        sr_CIC <- mar_CIC
+        sr_CIC_err <- MAR_CIC_err
       }
 
 
