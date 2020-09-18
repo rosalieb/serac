@@ -864,7 +864,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                            "SAR_CIC_err_mm.yr" = sr_CIC_err)
       } else {
         out_list$`CIC model` <- data.frame("depth_avg_mm"  = dt$depth_avg[!is.na(dt$Pbex)],
-                                           "mass_depth_g.mm.2" = dt$mass_depth_avg_corr[!is.na(dt$Pbex)],
+                                           "mass_depth_g.mm.2" = dt$mass_depth_avg[!is.na(dt$Pbex)],
                                            "m_CIC"      = m_CIC,
                                            "m_CIC_low"  = m_CIC_low,
                                            "m_CIC_high" = m_CIC_high,
@@ -921,15 +921,15 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
       # Save output
       if(!mass_depth) {
-        out_list$`CRS model` <- data.frame("depth_avg_mm"  = dt$depth_avg[!is.na(dt$Pbex)],
+        out_list$`CRS model` <- data.frame("depth_avg_mm"  = dt$depth_avg[whichkeep],
                                            "m_CRS"      = m_CRS,
                                            "m_CRS_low"  = m_CRS_low,
                                            "m_CRS_high" = m_CRS_high,
                                            "SAR_CRS_mm.yr"     = sr_CRS,
                                            "SAR_CRS_err_mm.yr" = sr_CRS_err)
       } else {
-        out_list$`CRS model` <- data.frame("depth_avg_mm"  = dt$depth_avg[!is.na(dt$Pbex)],
-                                           "mass_depth_g.mm.2" = dt$mass_depth_avg_corr[!is.na(dt$Pbex)],
+        out_list$`CRS model` <- data.frame("depth_avg_mm"  = dt$depth_avg[whichkeep],
+                                           "mass_depth_g.mm.2" = dt$mass_depth_avg[whichkeep],
                                            "m_CRS"      = m_CRS,
                                            "m_CRS_low"  = m_CRS_low,
                                            "m_CRS_high" = m_CRS_high,
@@ -1165,7 +1165,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       } else {
         out_list$`CRS composite model` <- data.frame(
           "depth_avg_mm"        = complete_core_depth[whichkeep],
-          "mass_depth_g.mm.2" = dt$mass_depth_avg_corr[!is.na(dt$Pbex)],
+          "mass_depth_g.mm.2" = dt$mass_depth_avg[whichkeep],
           "m_CRS_comp"      = m_CRS_comp,
           "m_CRS_comp_low"  = m_CRS_comp_low,
           "m_CRS_comp_high" = m_CRS_comp_high,
