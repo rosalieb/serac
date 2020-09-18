@@ -1025,19 +1025,20 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           #     Err_ P_supply_rate2 * 1/lambda *
           #     (-lambda*Az-2/( P_supply_rate2)^2) *
           #     [1/(exp(-lambda*t2) + lambda * Az-2 / P_supply_rate2)]
-          Tm_CRS_comp_Appleby_error <- c(Tm_CRS_comp_Appleby_error,
-                                         lambda_err * (-1 / (lambda^2) * log(
-                                           exp((-lambda) * (coring_yr - t2)) +
-                                             lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate
-                                         ) +
-                                           1 / lambda * 1 / exp((-lambda) * (coring_yr - t2) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate) *
-                                           (coring_yr - t2) * (exp((-lambda) * (coring_yr - t2)) + sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate)) +
-                                           sum(Activity_Bq_m2_error[i:imax], na.rm = T) * 1 / lambda * lambda / P_supply_rate *
-                                           (1/exp((-lambda) * (coring_yr - t2)) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate) +
-                                           P_supply_rate_err * 1 / lambda *
-                                           ((-lambda) * sum(Activity_Bq_m2[i:imax], na.rm = T) / (P_supply_rate^2)) *
-                                           (1 / exp((-lambda) * (coring_yr - t2)) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate)
-          )
+          error_appleby_CRS <-  lambda_err * (-1 / (lambda^2) * log(
+            exp((-lambda) * (coring_yr - t2)) +
+              lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate
+          ) +
+            1 / lambda * 1 / exp((-lambda) * (coring_yr - t2) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate) *
+            (coring_yr - t2) * (exp((-lambda) * (coring_yr - t2)) + sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate)) +
+            sum(Activity_Bq_m2_error[i:imax], na.rm = T) * 1 / lambda * lambda / P_supply_rate *
+            (1/exp((-lambda) * (coring_yr - t2)) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate) +
+            P_supply_rate_err * 1 / lambda *
+            ((-lambda) * sum(Activity_Bq_m2[i:imax], na.rm = T) / (P_supply_rate^2)) *
+            (1 / exp((-lambda) * (coring_yr - t2)) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate)
+
+          Tm_CRS_comp_Appleby_error <-
+            c(Tm_CRS_comp_Appleby_error, ifelse(i == imin, 0, error_appleby_CRS))
 
 
           # Equation 19 in Abril (2019, Quaternary Geochronology)
