@@ -5,13 +5,13 @@
 #' @export
 #' @param name Name of the core, given using quotes. Defaults to the core provided with serac. Use preferably the published name of the core for traceability.
 #' @param coring_yr Year of coring.
-#' @param model Select 1 to 4 item between c("CFCS", "CIC", "CRS", "CRS_comp"). If several models are selected, they will all be plotted together in the last window.
+#' @param model Select 1 to 4 item between c("CFCS", "CIC", "CRS", "CRS_pw"). If several models are selected, they will all be plotted together in the last window.
 #' @param Cher If 137Cs measurement were done, where do you detect the Chernobyl peak? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the 1986 Chernobyl event. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty. Note that the two depths needs to represent a sample, or more than a sample.
 #' @param NWT If 137Cs measurement were done, where do you detect the Nuclear Weapon Test peak? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the 1960s Nuclear Weapon Test event. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty. Note that the two depths needs to represent a sample, or more than a sample.
 #' @param Hemisphere Chose between North Hemisphere "NH" and South Hemisphere "SH" depending on the location of your system. This argument is required if you chose to plot NWT.
 #' @param FF If 137Cs measurement were done, where do you detect the First Fallout period? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the First Fallout period in 1955. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty. Note that the two depths needs to represent a sample, or more than a sample.
-#' @param age_forced_CRS If CRS_comp is chosen, which age(s) to be used to force the model. Must be the same length as depth_forced_CRS. Using by default 1986 for Chernobyl event.
-#' @param depth_forced_CRS If CRS_comp is chosen, which depth(s) to be used to force the model. Must be the same length as age_forced_CRS. Using by default the average depth chosen in the argument Cher, i.e., if Cher = c(55, 65) and depth_forced_CRS is left NULL, then the function will calculate depth_forced_CRS to be 60.
+#' @param age_forced_CRS If CRS_pw is chosen, which age(s) to be used to force the model. Must be the same length as depth_forced_CRS. Using by default 1986 for Chernobyl event.
+#' @param depth_forced_CRS If CRS_pw is chosen, which depth(s) to be used to force the model. Must be the same length as age_forced_CRS. Using by default the average depth chosen in the argument Cher, i.e., if Cher = c(55, 65) and depth_forced_CRS is left NULL, then the function will calculate depth_forced_CRS to be 60.
 #' @param inst_deposit Upper and lower depths (in mm) of sections of abrupt accumulation that inst_deposit c() should be excised, e.g., c(100, 120, 185, 195) for two sections of 10.0-12.0 cm and 18.5-19.5 cm depth
 #' @param input_depth_mm Units for SML, radionuclides peaks (Chernobyl, Nuclear War Tests, and First Fallouts), instantaneous deposits, depths to ignore. Default is TRUE, and inputs must be in mm - unless "input_depth_mm=F". If turned to FALSE, input can be given in g/cm2.
 #' @param ignore The depth (in mm - unless "input_depth_mm=F") of any sample that should be ignored from the age-depth model computation, e.g., c(55) will remove the measurement done at 5.5 cm. The data will be ploted by default in grey on the output graph (you can change this with the inst_depositcol argument)
@@ -159,16 +159,16 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     if(SML>0)                                       stop("\n Warning, CIC model should not be run if you assume the presence of a surface mixed layer. \n\n")
   }
 
-  # specific requirements to run CRS composite model.
-  if(any(model=="CRS_comp")) {
-    if(is.null(age_forced_CRS)&&is.null(depth_forced_CRS)&&is.null(Cher)) stop("\n Warning, if choosing to use the CRS composite model, you need to enter an age and\n a depth to force the model.\n Alternatively, the model can use Chernobyl if depths are given in the Cher argument.\n\n")
+  # specific requirements to run CRS piecewise model.
+  if(any(model=="CRS_pw")) {
+    if(is.null(age_forced_CRS)&&is.null(depth_forced_CRS)&&is.null(Cher)) stop("\n Warning, if choosing to use the CRS piecewise model, you need to enter an age and\n a depth to force the model.\n Alternatively, the model can use Chernobyl if depths are given in the Cher argument.\n\n")
     if(is.null(age_forced_CRS)&&is.null(depth_forced_CRS)) {
       age_forced_CRS = 1986
       depth_forced_CRS = mean(Cher)
-      message(paste0("\n You chose to use the CRS composite model but did not indicate how to force the model. \n By default, we are using the information you entered for Chernobyl (1986, depth = ",depth_forced_CRS," mm).\n\n"))
+      message(paste0("\n You chose to use the CRS piecewise model but did not indicate how to force the model. \n By default, we are using the information you entered for Chernobyl (1986, depth = ",depth_forced_CRS," mm).\n\n"))
     }
     if(length(age_forced_CRS) != length(depth_forced_CRS)) stop("\n Warning, age_forced_CRS and depth_forced_CRS must be vector of the same length. \n   (for every age_forced_CRS, one depth_forced_CRS)\n\n")
-    if(is.null(age_forced_CRS)|is.null(depth_forced_CRS)) stop("\n Warning, if choosing to use the CRS composite model, you need to enter both an age and a depth to force the model.\n\n")
+    if(is.null(age_forced_CRS)|is.null(depth_forced_CRS)) stop("\n Warning, if choosing to use the CRS piecewise model, you need to enter both an age and a depth to force the model.\n\n")
 
   }
 
@@ -255,7 +255,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
   # Additional warning not so related to this section
   # If density is missing, cannot calculate CRS
-  if(any(model %in% c("CRS", "CRS_comp"))) if(is.null(dt$density)) stop("\n Warning, you need to include the density in g/cm2 for each sample to compute CRS model.\n\n")
+  if(any(model %in% c("CRS", "CRS_pw"))) if(is.null(dt$density)) stop("\n Warning, you need to include the density in g/cm2 for each sample to compute CRS model.\n\n")
   if(mass_depth) if(is.null(dt$density)) stop("\n Warning, you need to include the density in g/cm2 for each sample to calculate mass accumulation rate.\n\n")
 
   # Additional warning if density is not given continuously
@@ -632,7 +632,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                    "inst_deposit", "ignore_depths",
                                    "historic_depth", "historic_age", "historic_name",
                                    "suppdescriptor", "descriptor_lab",
-                                   "varves", "sedchange", "SML", "age_forced_CRS_composite", "depth_forced_CRS_composite")
+                                   "varves", "sedchange", "SML", "age_forced_CRS_pwosite", "depth_forced_CRS_pwosite")
   # First, check whether a file already exists
   if(length(list.files(paste(getwd(), "/Cores/", name, "/", sep=""), pattern="serac_model_history*", full.names=TRUE))==1) {
     # read previous file
@@ -669,7 +669,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   }
 
   # error message
-  if(rev(dt$Pbex)[1] >= dt$Pbex[1]/16 & any(model %in% c("CRS", "CRS_comp"))) packageStartupMessage("\n Warning, it seems that 210Pb_excess has not reached equilibrium. \n Make sure the conditions of application for CRS model are fulfilled.")
+  if(rev(dt$Pbex)[1] >= dt$Pbex[1]/16 & any(model %in% c("CRS", "CRS_pw"))) packageStartupMessage("\n Warning, it seems that 210Pb_excess has not reached equilibrium. \n Make sure the conditions of application for CRS model are fulfilled.")
 
   if(length(model)>=1) {
     # Write the result of the model
@@ -901,7 +901,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       # Equation 38 in Sanchez-Cabeza and Ruiz-Fernandez (2012, Geochimica et Cosmochimica Acta)
       sr_CRS <- sr_CRS_err <- NULL
       for (i in 1:length(m_CRS)) {
-        sr_temporary <- lambda * Inventory_CRS[i] / complete_core_Pbex[whichkeep][i] *10
+        sr_temporary <- lambda * Inventory_CRS[i] / complete_core_Pbex[whichkeep][i] / 10
         sr_CRS <- c(sr_CRS, sr_temporary)
         #Pour les calcul d'erreur MAR: racine{(deltaIventaire à la prof z/Inventaire à la profz)^2 +(delta activité à la prof z/activité à la prof z)^2}*MAR
         sr_CRS_err <- c(sr_CRS_err,
@@ -947,7 +947,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       }
     }
 
-    if(any(model=="CRS_comp")) {
+    if(any(model=="CRS_pw")) {
 
       # Use Inventory_CRS calculated earlier
       # Inventory: sum from depth to the bottom
@@ -1002,7 +1002,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
       # Calculate age t at mass depth m (t(m))
       # Equations 19-20 in Abril (2019)
-      Tm_CRS_comp_Appleby <- Tm_CRS_comp_Abril <- P_supply_rate_core <- P_supply_rate_core_err <- Tm_CRS_comp_Appleby_error <- Tm_CRS_comp_Abril_error <- NULL
+      Tm_CRS_pw_Appleby <- Tm_CRS_pw_Abril <- P_supply_rate_core <- P_supply_rate_core_err <- Tm_CRS_pw_Appleby_error <- Tm_CRS_pw_Abril_error <- NULL
       for (i in 1:length(complete_core_depth_bottom[whichkeep])) {
         t1 <- Incremental_inventory_CRS$age_max[Incremental_inventory_CRS$depth_bottom >=  complete_core_depth_bottom[whichkeep][i] & Incremental_inventory_CRS$depth_top < complete_core_depth_bottom[whichkeep][i]]
         t2 <- Incremental_inventory_CRS$age_min[Incremental_inventory_CRS$age_max == t1]
@@ -1013,14 +1013,14 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         imin <- min(which(complete_core_depth_bottom[whichkeep] >= Incremental_inventory_CRS$depth_top[Incremental_inventory_CRS$age_max == t1]))
         imax <- max(which(complete_core_depth_bottom[whichkeep] <= Incremental_inventory_CRS$depth_bottom[Incremental_inventory_CRS$age_max == t1]))
         # Message below when P_supply_rate != 1
-        if(length(P_supply_rate) != 1) stop("\n We couldn't correctly identify which flux to use for the CRS composite model.\n   We did not find the value for mean 210Pb supply rate, to compute the CRS composite model.\n   Please contact the authors so we can assess whether it is a data or a code issue.\n")
+        if(length(P_supply_rate) != 1) stop("\n We couldn't correctly identify which flux to use for the CRS piecewise model.\n   We did not find the value for mean 210Pb supply rate, to compute the CRS piecewise model.\n   Please contact the authors so we can assess whether it is a data or a code issue.\n")
         if(P_supply_rate != Incremental_inventory_CRS$mean_Pb_supply_rate[nrow(Incremental_inventory_CRS)])
         { # when t1 and t2 are known
           # Equation 24 in Appleby 2001
-          Tm_CRS_comp_Appleby <- c(Tm_CRS_comp_Appleby,
-                                   (1/lambda) * log(
-                                     exp((-lambda) * (coring_yr-t2)) + lambda / P_supply_rate * sum(Activity_Bq_m2[i:imax], na.rm = T)
-                                   )
+          Tm_CRS_pw_Appleby <- c(Tm_CRS_pw_Appleby,
+                                 (1/lambda) * log(
+                                   exp((-lambda) * (coring_yr-t2)) + lambda / P_supply_rate * sum(Activity_Bq_m2[i:imax], na.rm = T)
+                                 )
           )
 
           # Error
@@ -1047,40 +1047,40 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
             ((-lambda) * sum(Activity_Bq_m2[i:imax], na.rm = T) / (P_supply_rate^2)) *
             (1 / exp((-lambda) * (coring_yr - t2)) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate)
 
-          Tm_CRS_comp_Appleby_error <-
-            c(Tm_CRS_comp_Appleby_error, ifelse(i == imin, 0, error_appleby_CRS))
+          Tm_CRS_pw_Appleby_error <-
+            c(Tm_CRS_pw_Appleby_error, ifelse(i == imin, 0, error_appleby_CRS))
 
 
           # Equation 19 in Abril (2019, Quaternary Geochronology)
-          Tm_CRS_comp_Abril <- c(Tm_CRS_comp_Abril, NA
-                                 # # Not including the equation below because it creates NA when Pb remains high on the first section.
-                                 # (1/lambda) * log(
-                                 #   P_supply_rate / (P_supply_rate - lambda * sum(Activity_Bq_m2[1:i], na.rm = T))
-                                 # )
+          Tm_CRS_pw_Abril <- c(Tm_CRS_pw_Abril, NA
+                               # # Not including the equation below because it creates NA when Pb remains high on the first section.
+                               # (1/lambda) * log(
+                               #   P_supply_rate / (P_supply_rate - lambda * sum(Activity_Bq_m2[1:i], na.rm = T))
+                               # )
           )
 
-          Tm_CRS_comp_Abril_error <- c(Tm_CRS_comp_Abril_error, NA)
+          Tm_CRS_pw_Abril_error <- c(Tm_CRS_pw_Abril_error, NA)
 
         } else {
           #Same equation for Appleby
-          Tm_CRS_comp_Appleby <- c(Tm_CRS_comp_Appleby,
-                                   (1/lambda) * log(
-                                     exp((-lambda) * (coring_yr-t2)) + lambda / P_supply_rate * sum(Activity_Bq_m2[i:imax], na.rm = T)
-                                   )
+          Tm_CRS_pw_Appleby <- c(Tm_CRS_pw_Appleby,
+                                 (1/lambda) * log(
+                                   exp((-lambda) * (coring_yr-t2)) + lambda / P_supply_rate * sum(Activity_Bq_m2[i:imax], na.rm = T)
+                                 )
           )
 
 
-          Tm_CRS_comp_Appleby_error <- c(Tm_CRS_comp_Appleby_error, NA)
+          Tm_CRS_pw_Appleby_error <- c(Tm_CRS_pw_Appleby_error, NA)
 
           # Equation 20 in Abril (2019, Quaternary Geochronology)
           # Tz = tr + 1/lambda*ln(A_inf/A_z)
           # Tz is the time elapsed between the coring year and the age of the depth being dated
           # A_inf is the inventory between tr and the deepest depth
           # A_z is the inventory at the depth to date (z) and the deepest depth
-          Tm_CRS_comp_Abril <- c(Tm_CRS_comp_Abril,
-                                 (coring_yr-t1) + (1/lambda) * log(
-                                   incremental_invent / sum(Activity_Bq_m2[i:imax], na.rm = T)
-                                 )
+          Tm_CRS_pw_Abril <- c(Tm_CRS_pw_Abril,
+                               (coring_yr-t1) + (1/lambda) * log(
+                                 incremental_invent / sum(Activity_Bq_m2[i:imax], na.rm = T)
+                               )
           )
 
           # Error
@@ -1092,133 +1092,133 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
             (1/(lambda * incremental_invent) * incremental_invent_err) +
             (1/(lambda * sum(Activity_Bq_m2[i:imax])) * sum(Activity_Bq_m2_error[i:imax]))
 
-          Tm_CRS_comp_Abril_error <-
-            c(Tm_CRS_comp_Abril_error, ifelse(i == imin, 0, error_abril_CRS))
+          Tm_CRS_pw_Abril_error <-
+            c(Tm_CRS_pw_Abril_error, ifelse(i == imin, 0, error_abril_CRS))
 
         }
 
         # calculation age error: delta(tx)=1/lambda*((0.00017*t)^2+(delta(I0)/I0)^2+(1-2*Ix/Io)*(delta(Ix)/Ix)^2)^(0.5)
         # with I0: iInventory, Ix= Inventory below depth x
-        #Tm_CRS_comp_err <- 1/lambda*((lambda_err*Tm_CRS_comp)^2+(Inventory_CRS_comp_error[1]/Inventory_CRS_comp[1])^2+(1-2*Inventory_CRS_comp/Inventory_CRS_comp[1])*(Inventory_CRS_comp_error/Inventory_CRS_comp)^2)^(0.5)
+        #Tm_CRS_pw_err <- 1/lambda*((lambda_err*Tm_CRS_pw)^2+(Inventory_CRS_pw_error[1]/Inventory_CRS_pw[1])^2+(1-2*Inventory_CRS_pw/Inventory_CRS_pw[1])*(Inventory_CRS_pw_error/Inventory_CRS_pw)^2)^(0.5)
         P_supply_rate_core <- c(P_supply_rate_core, P_supply_rate)
         P_supply_rate_core_err <- c(P_supply_rate_core_err, P_supply_rate_err)
       }
 
-      Tm_CRS_comp <- abs(c(Tm_CRS_comp_Appleby[1:(imin-1)], Tm_CRS_comp_Abril[imin:imax]))
-      #Tm_CRS_comp <- abs(Tm_CRS_comp_Abril)
-      Tm_CRS_comp_err <- abs(c(Tm_CRS_comp_Appleby_error[1:(imin-1)], Tm_CRS_comp_Abril_error[imin:imax]))
+      Tm_CRS_pw <- abs(c(Tm_CRS_pw_Appleby[1:(imin-1)], Tm_CRS_pw_Abril[imin:imax]))
+      #Tm_CRS_pw <- abs(Tm_CRS_pw_Abril)
+      Tm_CRS_pw_err <- abs(c(Tm_CRS_pw_Appleby_error[1:(imin-1)], Tm_CRS_pw_Abril_error[imin:imax]))
 
       # calculation of Best Age and errors
-      m_CRS_comp <- coring_yr - Tm_CRS_comp
-      if(m_CRS_comp[1] == coring_yr) Tm_CRS_comp[1] <- 0
-      m_CRS_comp_low <- m_CRS_comp - Tm_CRS_comp_err
-      m_CRS_comp_high <- m_CRS_comp + Tm_CRS_comp_err
+      m_CRS_pw <- coring_yr - Tm_CRS_pw
+      if(m_CRS_pw[1] == coring_yr) Tm_CRS_pw[1] <- 0
+      m_CRS_pw_low <- m_CRS_pw - Tm_CRS_pw_err
+      m_CRS_pw_high <- m_CRS_pw + Tm_CRS_pw_err
 
       # Recommend potential better depth_forced, so the model goes through the known ages
-      CRS_comp_period <- NULL
+      CRS_pw_period <- NULL
       for(i in seq_along(complete_core_depth_bottom[whichkeep])) {
-        CRS_comp_period <- c(CRS_comp_period,
-                             paste( "Period", which(Incremental_inventory_CRS$depth_top < complete_core_depth_bottom[whichkeep][i]
-                                                    & Incremental_inventory_CRS$depth_bottom >= complete_core_depth_bottom[whichkeep][i]) )
+        CRS_pw_period <- c(CRS_pw_period,
+                           paste( "Period", which(Incremental_inventory_CRS$depth_top < complete_core_depth_bottom[whichkeep][i]
+                                                  & Incremental_inventory_CRS$depth_bottom >= complete_core_depth_bottom[whichkeep][i]) )
         )
       }
 
-      CRS_comp_period <- data.frame(
-        period = CRS_comp_period,
+      CRS_pw_period <- data.frame(
+        period = CRS_pw_period,
         depth_top = complete_core_depth_top[whichkeep],
         depth_bottom = complete_core_depth_bottom[whichkeep],
         depth  = complete_core_depth[whichkeep],
-        age    = m_CRS_comp
+        age    = m_CRS_pw
       )
 
       # Message recommending average depth for plotting
       if(any(!depth_forced_CRS %in% complete_core_depth[whichkeep])) {
-        message("\n General message about visualisation of the CRS composite model:\n")
-        message_CRS_comp_period <- NULL
+        message("\n General message about visualisation of the CRS piecewise model:\n")
+        message_CRS_pw_period <- NULL
         for(i in seq_along(depth_forced_CRS)) {
           if(!depth_forced_CRS[i] %in% complete_core_depth[whichkeep]) {
             message(paste0(
               " Age forced = ", age_forced_CRS[i], ": \n",
               "      The depth you chose (", depth_forced_CRS[i]," mm) is not the mid-section of any sample. You can \n      choose to leave the model as it is, or change the value to the nearest \n      mid-section depth (i.e., ",
-              paste(CRS_comp_period$depth[depth_forced_CRS[i] >= CRS_comp_period$depth_top & depth_forced_CRS[i] <= CRS_comp_period$depth_bottom], sep = "", collapse = ", "),
+              paste(CRS_pw_period$depth[depth_forced_CRS[i] >= CRS_pw_period$depth_top & depth_forced_CRS[i] <= CRS_pw_period$depth_bottom], sep = "", collapse = ", "),
               ") to see the model pass by ", age_forced_CRS[i]," exactly.\n"
             ))
-            message_CRS_comp_period <-
-              c(message_CRS_comp_period,
-                CRS_comp_period$depth[depth_forced_CRS[i] >= CRS_comp_period$depth_top & depth_forced_CRS[i] <= CRS_comp_period$depth_bottom][1])
+            message_CRS_pw_period <-
+              c(message_CRS_pw_period,
+                CRS_pw_period$depth[depth_forced_CRS[i] >= CRS_pw_period$depth_top & depth_forced_CRS[i] <= CRS_pw_period$depth_bottom][1])
           } else {
-            message_CRS_comp_period <- c(message_CRS_comp_period, depth_forced_CRS[i])
+            message_CRS_pw_period <- c(message_CRS_pw_period, depth_forced_CRS[i])
           }
         }
         message(paste0(" => In the code, replace depth_forced_CRS = c(",
                        paste(depth_forced_CRS, sep="", collapse= ", "),
                        ") \n                      by depth_forced_CRS = c(",
-                       paste(message_CRS_comp_period, sep="", collapse= ", "), ")\n"))
+                       paste(message_CRS_pw_period, sep="", collapse= ", "), ")\n"))
       }
 
       # Calculate mass accumuation rate rate at time t,
       # Equation 25 from Appleby 2001
       # Equation 4 in Putyrskaya et al, 2020, Journal of Environmental Radioactivity
       # Based on the relation C = P/r. I'm calling C, "C_Pb" below.
-      sr_CRS_comp <- sr_CRS_comp_err <- rep(NA, length(m_CRS_comp))
-      for (i in seq_along(sr_CRS_comp)) {
+      sr_CRS_pw <- sr_CRS_pw_err <- rep(NA, length(m_CRS_pw))
+      for (i in seq_along(sr_CRS_pw)) {
         if(!is.na(Activity_Bq_m2[i])) {
           # MAR = Flux/C * e(-lambda*t)
           # sr[i] = P_supply_rate_core[i] * exp((-lambda)*t) / Activity_Bq_m2[i]
-          sr_CRS_comp[i] <- P_supply_rate_core[i] * exp((-lambda)*(coring_yr - m_CRS_comp[i])) / Activity_Bq_m2[i]
+          sr_CRS_pw[i] <- P_supply_rate_core[i] * exp((-lambda)*(coring_yr - m_CRS_pw[i])) / Activity_Bq_m2[i]
 
           # Err_MAR = [1/C * e(-lambda*t)*Err_F] +
           #            [-F/(C)^2*e(-lambda*t)*Err_C] +
           #            [-t*F/C * e(-lambda*t)*Err_lambda] +
           #            [-F*lambda/C * e(-lambda*t) * Err_t]
           # Had to remove the negative signs because errors are supposed to add up
-          sr_CRS_comp_err[i] <- (1/Activity_Bq_m2[i] * exp((-lambda) * Tm_CRS_comp[i]) * P_supply_rate_core_err[i]) +
-            (P_supply_rate_core[i] / (Activity_Bq_m2[i])^2 * exp((-lambda) * Tm_CRS_comp[i]) * Activity_Bq_m2_error[i]) +
-            (Tm_CRS_comp[i] * P_supply_rate_core[i] / Activity_Bq_m2[i] * exp((-lambda) * Tm_CRS_comp[i]) * lambda_err) +
-            (P_supply_rate_core[i] * lambda / Activity_Bq_m2[i] * exp((-lambda) * Tm_CRS_comp[i]) * Tm_CRS_comp_err[i])
+          sr_CRS_pw_err[i] <- (1/Activity_Bq_m2[i] * exp((-lambda) * Tm_CRS_pw[i]) * P_supply_rate_core_err[i]) +
+            (P_supply_rate_core[i] / (Activity_Bq_m2[i])^2 * exp((-lambda) * Tm_CRS_pw[i]) * Activity_Bq_m2_error[i]) +
+            (Tm_CRS_pw[i] * P_supply_rate_core[i] / Activity_Bq_m2[i] * exp((-lambda) * Tm_CRS_pw[i]) * lambda_err) +
+            (P_supply_rate_core[i] * lambda / Activity_Bq_m2[i] * exp((-lambda) * Tm_CRS_pw[i]) * Tm_CRS_pw_err[i])
 
 
 
         } else {
-          sr_CRS_comp[i] <- Inf
-          sr_CRS_comp_err[i] <- Inf
+          sr_CRS_pw[i] <- Inf
+          sr_CRS_pw_err[i] <- Inf
 
         }
       }
 
       if(!mass_depth) {
         #SAR=MAR*10/DBD
-        sar_CRS_comp = sr_CRS_comp *10 / complete_core_density[whichkeep]
-        sar_CRS_comp_err = sar_CRS_comp * sqrt((sr_CRS_comp_err / sr_CRS_comp)^2 + 0.07^2)
-        sr_CRS_comp <- sar_CRS_comp
-        sr_CRS_comp_err <- sar_CRS_comp_err
+        sar_CRS_pw = sr_CRS_pw *10 / complete_core_density[whichkeep]
+        sar_CRS_pw_err = sar_CRS_pw * sqrt((sr_CRS_pw_err / sr_CRS_pw)^2 + 0.07^2)
+        sr_CRS_pw <- sar_CRS_pw
+        sr_CRS_pw_err <- sar_CRS_pw_err
       }
 
       # Print message
       if(!mass_depth) {
-        cat(paste("\n Sediment accumulation rate (CRS composite model): see output file.\n", sep=""))
+        cat(paste("\n Sediment accumulation rate (CRS piecewise model): see output file.\n", sep=""))
       } else {
-        cat(paste("\n Mass accumulation rate (CRS composite model): see output file.\n", sep=""))
+        cat(paste("\n Mass accumulation rate (CRS piecewise model): see output file.\n", sep=""))
       }
 
       # Save output
       if(!mass_depth) {
-        out_list$`CRS composite model` <- data.frame(
+        out_list$`CRS piecewise model` <- data.frame(
           "depth_avg_mm"        = complete_core_depth[whichkeep],
-          "m_CRS_comp"      = m_CRS_comp,
-          "m_CRS_comp_low"  = m_CRS_comp_low,
-          "m_CRS_comp_high" = m_CRS_comp_high,
-          "SAR_CRS_comp_mm.yr"     = sr_CRS_comp,
-          "SAR_CRS_comp_err_mm.yr" = sr_CRS_comp_err)
+          "m_CRS_pw"      = m_CRS_pw,
+          "m_CRS_pw_low"  = m_CRS_pw_low,
+          "m_CRS_pw_high" = m_CRS_pw_high,
+          "SAR_CRS_pw_mm.yr"     = sr_CRS_pw,
+          "SAR_CRS_pw_err_mm.yr" = sr_CRS_pw_err)
       } else {
-        out_list$`CRS composite model` <- data.frame(
+        out_list$`CRS piecewise model` <- data.frame(
           "depth_avg_mm"        = complete_core_depth[whichkeep],
           "mass_depth_g.cm.2" = dt$mass_depth_avg[whichkeep],
-          "m_CRS_comp"      = m_CRS_comp,
-          "m_CRS_comp_low"  = m_CRS_comp_low,
-          "m_CRS_comp_high" = m_CRS_comp_high,
-          "MAR_CRS_comp_g.cm-2.yr"     = sr_CRS_comp,
-          "MAR_CRS_comp_err_g.cm-2.yr" = sr_CRS_comp_err)
+          "m_CRS_pw"      = m_CRS_pw,
+          "m_CRS_pw_low"  = m_CRS_pw_low,
+          "m_CRS_pw_high" = m_CRS_pw_high,
+          "MAR_CRS_pw_g.cm-2.yr"     = sr_CRS_pw,
+          "MAR_CRS_pw_err_g.cm-2.yr" = sr_CRS_pw_err)
       }
     }
   }
@@ -1616,62 +1616,62 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     mycollegend <- c(mycollegend, modelcol[3])
   }
 
-  if(any(model=="CRS_comp")) {
+  if(any(model=="CRS_pw")) {
     if(exists("inst_deposit")&&length(inst_deposit)>1) {
-      # Create the depth for CRS_comp model plotting
-      new_y_CRS_comp <- c(complete_core_depth[!is.na(complete_core_depth_2)], as.vector(inst_deposit)[inst_deposit<=max(dt$depth_avg, na.rm=T)])
-      new_y_CRS_comp_corr <- c(complete_core_depth_corr, inst_deposit_corr[, 1][inst_deposit[, 1]<=max(dt$depth_avg, na.rm=T)], inst_deposit_corr[, 1][inst_deposit[, 2]<=max(dt$depth_avg, na.rm=T)])
+      # Create the depth for CRS_pw model plotting
+      new_y_CRS_pw <- c(complete_core_depth[!is.na(complete_core_depth_2)], as.vector(inst_deposit)[inst_deposit<=max(dt$depth_avg, na.rm=T)])
+      new_y_CRS_pw_corr <- c(complete_core_depth_corr, inst_deposit_corr[, 1][inst_deposit[, 1]<=max(dt$depth_avg, na.rm=T)], inst_deposit_corr[, 1][inst_deposit[, 2]<=max(dt$depth_avg, na.rm=T)])
 
       # Sort in correct order
-      new_y_CRS_comp <- new_y_CRS_comp[order(new_y_CRS_comp)]
-      new_y_CRS_comp_corr <- new_y_CRS_comp_corr[order(new_y_CRS_comp_corr)]
+      new_y_CRS_pw <- new_y_CRS_pw[order(new_y_CRS_pw)]
+      new_y_CRS_pw_corr <- new_y_CRS_pw_corr[order(new_y_CRS_pw_corr)]
 
       # Create the new ages
-      new_x_CRS_comp <- approx(x = complete_core_depth_corr,
-                               y = m_CRS_comp,
-                               xout = new_y_CRS_comp_corr, rule = 2, ties = mean)$y
-      new_x_CRS_comp_low <- approx(x = complete_core_depth_corr,
-                                   y = m_CRS_comp_low,
-                                   xout = new_y_CRS_comp_corr, rule = 2, ties = mean)$y
-      new_x_CRS_comp_high <- approx(x = complete_core_depth_corr,
-                                    y = m_CRS_comp_high,
-                                    xout = new_y_CRS_comp_corr, rule = 2, ties = mean)$y
+      new_x_CRS_pw <- approx(x = complete_core_depth_corr,
+                             y = m_CRS_pw,
+                             xout = new_y_CRS_pw_corr, rule = 2, ties = mean)$y
+      new_x_CRS_pw_low <- approx(x = complete_core_depth_corr,
+                                 y = m_CRS_pw_low,
+                                 xout = new_y_CRS_pw_corr, rule = 2, ties = mean)$y
+      new_x_CRS_pw_high <- approx(x = complete_core_depth_corr,
+                                  y = m_CRS_pw_high,
+                                  xout = new_y_CRS_pw_corr, rule = 2, ties = mean)$y
     }
 
-    output_agemodel_CRS_comp <- as.data.frame(matrix(c(0, complete_core_depth_top[order(complete_core_depth_top, decreasing = F)][whichkeep],
-                                                       c(coring_yr, m_CRS_comp),
-                                                       c(coring_yr, m_CRS_comp_low),
-                                                       c(coring_yr, m_CRS_comp_high),
-                                                       c(0, sr_CRS_comp),
-                                                       c(0, sr_CRS_comp_err)
+    output_agemodel_CRS_pw <- as.data.frame(matrix(c(0, complete_core_depth_top[order(complete_core_depth_top, decreasing = F)][whichkeep],
+                                                     c(coring_yr, m_CRS_pw),
+                                                     c(coring_yr, m_CRS_pw_low),
+                                                     c(coring_yr, m_CRS_pw_high),
+                                                     c(0, sr_CRS_pw),
+                                                     c(0, sr_CRS_pw_err)
     ), byrow = F, ncol=6))
     if(!mass_depth) {
-      colnames(output_agemodel_CRS_comp) <- c("depth_avg_mm", "BestAD_CRS_comp", "MinAD_CRS_comp", "MaxAD_CRS_comp", "SAR_CRS_comp_mm.yr", "SAR_CRS_comp_err_mm.yr")
+      colnames(output_agemodel_CRS_pw) <- c("depth_avg_mm", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "SAR_CRS_pw_mm.yr", "SAR_CRS_pw_err_mm.yr")
     } else {
-      colnames(output_agemodel_CRS_comp) <- c("depth_avg_mm", "BestAD_CRS_comp", "MinAD_CRS_comp", "MaxAD_CRS_comp", "MAR_CRS_comp_g.cm.2.yr", "MAR_CRS_comp_err_g.cm.2.yr")
-      output_agemodel_CRS_comp$mass_depth_g.cm.2 <- c(0, dt$mass_depth_avg_corr[!is.na(dt$Pbex)])
-      output_agemodel_CRS_comp <- output_agemodel_CRS_comp[ , c("depth_avg_mm", "mass_depth_g.cm.2", "BestAD_CRS_comp", "MinAD_CRS_comp", "MaxAD_CRS_comp", "MAR_CRS_comp_g.cm.2.yr", "MAR_CRS_comp_err_g.cm.2.yr")]
+      colnames(output_agemodel_CRS_pw) <- c("depth_avg_mm", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "MAR_CRS_pw_g.cm.2.yr", "MAR_CRS_pw_err_g.cm.2.yr")
+      output_agemodel_CRS_pw$mass_depth_g.cm.2 <- c(0, dt$mass_depth_avg_corr[!is.na(dt$Pbex)])
+      output_agemodel_CRS_pw <- output_agemodel_CRS_pw[ , c("depth_avg_mm", "mass_depth_g.cm.2", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "MAR_CRS_pw_g.cm.2.yr", "MAR_CRS_pw_err_g.cm.2.yr")]
     }
-    output_agemodel_CRS_comp_inter <- as.data.frame(seq(0, max(output_agemodel_CRS_comp$depth_avg_mm, na.rm = T), stepout))
-    if(mass_depth) output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth_avg_mm, output_agemodel_CRS_comp$mass_depth_g.cm.2, xout= seq(0, max(output_agemodel_CRS_comp$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
-    output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth_avg_mm, output_agemodel_CRS_comp$BestAD_CRS_comp, xout= seq(0, max(output_agemodel_CRS_comp$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
-    output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth_avg_mm, output_agemodel_CRS_comp$MinAD_CRS_comp, xout= seq(0, max(output_agemodel_CRS_comp$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
-    output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth_avg_mm, output_agemodel_CRS_comp$MaxAD_CRS_comp, xout= seq(0, max(output_agemodel_CRS_comp$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
-    output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth_avg_mm, output_agemodel_CRS_comp[,c(ncol(output_agemodel_CRS_comp)-1)], xout= seq(0, max(output_agemodel_CRS_comp$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
-    output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth_avg_mm, output_agemodel_CRS_comp[,ncol(output_agemodel_CRS_comp)], xout= seq(0, max(output_agemodel_CRS_comp$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_pw_inter <- as.data.frame(seq(0, max(output_agemodel_CRS_pw$depth_avg_mm, na.rm = T), stepout))
+    if(mass_depth) output_agemodel_CRS_pw_inter <- cbind(output_agemodel_CRS_pw_inter, approx(x= output_agemodel_CRS_pw$depth_avg_mm, output_agemodel_CRS_pw$mass_depth_g.cm.2, xout= seq(0, max(output_agemodel_CRS_pw$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_pw_inter <- cbind(output_agemodel_CRS_pw_inter, approx(x= output_agemodel_CRS_pw$depth_avg_mm, output_agemodel_CRS_pw$BestAD_CRS_pw, xout= seq(0, max(output_agemodel_CRS_pw$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_pw_inter <- cbind(output_agemodel_CRS_pw_inter, approx(x= output_agemodel_CRS_pw$depth_avg_mm, output_agemodel_CRS_pw$MinAD_CRS_pw, xout= seq(0, max(output_agemodel_CRS_pw$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_pw_inter <- cbind(output_agemodel_CRS_pw_inter, approx(x= output_agemodel_CRS_pw$depth_avg_mm, output_agemodel_CRS_pw$MaxAD_CRS_pw, xout= seq(0, max(output_agemodel_CRS_pw$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_pw_inter <- cbind(output_agemodel_CRS_pw_inter, approx(x= output_agemodel_CRS_pw$depth_avg_mm, output_agemodel_CRS_pw[,c(ncol(output_agemodel_CRS_pw)-1)], xout= seq(0, max(output_agemodel_CRS_pw$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_pw_inter <- cbind(output_agemodel_CRS_pw_inter, approx(x= output_agemodel_CRS_pw$depth_avg_mm, output_agemodel_CRS_pw[,ncol(output_agemodel_CRS_pw)], xout= seq(0, max(output_agemodel_CRS_pw$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
     if(!mass_depth) {
-      colnames(output_agemodel_CRS_comp_inter) <- c("depth_avg_mm", "BestAD_CRS_comp", "MinAD_CRS_comp", "MaxAD_CRS_comp", "SAR_CRS_comp_mm.yr", "SAR_CRS_comp_err_mm.yr")
+      colnames(output_agemodel_CRS_pw_inter) <- c("depth_avg_mm", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "SAR_CRS_pw_mm.yr", "SAR_CRS_pw_err_mm.yr")
     } else {
-      colnames(output_agemodel_CRS_comp_inter) <- c("depth_avg_mm", "mass_depth_g.cm.2", "BestAD_CRS_comp", "MinAD_CRS_comp", "MaxAD_CRS_comp", "MAR_CRS_comp_g.cm.2.yr", "MAR_CRS_comp_err_g.cm.2.yr")
+      colnames(output_agemodel_CRS_pw_inter) <- c("depth_avg_mm", "mass_depth_g.cm.2", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "MAR_CRS_pw_g.cm.2.yr", "MAR_CRS_pw_err_g.cm.2.yr")
     }
-    write.table(x = output_agemodel_CRS_comp[order(output_agemodel_CRS_comp$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_comp.txt", sep = ""), col.names = T, row.names = T)
-    write.table(x = output_agemodel_CRS_comp_inter[order(output_agemodel_CRS_comp_inter$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_comp_interpolation.txt", sep = ""), col.names = T, row.names = T)
+    write.table(x = output_agemodel_CRS_pw[order(output_agemodel_CRS_pw$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_pw.txt", sep = ""), col.names = T, row.names = T)
+    write.table(x = output_agemodel_CRS_pw_inter[order(output_agemodel_CRS_pw_inter$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_pw_interpolation.txt", sep = ""), col.names = T, row.names = T)
 
     # Save output in the list
-    out_list$'CRS composite model age-depth model interpolated' <- output_agemodel_CRS_comp_inter
+    out_list$'CRS piecewise model age-depth model interpolated' <- output_agemodel_CRS_pw_inter
 
     # Parameters for legend
-    mylegend <- c(mylegend, "CRS composite model")
+    mylegend <- c(mylegend, "CRS piecewise model")
     mypchlegend <- c(mypchlegend, NA)
     myltylegend <- c(myltylegend, 1)
     mycollegend <- c(mycollegend, modelcol[4])
@@ -1760,8 +1760,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                        "Nuclear_War_Test", paste(paste(NWT, collapse = "-"), " (", Hemisphere, ")", sep=""),
                        "First_Fallout", paste(FF, collapse = "-"),
                        "Surface_Mixed_Layer", paste(SML, collapse = ""),
-                       "Age_forced_for_CRS_composite", ifelse(!is.null(age_forced_CRS), paste(age_forced_CRS, collapse = ", "), "NA - CRS composite model was not selected"),
-                       "Depth_forced_for_CRS_composite", ifelse(!is.null(age_forced_CRS), paste(depth_forced_CRS, collapse = ", "), "NA - CRS composite model was not selected"),
+                       "Age_forced_for_CRS_pwosite", ifelse(!is.null(age_forced_CRS), paste(age_forced_CRS, collapse = ", "), "NA - CRS piecewise model was not selected"),
+                       "Depth_forced_for_CRS_pwosite", ifelse(!is.null(age_forced_CRS), paste(depth_forced_CRS, collapse = ", "), "NA - CRS piecewise model was not selected"),
                        "Instantaneous_deposit_up_and_low_limits", paste(inst_deposit, collapse = ", "),
                        "Ignore_up_and_low_limits", paste(inst_deposit, collapse = ", "),
                        "Supplementary_descriptor", paste(descriptor_lab, collapse = ", "),
@@ -2734,22 +2734,22 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
     }
 
-    if(any(model=="CRS_comp")) {
+    if(any(model=="CRS_pw")) {
       if(exists("inst_deposit")&&length(inst_deposit)>1) {
-        lines(-new_x_CRS_comp, -new_y_CRS_comp, col=modelcol[4], lty=2, lwd=.5)
-        pol_x <- c(-new_x_CRS_comp_low, rev(-new_x_CRS_comp_high))
-        pol_y <- c(-new_y_CRS_comp, rev(-new_y_CRS_comp))
+        lines(-new_x_CRS_pw, -new_y_CRS_pw, col=modelcol[4], lty=2, lwd=.5)
+        pol_x <- c(-new_x_CRS_pw_low, rev(-new_x_CRS_pw_high))
+        pol_y <- c(-new_y_CRS_pw, rev(-new_y_CRS_pw))
         polygon(x=pol_x, y = pol_y, col=adjustcolor(modelcol[4], alpha.f=0.2), border=NA)
-        lines(-new_x_CRS_comp[new_y_CRS_comp>=SML&new_y_CRS_comp<=max(dt$depth_avg)], -new_y_CRS_comp[new_y_CRS_comp>=SML&new_y_CRS_comp<=max(dt$depth_avg)], col=modelcol[4])
+        lines(-new_x_CRS_pw[new_y_CRS_pw>=SML&new_y_CRS_pw<=max(dt$depth_avg)], -new_y_CRS_pw[new_y_CRS_pw>=SML&new_y_CRS_pw<=max(dt$depth_avg)], col=modelcol[4])
       } else {
-        depth_CRS_comp_plot = -c(complete_core_depth[whichkeep])
-        if(length(depth_CRS_comp_plot) != length(m_CRS_comp)) depth_CRS_comp_plot = -c(0,complete_core_depth[whichkeep])
+        depth_CRS_pw_plot = -c(complete_core_depth[whichkeep])
+        if(length(depth_CRS_pw_plot) != length(m_CRS_pw)) depth_CRS_pw_plot = -c(0,complete_core_depth[whichkeep])
 
-        lines(-m_CRS_comp, depth_CRS_comp_plot, col=modelcol[4], lty=2, lwd=.5)
-        pol_x <- c(-m_CRS_comp_low, rev(-m_CRS_comp_high))
-        pol_y <- c(depth_CRS_comp_plot, rev(depth_CRS_comp_plot))
+        lines(-m_CRS_pw, depth_CRS_pw_plot, col=modelcol[4], lty=2, lwd=.5)
+        pol_x <- c(-m_CRS_pw_low, rev(-m_CRS_pw_high))
+        pol_y <- c(depth_CRS_pw_plot, rev(depth_CRS_pw_plot))
         polygon(x=pol_x, y = pol_y, col=adjustcolor(modelcol[4], alpha.f=0.2), border=NA)
-        lines(-m_CRS_comp[-depth_CRS_comp_plot>=SML&-depth_CRS_comp_plot<=max(dt$depth_avg)], depth_CRS_comp_plot[-depth_CRS_comp_plot>=SML&-depth_CRS_comp_plot<=max(dt$depth_avg)], col=modelcol[4])
+        lines(-m_CRS_pw[-depth_CRS_pw_plot>=SML&-depth_CRS_pw_plot<=max(dt$depth_avg)], depth_CRS_pw_plot[-depth_CRS_pw_plot>=SML&-depth_CRS_pw_plot<=max(dt$depth_avg)], col=modelcol[4])
       }
     }
 
