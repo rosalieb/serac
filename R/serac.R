@@ -826,7 +826,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       # if MAR
       if(mass_depth) {
         mar_CIC <- MAR_CIC_err <-  NULL
-        for (j in seq_along(sr_CIC)) {
+        for (i in seq_along(sr_CIC)) {
           if(sr_CIC[i] != Inf) {
             mar_CIC <- c(mar_CIC,
                          sr_CIC[i] / 10 * complete_core_density[whichkeep][i])
@@ -841,8 +841,6 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                mar_CIC[i] * sqrt((Tm_CIC_err[i-1])^2 + (Tm_CIC_err[i])^2)/(Tm_CIC[i]-Tm_CIC[i-1])
               )
             }
-
-
 
           } else {
             mar_CIC <- c(mar_CIC, Inf)
@@ -876,8 +874,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                            "m_CIC"      = m_CIC,
                                            "m_CIC_low"  = m_CIC_low,
                                            "m_CIC_high" = m_CIC_high,
-                                           "MAR_CIC_g.mm-2.yr"     = sr_CIC,
-                                           "MAR_CIC_err_g.mm-2.yr" = sr_CIC_err)
+                                           "MAR_CIC_g.cm-2.yr"     = sr_CIC,
+                                           "MAR_CIC_err_g.cm-2.yr" = sr_CIC_err)
       }
 
     }
@@ -1001,11 +999,12 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
       # Calculate age t at mass depth m (t(m))
       # Equations 19-20 in Abril (2019)
-      Tm_CRS_comp_Appleby <- Tm_CRS_comp_Abril <- P_supply_rate_core <- Tm_CRS_comp_Appleby_error <- NULL
+      Tm_CRS_comp_Appleby <- Tm_CRS_comp_Abril <- P_supply_rate_core <- P_supply_rate_core_err <- Tm_CRS_comp_Appleby_error <- Tm_CRS_comp_Abril_error <- NULL
       for (i in 1:length(complete_core_depth_bottom[whichkeep])) {
         t1 <- Incremental_inventory_CRS$age_max[Incremental_inventory_CRS$depth_bottom >=  complete_core_depth_bottom[whichkeep][i] & Incremental_inventory_CRS$depth_top < complete_core_depth_bottom[whichkeep][i]]
         t2 <- Incremental_inventory_CRS$age_min[Incremental_inventory_CRS$age_max == t1]
         incremental_invent <- Incremental_inventory_CRS$incremental_invent[Incremental_inventory_CRS$age_max == t1]
+        incremental_invent_err <- Incremental_inventory_CRS$incremental_invent_error[Incremental_inventory_CRS$age_max == t1]
         P_supply_rate <- Incremental_inventory_CRS$mean_Pb_supply_rate[Incremental_inventory_CRS$age_max == t1]
         P_supply_rate_err <- Incremental_inventory_CRS$mean_Pb_supply_rate_error[Incremental_inventory_CRS$age_max == t1]
         imin <- min(which(complete_core_depth_bottom[whichkeep] >= Incremental_inventory_CRS$depth_top[Incremental_inventory_CRS$age_max == t1]))
@@ -1057,6 +1056,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                  # )
           )
 
+          Tm_CRS_comp_Abril_error <- c(Tm_CRS_comp_Abril_error, NA)
 
         } else {
           #Same equation for Appleby
@@ -1066,25 +1066,42 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                    )
           )
 
+
+          Tm_CRS_comp_Appleby_error <- c(Tm_CRS_comp_Appleby_error, NA)
+
           # Equation 20 in Abril (2019, Quaternary Geochronology)
+          # Tz = tr + 1/lambda*ln(A_inf/A_z)
+          # Tz is the time elapsed between the coring year and the age of the depth being dated
+          # A_inf is the inventory between tr and the deepest depth
+          # A_z is the inventory at the depth to date (z) and the deepest depth
           Tm_CRS_comp_Abril <- c(Tm_CRS_comp_Abril,
                                  (coring_yr-t1) + (1/lambda) * log(
                                    incremental_invent / sum(Activity_Bq_m2[i:imax], na.rm = T)
                                  )
           )
 
-          Tm_CRS_comp_Appleby_error <- c(Tm_CRS_comp_Appleby_error, 0)
+          # Error
+          # Note that all terms in between [] must be positive, because errors add up, so I removed the - signs (must have been an error when doing the math)
+          # Err_Tz = [- 1/lambda*ln(A_inf/A_z)*Err_lambda] +
+          #          [1/(lambda* A_inf)*Err_ A_inf] +
+          #          [– 1/(lambda*A_z)*Err_A_z]
+          Tm_CRS_comp_Abril <- c(Tm_CRS_comp_Abril,
+                                 (1/lambda * log(incremental_invent / sum(Activity_Bq_m2[i:imax])) * lambda_err) +
+                                   (1/(lambda * incremental_invent) * incremental_invent_err) +
+                                   (1/(lambda * sum(Activity_Bq_m2[i:imax])) * sum(Activity_Bq_m2_error[i:imax]))
+          )
         }
 
         # calculation age error: delta(tx)=1/lambda*((0.00017*t)^2+(delta(I0)/I0)^2+(1-2*Ix/Io)*(delta(Ix)/Ix)^2)^(0.5)
         # with I0: iInventory, Ix= Inventory below depth x
         #Tm_CRS_comp_err <- 1/lambda*((lambda_err*Tm_CRS_comp)^2+(Inventory_CRS_comp_error[1]/Inventory_CRS_comp[1])^2+(1-2*Inventory_CRS_comp/Inventory_CRS_comp[1])*(Inventory_CRS_comp_error/Inventory_CRS_comp)^2)^(0.5)
         P_supply_rate_core <- c(P_supply_rate_core, P_supply_rate)
+        P_supply_rate_core_err <- c(P_supply_rate_core_err, P_supply_rate_err)
       }
 
       Tm_CRS_comp <- abs(c(Tm_CRS_comp_Appleby[1:(imin-1)], Tm_CRS_comp_Abril[imin:imax]))
       #Tm_CRS_comp <- abs(Tm_CRS_comp_Abril)
-      Tm_CRS_comp_err <- abs(Tm_CRS_comp_Appleby_error)
+      Tm_CRS_comp_err <- abs(c(Tm_CRS_comp_Appleby_error[1:(imin-1)], Tm_CRS_comp_Abril_error[imin:imax]))
 
       # calculation of Best Age and errors
       m_CRS_comp <- coring_yr - Tm_CRS_comp
@@ -1109,6 +1126,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         age    = m_CRS_comp
       )
 
+      # Message recommending average depth for plotting
       if(any(!depth_forced_CRS %in% complete_core_depth[whichkeep])) {
         message("\n General message about visualisation of the CRS composite model:\n")
         message_CRS_comp_period <- NULL
@@ -1133,26 +1151,41 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                        paste(message_CRS_comp_period, sep="", collapse= ", "), ")\n"))
       }
 
-      depth_forced_CRS <- c(74.9,depth_forced_CRS[2:3])
-
       # Calculate mass accumuation rate rate at time t,
       # Equation 25 from Appleby 2001
       # Equation 4 in Putyrskaya et al, 2020, Journal of Environmental Radioactivity
       # Based on the relation C = P/r. I'm calling C, "C_Pb" below.
-      sr_CRS_comp <- rep(NA, length(m_CRS_comp))
+      sr_CRS_comp <- sr_CRS_comp_err <- rep(NA, length(m_CRS_comp))
       for (i in seq_along(sr_CRS_comp)) {
         if(!is.na(Activity_Bq_m2[i])) {
-          #sr[i] = P_supply_rate_core[i] * exp((-lambda)*t) / Activity_Bq_m2[i]
+          # MAR = Flux/C * e(-lambda*t)
+          # sr[i] = P_supply_rate_core[i] * exp((-lambda)*t) / Activity_Bq_m2[i]
           sr_CRS_comp[i] <- P_supply_rate_core[i] * exp((-lambda)*(coring_yr - m_CRS_comp[i])) / Activity_Bq_m2[i]
+
+          # Err_MAR = [1/C * e(-lambda*t)*Err_F] +
+          #            [-F/(C)^2*e(-lambda*t)*Err_C] +
+          #            [-t*F/C * e(-lambda*t)*Err_lambda] +
+          #            [-F*lambda/C * e(-lambda*t) * Err_t]
+          sr_CRS_comp_err <- c(sr_CRS_comp_err,
+                               (1/Activity_Bq_m2[i] * exp((-lambda) * Tm_CRS_comp[i]) * P_supply_rate_core_err[i]) +
+                                 (-P_supply_rate_core[i] / (Activity_Bq_m2[i])^2 * exp((-lambda) * Tm_CRS_comp[i]) * Activity_Bq_m2_error[i]) +
+                                 (-Tm_CRS_comp[i] * P_supply_rate_core[i] / Activity_Bq_m2[i] * exp((-lambda) * Tm_CRS_comp[i]) * lambda_err) +
+                                 (-P_supply_rate_core[i] * lambda / Activity_Bq_m2[i] * exp((-lambda) * Tm_CRS_comp[i]) * Tm_CRS_comp_err[i])
+          )
+
+
         } else {
           sr_CRS_comp[i] <- Inf
+          sr_CRS_comp_err[i] <- Inf
+
         }
       }
-      sr_CRS_comp_err <- rep(0, length(sr_CRS_comp))
 
-      if(mass_depth) {
-        #MAR = SAR/(DBD*10)
-        sr_CRS_comp = sr_CRS_comp / (complete_core_density[whichkeep] * 10)
+      if(!mass_depth) {
+        #SAR=MAR*10/DBD
+        sar_CRS_comp = sr_CRS_comp *10 / complete_core_density[whichkeep]
+        sr_CRS_comp_err = sar_CRS_comp * sqrt((sr_CRS_comp_err / sr_CRS_comp)^2 + 0.07^2)
+        sr_CRS_comp <- sar_CRS_comp
       }
 
       # Print message
@@ -1178,8 +1211,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           "m_CRS_comp"      = m_CRS_comp,
           "m_CRS_comp_low"  = m_CRS_comp_low,
           "m_CRS_comp_high" = m_CRS_comp_high,
-          "MAR_CRS_comp_g.mm-2.yr"     = sr_CRS_comp,
-          "MAR_CRS_comp_err_g.mm-2.yr" = sr_CRS_comp_err)
+          "MAR_CRS_comp_g.cm-2.yr"     = sr_CRS_comp,
+          "MAR_CRS_comp_err_g.cm-2.yr" = sr_CRS_comp_err)
       }
     }
   }
