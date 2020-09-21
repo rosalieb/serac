@@ -1541,7 +1541,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       colnames(output_agemodel_CRS) <- c("depth_avg_mm", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "SAR_CRS_mm.yr", "SAR_CRS_err_mm.yr")
     } else {
       colnames(output_agemodel_CRS) <- c("depth_avg_mm", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "MAR_CRS_g.cm.2.yr", "MAR_CRS_err_g.cm.2.yr")
-      output_agemodel_CRS$mass_depth_g.cm.2 <- c(0, dt$mass_depth_avg_corr[!is.na(dt$Pbex)])
+      output_agemodel_CRS$mass_depth_g.cm.2 <- c(0, dt$mass_depth_avg_corr[whichkeep])
       output_agemodel_CRS <- output_agemodel_CRS[ , c("depth_avg_mm", "mass_depth_g.cm.2", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "MAR_CRS_g.cm.2.yr", "MAR_CRS_err_g.cm.2.yr")]
     }
     output_agemodel_CRS_inter <- as.data.frame(seq(0, max(output_agemodel_CRS$depth_avg_mm, na.rm = T), stepout))
