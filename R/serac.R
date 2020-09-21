@@ -1085,11 +1085,11 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
           # Error
           # Note that all terms in between [] must be positive, because errors add up, so I removed the - signs (must have been an error when doing the math)
-          # Err_Tz = [- 1/lambda*ln(A_inf/A_z)*Err_lambda] +
+          # Err_Tz = [- 1/lambda^2 *ln(A_inf/A_z)*Err_lambda] +
           #          [1/(lambda* A_inf)*Err_ A_inf] +
           #          [– 1/(lambda*A_z)*Err_A_z]
           Tm_CRS_comp_Abril_error <- c(Tm_CRS_comp_Abril_error,
-                                       (1/lambda * log(incremental_invent / sum(Activity_Bq_m2[i:imax])) * lambda_err) +
+                                       (1/lambda^2 * log(incremental_invent / sum(Activity_Bq_m2[i:imax])) * lambda_err) +
                                          (1/(lambda * incremental_invent) * incremental_invent_err) +
                                          (1/(lambda * sum(Activity_Bq_m2[i:imax])) * sum(Activity_Bq_m2_error[i:imax]))
           )
