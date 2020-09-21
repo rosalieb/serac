@@ -1165,7 +1165,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         if(!is.na(Activity_Bq_m2[i])) {
           # MAR = Flux/C * e(-lambda*t)
           # sr[i] = P_supply_rate_core[i] * exp((-lambda)*t) / Activity_Bq_m2[i]
-          sr_CRS_pw[i] <- P_supply_rate_core[i] * exp((-lambda)*(coring_yr - m_CRS_pw[i])) / Activity_Bq_m2[i]
+          sr_CRS_pw[i] <- P_supply_rate_core[i] * exp((-lambda)*(coring_yr - m_CRS_pw[i])) / Activity_Bq_m2[i] /10
 
           # Err_MAR = [1/C * e(-lambda*t)*Err_F] +
           #            [-F/(C)^2*e(-lambda*t)*Err_C] +
