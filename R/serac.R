@@ -1166,11 +1166,12 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           #            [-F/(C)^2*e(-lambda*t)*Err_C] +
           #            [-t*F/C * e(-lambda*t)*Err_lambda] +
           #            [-F*lambda/C * e(-lambda*t) * Err_t]
+          # Had to remove the negative signs because errors are supposed to add up
           sr_CRS_comp_err <- c(sr_CRS_comp_err,
                                (1/Activity_Bq_m2[i] * exp((-lambda) * Tm_CRS_comp[i]) * P_supply_rate_core_err[i]) +
-                                 (-P_supply_rate_core[i] / (Activity_Bq_m2[i])^2 * exp((-lambda) * Tm_CRS_comp[i]) * Activity_Bq_m2_error[i]) +
-                                 (-Tm_CRS_comp[i] * P_supply_rate_core[i] / Activity_Bq_m2[i] * exp((-lambda) * Tm_CRS_comp[i]) * lambda_err) +
-                                 (-P_supply_rate_core[i] * lambda / Activity_Bq_m2[i] * exp((-lambda) * Tm_CRS_comp[i]) * Tm_CRS_comp_err[i])
+                                 (P_supply_rate_core[i] / (Activity_Bq_m2[i])^2 * exp((-lambda) * Tm_CRS_comp[i]) * Activity_Bq_m2_error[i]) +
+                                 (Tm_CRS_comp[i] * P_supply_rate_core[i] / Activity_Bq_m2[i] * exp((-lambda) * Tm_CRS_comp[i]) * lambda_err) +
+                                 (P_supply_rate_core[i] * lambda / Activity_Bq_m2[i] * exp((-lambda) * Tm_CRS_comp[i]) * Tm_CRS_comp_err[i])
           )
 
 
