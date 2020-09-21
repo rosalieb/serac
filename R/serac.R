@@ -1088,11 +1088,13 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           # Err_Tz = [- 1/lambda^2 *ln(A_inf/A_z)*Err_lambda] +
           #          [1/(lambda* A_inf)*Err_ A_inf] +
           #          [– 1/(lambda*A_z)*Err_A_z]
-          Tm_CRS_comp_Abril_error <- c(Tm_CRS_comp_Abril_error,
-                                       (1/lambda^2 * log(incremental_invent / sum(Activity_Bq_m2[i:imax])) * lambda_err) +
-                                         (1/(lambda * incremental_invent) * incremental_invent_err) +
-                                         (1/(lambda * sum(Activity_Bq_m2[i:imax])) * sum(Activity_Bq_m2_error[i:imax]))
-          )
+          error_abril_CRS <- (1/lambda^2 * log(incremental_invent / sum(Activity_Bq_m2[i:imax])) * lambda_err) +
+            (1/(lambda * incremental_invent) * incremental_invent_err) +
+            (1/(lambda * sum(Activity_Bq_m2[i:imax])) * sum(Activity_Bq_m2_error[i:imax]))
+
+          Tm_CRS_comp_Abril_error <-
+            c(Tm_CRS_comp_Abril_error, ifelse(i == imin, 0, error_abril_CRS))
+
         }
 
         # calculation age error: delta(tx)=1/lambda*((0.00017*t)^2+(delta(I0)/I0)^2+(1-2*Ix/Io)*(delta(Ix)/Ix)^2)^(0.5)
