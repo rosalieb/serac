@@ -912,7 +912,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
       # need to convert sediment rate if SAR
       if(!mass_depth) {
-        sar_CRS = sr_CRS / 10 / complete_core_density[whichkeep]
+        sar_CRS = sr_CRS * 10 / complete_core_density[whichkeep]
         # SAR_error = SAR * sqrt[(MAR_error/MAR)^2+0.07^2]
         # Appleby (2001) suggest a 7% error on DBD, which is the 0.07 in the equation below
         sr_CRS_err = sar_CRS * sqrt((sr_CRS_err / sr_CRS)^2 + 0.07^2)
