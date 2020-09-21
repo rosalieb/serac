@@ -1165,17 +1165,17 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         if(!is.na(Activity_Bq_m2[i])) {
           # MAR = Flux/C * e(-lambda*t)
           # sr[i] = P_supply_rate_core[i] * exp((-lambda)*t) / Activity_Bq_m2[i]
-          sr_CRS_pw[i] <- P_supply_rate_core[i] * exp((-lambda)*(coring_yr - m_CRS_pw[i])) / Activity_Bq_m2[i] /10
+          sr_CRS_pw[i] <- P_supply_rate_core[i] * exp((-lambda)*(coring_yr - m_CRS_pw[i])) / complete_core_Pbex[whichkeep][i] /10
 
           # Err_MAR = [1/C * e(-lambda*t)*Err_F] +
           #            [-F/(C)^2*e(-lambda*t)*Err_C] +
           #            [-t*F/C * e(-lambda*t)*Err_lambda] +
           #            [-F*lambda/C * e(-lambda*t) * Err_t]
           # Had to remove the negative signs because errors are supposed to add up
-          sr_CRS_pw_err[i] <- (1/Activity_Bq_m2[i]/1000 * exp((-lambda) * Tm_CRS_pw[i]) * P_supply_rate_core_err[i]*10000) +
-            (P_supply_rate_core[i] * 10000/ (Activity_Bq_m2[i]/1000)^2 * exp((-lambda) * Tm_CRS_pw[i]) * Activity_Bq_m2_error[i]/1000) +
-            (Tm_CRS_pw[i] * P_supply_rate_core[i]*10000 / Activity_Bq_m2[i]/1000 * exp((-lambda) * Tm_CRS_pw[i]) * lambda_err) +
-            (P_supply_rate_core[i] *10000 * lambda / Activity_Bq_m2[i]/1000 * exp((-lambda) * Tm_CRS_pw[i]) * Tm_CRS_pw_err[i])
+          sr_CRS_pw_err[i] <- (1/complete_core_Pbex[whichkeep][i]/1000 * exp((-lambda) * Tm_CRS_pw[i]) * P_supply_rate_core_err[i]*10000) +
+            (P_supply_rate_core[i] / (complete_core_Pbex[whichkeep][i]/1000)^2 * exp((-lambda) * Tm_CRS_pw[i]) * complete_core_Pbex_err[whichkeep][i]/1000) +
+            (Tm_CRS_pw[i] * P_supply_rate_core[i]*10000 / complete_core_Pbex[whichkeep][i]/1000 * exp((-lambda) * Tm_CRS_pw[i]) * lambda_err) +
+            (P_supply_rate_core[i]*10000  * lambda / complete_core_Pbex[whichkeep][i]/1000 * exp((-lambda) * Tm_CRS_pw[i]) * Tm_CRS_pw_err[i])
 
 
         } else {
