@@ -1532,8 +1532,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     output_agemodel_CIC_inter <- cbind(output_agemodel_CIC_inter, approx(x= output_agemodel_CIC$depth_avg_mm, output_agemodel_CIC$BestAD_CIC, xout= seq(0, max(output_agemodel_CIC$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CIC_inter <- cbind(output_agemodel_CIC_inter, approx(x= output_agemodel_CIC$depth_avg_mm, output_agemodel_CIC$MinAD_CIC, xout= seq(0, max(output_agemodel_CIC$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CIC_inter <- cbind(output_agemodel_CIC_inter, approx(x= output_agemodel_CIC$depth_avg_mm, output_agemodel_CIC$MaxAD_CIC, xout= seq(0, max(output_agemodel_CIC$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
-    output_agemodel_CIC_inter <- cbind(output_agemodel_CIC_inter, approx(x= output_agemodel_CIC$depth_avg_mm, output_agemodel_CIC[,5], xout= seq(0, max(output_agemodel_CIC$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
-    output_agemodel_CIC_inter <- cbind(output_agemodel_CIC_inter, approx(x= output_agemodel_CIC$depth_avg_mm, output_agemodel_CIC[,6], xout= seq(0, max(output_agemodel_CIC$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CIC_inter <- cbind(output_agemodel_CIC_inter, approx(x= output_agemodel_CIC$depth_avg_mm, output_agemodel_CIC[,c(ncol(output_agemodel_CIC)-1)], xout= seq(0, max(output_agemodel_CIC$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CIC_inter <- cbind(output_agemodel_CIC_inter, approx(x= output_agemodel_CIC$depth_avg_mm, output_agemodel_CIC[,ncol(output_agemodel_CIC)], xout= seq(0, max(output_agemodel_CIC$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
     if(!mass_depth) {
       colnames(output_agemodel_CIC_inter) <- c("depth_avg_mm", "BestAD_CIC", "MinAD_CIC", "MaxAD_CIC", "SAR_CIC_mm.yr", "SAR_CIC_err_mm.yr")
     } else {
@@ -1594,8 +1594,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth_avg_mm, output_agemodel_CRS$BestAD_CRS, xout= seq(0, max(output_agemodel_CRS$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth_avg_mm, output_agemodel_CRS$MinAD_CRS, xout= seq(0, max(output_agemodel_CRS$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth_avg_mm, output_agemodel_CRS$MaxAD_CRS, xout= seq(0, max(output_agemodel_CRS$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
-    output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth_avg_mm, output_agemodel_CRS[,5], xout= seq(0, max(output_agemodel_CRS$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
-    output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth_avg_mm, output_agemodel_CRS[,6], xout= seq(0, max(output_agemodel_CRS$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth_avg_mm, output_agemodel_CRS[,c(ncol(output_agemodel_CRS)-1)], xout= seq(0, max(output_agemodel_CRS$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth_avg_mm, output_agemodel_CRS[,ncol(output_agemodel_CRS)], xout= seq(0, max(output_agemodel_CRS$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
     if(!mass_depth) {
       colnames(output_agemodel_CRS_inter) <- c("depth_avg_mm", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "SAR_CRS_mm.yr", "SAR_CRS_err_mm.yr")
     } else {
@@ -1655,8 +1655,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth_avg_mm, output_agemodel_CRS_comp$BestAD_CRS_comp, xout= seq(0, max(output_agemodel_CRS_comp$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth_avg_mm, output_agemodel_CRS_comp$MinAD_CRS_comp, xout= seq(0, max(output_agemodel_CRS_comp$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
     output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth_avg_mm, output_agemodel_CRS_comp$MaxAD_CRS_comp, xout= seq(0, max(output_agemodel_CRS_comp$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
-    output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth_avg_mm, output_agemodel_CRS_comp[,5], xout= seq(0, max(output_agemodel_CRS_comp$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
-    output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth_avg_mm, output_agemodel_CRS_comp[,6], xout= seq(0, max(output_agemodel_CRS_comp$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth_avg_mm, output_agemodel_CRS_comp[,c(ncol(output_agemodel_CRS_comp)-1)], xout= seq(0, max(output_agemodel_CRS_comp$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_comp_inter <- cbind(output_agemodel_CRS_comp_inter, approx(x= output_agemodel_CRS_comp$depth_avg_mm, output_agemodel_CRS_comp[,ncol(output_agemodel_CRS_comp)], xout= seq(0, max(output_agemodel_CRS_comp$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
     if(!mass_depth) {
       colnames(output_agemodel_CRS_comp_inter) <- c("depth_avg_mm", "BestAD_CRS_comp", "MinAD_CRS_comp", "MaxAD_CRS_comp", "SAR_CRS_comp_mm.yr", "SAR_CRS_comp_err_mm.yr")
     } else {
