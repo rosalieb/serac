@@ -832,9 +832,17 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                          sr_CIC[i] / 10 * complete_core_density[whichkeep][i])
             # Appleby (2001) suggest a 7% error on DBD, which is the 0.07 in the equation below
             # delta(MAR)=MAR*racine(delta(T1)^2+delta(T2)^2)/(T2-T1)
-            MAR_CIC_err <- c(MAR_CIC_err,
-                             mar_CIC[i] * sqrt((Tm_CIC_err[i-1])^2 + (Tm_CIC_err[i])^2)/(Tm_CIC[i]-Tm_CIC[i-1])
-            )
+            if(i == 1) {
+              MAR_CIC_err <- c(MAR_CIC_err,
+                               mar_CIC[i] * sqrt((0)^2 + (Tm_CIC_err[i])^2)/(Tm_CIC[i]-coring_yr)
+              )
+            } else {
+              MAR_CIC_err <- c(MAR_CIC_err,
+                               mar_CIC[i] * sqrt((Tm_CIC_err[i-1])^2 + (Tm_CIC_err[i])^2)/(Tm_CIC[i]-Tm_CIC[i-1])
+              )
+            }
+
+
 
           } else {
             mar_CIC <- c(mar_CIC, Inf)
