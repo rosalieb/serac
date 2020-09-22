@@ -1172,11 +1172,10 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           #            [-t*F/C * e(-lambda*t)*Err_lambda] +
           #            [-F*lambda/C * e(-lambda*t) * Err_t]
           # Had to remove the negative signs because errors are supposed to add up
-          sr_CRS_pw_err[i] <- (1/complete_core_Pbex[whichkeep][i]/1000 * exp((-lambda) * Tm_CRS_pw[i]) * P_supply_rate_core_err[i]*10000) +
-            (P_supply_rate_core[i] / (complete_core_Pbex[whichkeep][i]/1000)^2 * exp((-lambda) * Tm_CRS_pw[i]) * complete_core_Pbex_err[whichkeep][i]/1000) +
-            (Tm_CRS_pw[i] * P_supply_rate_core[i]*10000 / complete_core_Pbex[whichkeep][i]/1000 * exp((-lambda) * Tm_CRS_pw[i]) * lambda_err) +
-            (P_supply_rate_core[i]*10000  * lambda / complete_core_Pbex[whichkeep][i]/1000 * exp((-lambda) * Tm_CRS_pw[i]) * Tm_CRS_pw_err[i])
-
+          sr_CRS_pw_err[i] <- (1/(complete_core_Pbex[whichkeep][i]/1000) * exp((-lambda) * Tm_CRS_pw[i]) * (P_supply_rate_core_err[i]/10000)) +
+            ((P_supply_rate_core[i]/10000) / ((complete_core_Pbex[whichkeep][i]/1000))^2 * exp((-lambda) * Tm_CRS_pw[i]) * (complete_core_Pbex_err[whichkeep][i]/1000)) +
+            (Tm_CRS_pw[i] * (P_supply_rate_core[i]/10000) / (complete_core_Pbex[whichkeep][i]/1000) * exp((-lambda) * Tm_CRS_pw[i]) * lambda_err) +
+            ((P_supply_rate_core[i]/10000)  * lambda / (complete_core_Pbex[whichkeep][i]/1000) * exp((-lambda) * Tm_CRS_pw[i]) * Tm_CRS_pw_err[i])
 
         } else {
           sr_CRS_pw[i] <- Inf
@@ -1648,7 +1647,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       colnames(output_agemodel_CRS_pw) <- c("depth_avg_mm", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "SAR_CRS_pw_mm.yr", "SAR_CRS_pw_err_mm.yr")
     } else {
       colnames(output_agemodel_CRS_pw) <- c("depth_avg_mm", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "MAR_CRS_pw_g.cm.2.yr", "MAR_CRS_pw_err_g.cm.2.yr")
-      output_agemodel_CRS_pw$mass_depth_g.cm.2 <- c(0, dt$mass_depth_avg_corr[!is.na(dt$Pbex)])
+      output_agemodel_CRS_pw$mass_depth_g.cm.2 <- c(0, dt$mass_depth_avg_corr[whichkeep])
       output_agemodel_CRS_pw <- output_agemodel_CRS_pw[ , c("depth_avg_mm", "mass_depth_g.cm.2", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "MAR_CRS_pw_g.cm.2.yr", "MAR_CRS_pw_err_g.cm.2.yr")]
     }
     output_agemodel_CRS_pw_inter <- as.data.frame(seq(0, max(output_agemodel_CRS_pw$depth_avg_mm, na.rm = T), stepout))
