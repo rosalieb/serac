@@ -658,13 +658,18 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     # The inventory should account only for the continuous deposition:
     # [whichkeep] allows to keep only the data for the depth that are not in an instantaneous deposit
     Activity_Bq_m2 <- complete_core_Pbex[whichkeep]*complete_core_density[whichkeep]*complete_core_thickness[whichkeep]
-    Activity_Bq_m2_error <- complete_core_Pbex_err[whichkeep]*complete_core_density[whichkeep]*complete_core_thickness[whichkeep]
+    # Appleby (2001) suggest a 7% error on DBD, which is the 0.07 in the equation below
+    #  Err(A)=A*sqrt((errC/C)^2+0.07^2) with C being activity in mBq.g-1
+    Activity_Bq_m2_error <- Activity_Bq_m2 * sqrt((complete_core_Pbex_err[whichkeep]/complete_core_Pbex[whichkeep])^2+0.07^2)
     Activity_Bq_m2_error[is.na(Activity_Bq_m2_error)] <- 0
     # Inventory: sum from depth to the bottom
     Inventory_CRS <- Inventory_CRS_error <- rep(NA, length(Activity_Bq_m2))
     for(i in 1:length(Activity_Bq_m2)) {
       Inventory_CRS[i] <- sum(Activity_Bq_m2[i:length(Activity_Bq_m2)], na.rm = T)
-      Inventory_CRS_error[i] <- sum(Activity_Bq_m2_error[i:length(Activity_Bq_m2_error)], na.rm = T)
+      # If Activity_Bq_m2_error is called A_err,
+      #    the error on the inventory B is
+      #    B=sqrt(A1_err^2+A2_err^2 +... AZ_err^2).
+      Inventory_CRS_error[i] <- sqrt(sum(Activity_Bq_m2_error[i:length(Activity_Bq_m2_error)]^2, na.rm=T))
     }
   }
 
@@ -964,8 +969,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                               sum(Activity_Bq_m2[complete_core_depth_bottom[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])], na.rm = T),
                                               sum(Activity_Bq_m2[complete_core_depth_bottom[whichkeep]>depth_forced_CRS[i-1] & complete_core_depth_bottom[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])], na.rm = T)),
                                        ifelse(i==1,
-                                              sum(Activity_Bq_m2_error[complete_core_depth_bottom[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])], na.rm = T),
-                                              sum(Activity_Bq_m2_error[complete_core_depth_bottom[whichkeep]>depth_forced_CRS[i-1] & complete_core_depth_bottom[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])], na.rm = T))
+                                              sqrt(sum(Activity_Bq_m2_error[complete_core_depth_bottom[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])]^2, na.rm = T)),
+                                              sqrt(sum(Activity_Bq_m2_error[complete_core_depth_bottom[whichkeep]>depth_forced_CRS[i-1] & complete_core_depth_bottom[whichkeep]<=depth_forced_CRS[i] & !is.na(complete_core_depth_2[whichkeep])]^2, na.rm = T)))
         )
       }
       # Last period, with unknown t2 (or t2 = infinity)
@@ -977,7 +982,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           depth_forced_CRS[length(depth_forced_CRS)], # depth_min
           max(dt$depth_bottom),                       # depth_max
           sum(Activity_Bq_m2[complete_core_depth_bottom[whichkeep]>depth_forced_CRS[length(age_forced_CRS)] & !is.na(complete_core_depth_2[whichkeep])], na.rm = T),
-          sum(Activity_Bq_m2_error[complete_core_depth_bottom[whichkeep]>depth_forced_CRS[length(age_forced_CRS)] & !is.na(complete_core_depth_2[whichkeep])], na.rm = T)
+          sqrt(sum(Activity_Bq_m2_error[complete_core_depth_bottom[whichkeep]>depth_forced_CRS[length(age_forced_CRS)] & !is.na(complete_core_depth_2[whichkeep])]^2, na.rm = T))
         )
 
 
@@ -1035,17 +1040,26 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           #     Err_ P_supply_rate2 * 1/lambda *
           #     (-lambda*Az-2/( P_supply_rate2)^2) *
           #     [1/(exp(-lambda*t2) + lambda * Az-2 / P_supply_rate2)]
-          error_appleby_CRS <-  lambda_err * (-1 / (lambda^2) * log(
-            exp((-lambda) * (coring_yr - t2)) +
-              lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate
+          error_appleby_CRS <- lambda_err * (
+            (-1 / (lambda^2)) * log(
+              exp((-lambda) * (coring_yr - t2)) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate
+            ) + 1 / lambda * 1 / (exp((-lambda) * (coring_yr - t2)) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate) * (
+              (coring_yr - t2) * (exp((-lambda) * (coring_yr - t2)) +
+                                    sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate))
           ) +
-            1 / lambda * 1 / exp((-lambda) * (coring_yr - t2) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate) *
-            (coring_yr - t2) * (exp((-lambda) * (coring_yr - t2)) + sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate)) +
-            sum(Activity_Bq_m2_error[i:imax], na.rm = T) * 1 / lambda * lambda / P_supply_rate *
-            (1/exp((-lambda) * (coring_yr - t2)) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate) +
-            P_supply_rate_err * 1 / lambda *
-            ((-lambda) * sum(Activity_Bq_m2[i:imax], na.rm = T) / (P_supply_rate^2)) *
-            (1 / exp((-lambda) * (coring_yr - t2)) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate)
+            sqrt(sum(Activity_Bq_m2_error[i:imax]^2, na.rm = T)) *
+            1 / lambda *
+            lambda / P_supply_rate *
+            (1/(exp((-lambda) * (coring_yr - t2)) +
+                  lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate)) +
+            P_supply_rate_err * 1 / lambda * (
+              (-lambda) * sum(Activity_Bq_m2[i:imax], na.rm = T) / (P_supply_rate^2)
+            ) * (
+              1 / (exp((-lambda) * (coring_yr - t2)) +
+                     lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate)
+            )
+
+
 
           Tm_CRS_pw_Appleby_error <-
             c(Tm_CRS_pw_Appleby_error, ifelse(i == imin, 0, error_appleby_CRS))
@@ -1090,7 +1104,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           #          [– 1/(lambda*A_z)*Err_A_z]
           error_abril_CRS <- (1/lambda^2 * log(incremental_invent / sum(Activity_Bq_m2[i:imax])) * lambda_err) +
             (1/(lambda * incremental_invent) * incremental_invent_err) +
-            (1/(lambda * sum(Activity_Bq_m2[i:imax])) * sum(Activity_Bq_m2_error[i:imax]))
+            (1/(lambda * sum(Activity_Bq_m2[i:imax])) * sqrt(sum(Activity_Bq_m2_error[i:imax]^2, na.rm = T)))
 
           Tm_CRS_pw_Abril_error <-
             c(Tm_CRS_pw_Abril_error, ifelse(i == imin, 0, error_abril_CRS))
@@ -1712,19 +1726,29 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     # Inventory = sum(activity layer z * dry sediment accumuated at layer z * thickness layer z)
     # The inventory should account only for the continuous deposition:
     # [whichkeep] allows to keep only the data for the depth that are not in an instantaneous deposit
-    Inventory_Cesium <- complete_core_Cs[whichkeep]*complete_core_density[whichkeep]*complete_core_thickness[whichkeep]
-    Inventory_Cesium_low <- (complete_core_Cs-complete_core_Cs_err)[whichkeep]*complete_core_density[whichkeep]*complete_core_thickness[whichkeep]
-    Inventory_Cesium_low[is.na(Inventory_Cesium_low)] <- Inventory_Cesium[is.na(Inventory_Cesium_low)]
-    Inventory_Cesium_high <- (complete_core_Cs+complete_core_Cs_err)[whichkeep]*complete_core_density[whichkeep]*complete_core_thickness[whichkeep]
-    Inventory_Cesium_high[is.na(Inventory_Cesium_high)] <- Inventory_Cesium[is.na(Inventory_Cesium_high)]
+    Activity_Cesium <- complete_core_Cs[whichkeep]*complete_core_density[whichkeep]*complete_core_thickness[whichkeep]
+    Activity_Cesium_err <- complete_core_Cs[whichkeep] * sqrt((complete_core_Cs_err[whichkeep]/complete_core_Cs[whichkeep])^2+0.07^2)
+    # Inventory: sum from depth to the bottom
+    Inventory_Cesium <- Inventory_Cesium_error <- rep(NA, length(Activity_Cesium))
+    for(i in 1:length(Activity_Cesium)) {
+      Inventory_Cesium[i] <- sum(Activity_Cesium[i:length(Activity_Cesium)], na.rm = T)
+      # If Activity_Bq_m2_error is called A_err,
+      #    the error on the inventory B is
+      #    B=sqrt(A1_err^2+A2_err^2 +... AZ_err^2).
+      Inventory_Cesium_error[i] <- sqrt(sum(Activity_Cesium_err[i:length(Activity_Cesium_err)]^2, na.rm=T))
+    }
+    Activity_Cesium_low <- (complete_core_Cs-complete_core_Cs_err)[whichkeep]*complete_core_density[whichkeep]*complete_core_thickness[whichkeep]
+    Activity_Cesium_low[is.na(Activity_Cesium_low)] <- Activity_Cesium[is.na(Activity_Cesium_low)]
+    Activity_Cesium_high <- (complete_core_Cs+complete_core_Cs_err)[whichkeep]*complete_core_density[whichkeep]*complete_core_thickness[whichkeep]
+    Activity_Cesium_high[is.na(Activity_Cesium_high)] <- Activity_Cesium[is.na(Activity_Cesium_high)]
     # We multiply the value by 10 because we ask for the depth in mm, and the density in g/cm3
-    cat(paste(" Inventory (Cesium): ", round(sum(Inventory_Cesium, na.rm=T), 3), " Bq/m2 (range: ", round(sum(Inventory_Cesium_low, na.rm=T)), "-", round(sum(Inventory_Cesium_high, na.rm=T)), " Bq/m2)\n", sep=""))
+    cat(paste(" Inventory (Cesium): ", round(sum(Activity_Cesium, na.rm=T), 3), " Bq/m2 (range: ", round(sum(Activity_Cesium_low, na.rm=T)), "-", round(sum(Activity_Cesium_high, na.rm=T)), " Bq/m2)\n", sep=""))
 
     # Save output in list
     out_list$`Inventories` <- rbind(out_list$`Inventories`,
-                                    data.frame("Inventory" = sum(Inventory_Cesium, na.rm=T),
-                                               "min" = sum(Inventory_Cesium_low, na.rm=T),
-                                               "max" = sum(Inventory_Cesium_high, na.rm=T)))
+                                    data.frame("Inventory" = sum(Activity_Cesium, na.rm=T),
+                                               "min" = sum(Activity_Cesium_low, na.rm=T),
+                                               "max" = sum(Activity_Cesium_high, na.rm=T)))
     rownames(out_list$`Inventories`)[nrow(out_list$`Inventories`)] <- "Cesium Bq.m-2"
   }
 
@@ -1842,7 +1866,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   # Add in output the inventory of Cesium if Cs and density available
   if(Cs_exists & length(grep("Cs", x = colnames(dt)))>1 & length(grep("density", x = colnames(dt)))>=1) {
     metadata <- rbind(metadata,
-                      c("Inventory (Cesium)", paste(round(sum(Inventory_Cesium, na.rm=T), 3), " Bq/m2 (range: ", round(sum(Inventory_Cesium_low, na.rm=T)), "-", round(sum(Inventory_Cesium_high, na.rm=T)), " Bq/m2)\n", sep="")))
+                      c("Inventory (Cesium)", paste(round(sum(Activity_Cesium, na.rm=T), 3), " Bq/m2 (range: ", round(sum(Activity_Cesium_low, na.rm=T)), "-", round(sum(Activity_Cesium_high, na.rm=T)), " Bq/m2)\n", sep="")))
   }
 
   # Add in the output data file the ages estimations for instantaneous deposit
