@@ -1040,20 +1040,25 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           #     Err_ P_supply_rate2 * 1/lambda *
           #     (-lambda*Az-2/( P_supply_rate2)^2) *
           #     [1/(exp(-lambda*t2) + lambda * Az-2 / P_supply_rate2)]
-          error_appleby_CRS <- lambda_err * (
-            (-1 / (lambda^2)) * log(
-              exp((-lambda) * (coring_yr - t2)) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate
-            ) + 1 / lambda * 1 / (exp((-lambda) * (coring_yr - t2)) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate) * (
-              (coring_yr - t2) * (exp((-lambda) * (coring_yr - t2)) +
-                                    sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate))
-          ) +
+          error_appleby_CRS <-
+            lambda_err * (
+              (-1 / (lambda^2)) * log(
+                exp((-lambda) * (coring_yr - t2)) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate
+              ) + 1 / lambda * 1 / (exp((-lambda) * (coring_yr - t2)) + lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate) *
+                (
+                  (coring_yr - t2) * (exp((-lambda) * (coring_yr - t2)) +
+                                        sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate)
+                )
+            ) +
             sqrt(sum(Activity_Bq_m2_error[i:imax]^2, na.rm = T)) *
             1 / lambda *
             lambda / P_supply_rate *
-            (1/(exp((-lambda) * (coring_yr - t2)) +
-                  lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate)) +
+            (
+              1/(exp((-lambda) * (coring_yr - t2)) +
+                   lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate)
+            ) +
             P_supply_rate_err * 1 / lambda * (
-              (-lambda) * sum(Activity_Bq_m2[i:imax], na.rm = T) / (P_supply_rate^2)
+              (lambda) * sum(Activity_Bq_m2[i:imax], na.rm = T) / (P_supply_rate^2)
             ) * (
               1 / (exp((-lambda) * (coring_yr - t2)) +
                      lambda * sum(Activity_Bq_m2[i:imax], na.rm = T) / P_supply_rate)
@@ -1711,7 +1716,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   # Inventory Lead
   if(Pb_exists & length(grep("Pb", x = colnames(dt)))>1 & length(grep("density", x = colnames(dt)))>=1) {
     # We multiply the value by 10 because we ask for the depth in mm, and the density in g/cm3
-    cat(paste(" Inventory (Lead): ", round(Inventory_CRS[1], 3), " Bq/m2 (range: ", round(Inventory_CRS[1]-Inventory_CRS_error[1]), "-", round(Inventory_CRS[1]+Inventory_CRS_error[1]), " Bq/m2)\n", sep=""))
+    cat(paste(" Inventory (Lead): ", round(Inventory_CRS[1], 3), " Bq/m2 (+/- ", round(Inventory_CRS_error[1], 1), " Bq/m2)\n", sep=""))
 
     # Save output in list
     out_list$`Inventories` <- rbind(out_list$`Inventories`,
@@ -1737,18 +1742,16 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       #    B=sqrt(A1_err^2+A2_err^2 +... AZ_err^2).
       Inventory_Cesium_error[i] <- sqrt(sum(Activity_Cesium_err[i:length(Activity_Cesium_err)]^2, na.rm=T))
     }
-    Activity_Cesium_low <- (complete_core_Cs-complete_core_Cs_err)[whichkeep]*complete_core_density[whichkeep]*complete_core_thickness[whichkeep]
-    Activity_Cesium_low[is.na(Activity_Cesium_low)] <- Activity_Cesium[is.na(Activity_Cesium_low)]
-    Activity_Cesium_high <- (complete_core_Cs+complete_core_Cs_err)[whichkeep]*complete_core_density[whichkeep]*complete_core_thickness[whichkeep]
-    Activity_Cesium_high[is.na(Activity_Cesium_high)] <- Activity_Cesium[is.na(Activity_Cesium_high)]
+    Inventory_Cesium_low <- Inventory_Cesium - Inventory_Cesium_error
+    Inventory_Cesium_high <- Inventory_Cesium + Inventory_Cesium_error
     # We multiply the value by 10 because we ask for the depth in mm, and the density in g/cm3
-    cat(paste(" Inventory (Cesium): ", round(sum(Activity_Cesium, na.rm=T), 3), " Bq/m2 (range: ", round(sum(Activity_Cesium_low, na.rm=T)), "-", round(sum(Activity_Cesium_high, na.rm=T)), " Bq/m2)\n", sep=""))
+    cat(paste(" Inventory (Cesium): ", round(Inventory_Cesium[1], 3), " Bq/m2 (+/- ", round(Inventory_Cesium_error[1], 1)," Bq/m2)\n", sep=""))
 
     # Save output in list
     out_list$`Inventories` <- rbind(out_list$`Inventories`,
-                                    data.frame("Inventory" = sum(Activity_Cesium, na.rm=T),
-                                               "min" = sum(Activity_Cesium_low, na.rm=T),
-                                               "max" = sum(Activity_Cesium_high, na.rm=T)))
+                                    data.frame("Inventory" = Inventory_Cesium[1],
+                                               "min" = Inventory_Cesium_low[1],
+                                               "max" = Inventory_Cesium_high[1]))
     rownames(out_list$`Inventories`)[nrow(out_list$`Inventories`)] <- "Cesium Bq.m-2"
   }
 
@@ -1860,13 +1863,13 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   # Add in output the inventory of Lead if CRS hypothesis was selected
   if(Pb_exists & length(grep("Pb", x = colnames(dt)))>1 & length(grep("density", x = colnames(dt)))>=1) {
     metadata <- rbind(metadata,
-                      c("Inventory (Lead)", paste(round(Inventory_CRS[1], 3), " Bq/m2 (range: ", round(Inventory_CRS[1]-Inventory_CRS_error[1]), "-", round(Inventory_CRS[1]+Inventory_CRS_error[1]), " Bq/m2)\n", sep="")))
+                      c("Inventory (Lead)", paste(round(Inventory_CRS[1], 3), " Bq/m2 (+/-", round(Inventory_CRS_error[1], 1), " Bq/m2)\n", sep="")))
   }
 
   # Add in output the inventory of Cesium if Cs and density available
   if(Cs_exists & length(grep("Cs", x = colnames(dt)))>1 & length(grep("density", x = colnames(dt)))>=1) {
     metadata <- rbind(metadata,
-                      c("Inventory (Cesium)", paste(round(sum(Activity_Cesium, na.rm=T), 3), " Bq/m2 (range: ", round(sum(Activity_Cesium_low, na.rm=T)), "-", round(sum(Activity_Cesium_high, na.rm=T)), " Bq/m2)\n", sep="")))
+                      c("Inventory (Cesium)", paste(round(Inventory_Cesium[1], 3), " Bq/m2 (+/- ", round(Inventory_Cesium_error[1], 1)," Bq/m2)\n", sep="")))
   }
 
   # Add in the output data file the ages estimations for instantaneous deposit
