@@ -1810,39 +1810,39 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     if(!mass_depth) {
       if (max(sedchange)>0) {
         metadata <- rbind(metadata,
-                          c(paste("Sediment accumulation rate (CFCS model) ", SML, "-", sedchange[1], "mm", sep=""), paste("SAR= ", abs(round(sr_sed1, 3)), "mm/yr, R2= ", round(summary(lm_sed1)$r.squared, 4), ", Error +/- ", abs(round(sr_sed1_err, 3)), "mm/yr", sep="")))
+                          c(paste("Sediment accumulation rate (CFCS model) ", SML, "-", sedchange[1], " mm", sep=""), paste("SAR= ", abs(round(sr_sed1, 3)), "mm/yr, R2= ", round(summary(lm_sed1)$r.squared, 4), ", Error +/- ", abs(round(sr_sed1_err, 3)), " mm/yr", sep="")))
       } else {
         metadata <- rbind(metadata,
-                          c("Sediment accumulation rate (CFCS model)", paste("SAR= ", abs(round(sr_sed1, 3)), "mm/yr, R2= ", round(summary(lm_sed1)$r.squared, 4), ", Error +/- ", abs(round(sr_sed1_err, 3)), "mm/yr", sep="")))
+                          c("Sediment accumulation rate (CFCS model)", paste("SAR= ", abs(round(sr_sed1, 3)), " mm/yr, R2= ", round(summary(lm_sed1)$r.squared, 4), ", Error +/- ", abs(round(sr_sed1_err, 3)), "mm/yr", sep="")))
       }
       if (max(sedchange)>0) {
         if(length(sedchange)==1) {
           metadata <- rbind(metadata,
-                            c(paste("Sediment accumulation rate (CFCS model) ", sedchange[1], "mm-bottom", sep=""), paste("SAR= ", abs(round(sr_sed2, 3)), "mm/yr, R2= ", round(summary(lm_sed2)$r.squared, 4), ", Error +/- ", abs(round(sr_sed2_err, 3)), "mm/yr", sep="")))
+                            c(paste("Sediment accumulation rate (CFCS model) ", sedchange[1], " mm-bottom", sep=""), paste("SAR= ", abs(round(sr_sed2, 3)), " mm/yr, R2= ", round(summary(lm_sed2)$r.squared, 4), ", Error +/- ", abs(round(sr_sed2_err, 3)), " mm/yr", sep="")))
         }
         if(length(sedchange)==2) {
           metadata <- rbind(metadata,
-                            c(paste("Sediment accumulation rate (CFCS model) ", sedchange[1], "-", sedchange[2], "mm", sep=""), paste("SAR= ", abs(round(sr_sed2, 3)), "mm/yr, R2= ", round(summary(lm_sed2)$r.squared, 4), ", Error +/- ", abs(round(sr_sed1_err, 3)), "mm/yr", sep="")),
-                            c(paste("Sediment accumulation rate (CFCS model) ", sedchange[2], "mm-bottom", sep=""), paste("SAR= ", abs(round(sr_sed3, 3)), "mm/yr, R2= ", round(summary(lm_sed3)$r.squared, 4), ", Error +/- ", abs(round(sr_sed1_err, 3)), "mm/yr", sep="")))
+                            c(paste("Sediment accumulation rate (CFCS model) ", sedchange[1], "-", sedchange[2], "mm", sep=""), paste("SAR= ", abs(round(sr_sed2, 3)), " mm/yr, R2= ", round(summary(lm_sed2)$r.squared, 4), ", Error +/- ", abs(round(sr_sed1_err, 3)), " mm/yr", sep="")),
+                            c(paste("Sediment accumulation rate (CFCS model) ", sedchange[2], " mm-bottom", sep=""), paste("SAR= ", abs(round(sr_sed3, 3)), " mm/yr, R2= ", round(summary(lm_sed3)$r.squared, 4), ", Error +/- ", abs(round(sr_sed1_err, 3)), " mm/yr", sep="")))
         }
       }
     } else {
       if (max(sedchange)>0) {
         metadata <- rbind(metadata,
-                          c(paste("Mass accumulation rate (CFCS model) ", SML, "-", sedchange[1], "mm", sep=""), paste("MAR= ", abs(round(sr_sed1, 3)), "g/cm2/yr, R2= ", round(summary(lm_sed1)$r.squared, 4), ", Error +/- ", abs(round(sr_sed1_err, 3)), "g/cm2/yr", sep="")))
+                          c(paste("Mass accumulation rate (CFCS model) ", SML, "-", sedchange[1], " mm", sep=""), paste("MAR= ", abs(round(sr_sed1, 3)), " g/cm2/yr, R2= ", round(summary(lm_sed1)$r.squared, 4), ", Error +/- ", abs(round(sr_sed1_err, 3)), " g/cm2/yr", sep="")))
       } else {
         metadata <- rbind(metadata,
-                          c("Mass accumulation rate (CFCS model)", paste("MAR= ", abs(round(sr_sed1, 3)), "g/cm2/yr, R2= ", round(summary(lm_sed1)$r.squared, 4), ", Error +/- ", abs(round(sr_sed1_err, 3)), "g/cm2/yr", sep="")))
+                          c("Mass accumulation rate (CFCS model)", paste("MAR= ", abs(round(sr_sed1, 3)), " g/cm2/yr, R2= ", round(summary(lm_sed1)$r.squared, 4), ", Error +/- ", abs(round(sr_sed1_err, 3)), " g/cm2/yr", sep="")))
       }
       if (max(sedchange)>0) {
         if(length(sedchange)==1) {
           metadata <- rbind(metadata,
-                            c(paste("Mass accumulation rate (CFCS model) ", sedchange[1], "mm-bottom", sep=""), paste("MAR= ", abs(round(sr_sed2, 3)), "g/cm2/yr, R2= ", round(summary(lm_sed2)$r.squared, 4), ", Error +/- ", abs(round(sr_sed2_err, 3)), "g/cm2/yr", sep="")))
+                            c(paste("Mass accumulation rate (CFCS model) ", sedchange[1], " mm-bottom", sep=""), paste("MAR= ", abs(round(sr_sed2, 3)), " g/cm2/yr, R2= ", round(summary(lm_sed2)$r.squared, 4), ", Error +/- ", abs(round(sr_sed2_err, 3)), " g/cm2/yr", sep="")))
         }
         if(length(sedchange)==2) {
           metadata <- rbind(metadata,
-                            c(paste("Mass accumulation rate (CFCS model) ", sedchange[1], "-", sedchange[2], "mm", sep=""), paste("MAR= ", abs(round(sr_sed2, 3)), "g/cm2/yr, R2= ", round(summary(lm_sed2)$r.squared, 4), ", Error +/- ", abs(round(sr_sed2_err, 3)), "g/cm2/yr", sep="")),
-                            c(paste("Mass accumulation rate (CFCS model) ", sedchange[2], "mm-bottom", sep=""), paste("MAR= ", abs(round(sr_sed3, 3)), "g/cm2/yr, R2= ", round(summary(lm_sed3)$r.squared, 4), ", Error +/- ", abs(round(sr_sed3_err, 3)), "g/cm2/yr", sep="")))
+                            c(paste("Mass accumulation rate (CFCS model) ", sedchange[1], "-", sedchange[2], " mm", sep=""), paste("MAR= ", abs(round(sr_sed2, 3)), " g/cm2/yr, R2= ", round(summary(lm_sed2)$r.squared, 4), ", Error +/- ", abs(round(sr_sed2_err, 3)), " g/cm2/yr", sep="")),
+                            c(paste("Mass accumulation rate (CFCS model) ", sedchange[2], " mm-bottom", sep=""), paste("MAR= ", abs(round(sr_sed3, 3)), " g/cm2/yr, R2= ", round(summary(lm_sed3)$r.squared, 4), ", Error +/- ", abs(round(sr_sed3_err, 3)), " g/cm2/yr", sep="")))
         }
       }
     }
