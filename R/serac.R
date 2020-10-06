@@ -39,6 +39,7 @@
 #' @param dmin Maximum depth of age-depth model (useful if the user doesn't want to plot the lower region).
 #' @param dmax Maximum depth of age-depth model (useful if the user doesn't want to plot the lower region). dmax cannot be in the middle of an instantaneous deposit. e.g. if there is an instantaneous deposit between 180 and 200 mm, dmax cannot be 190 mm, and will be converted to 200 mm automatically.
 #' @param sedchange Up to two changes in sedimentation rate, e.g., sedchange=c(175, 290) indicates two changes of sedimentation rate at 17.5 and 29.0 cm.
+#' @param error_DBD By default, error_DBD = 0.07, as Appleby (2001) suggest a 7% error on dry bulk density (DBD).
 #' @param min_yr The minimum year limit for the age-depth model plot. The user can adjust this argument after a first computation of the model
 #' @param SML Surface Mixed Layer: a depth in mm - unless "input_depth_mm=F" above which the sediment is considered to be mixed. E.g., SML=30 indicates that the first 3 cm are mixed sediment: the data point are ploted but not included in the Pb models.
 #' @param stepout Depth resolution for the file out in mm - unless "input_depth_mm=F".
@@ -82,7 +83,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                   coring_yr = c(), plot_Am = FALSE, plot_Cs = FALSE, plot_Pb = TRUE,
                   plot_Pb_inst_deposit = FALSE, plot_CFCS_regression = c(),
                   varves = FALSE, dmin = c(), dmax = c(), sedchange = c(0),
-                  min_yr = 1880, SML = c(0), stepout = 5, mycex = 1,
+                  error_DBD = 0.07, min_yr = 1880, SML = c(0), stepout = 5, mycex = 1,
                   archive_metadata = FALSE, save_code = TRUE,
                   prop_width_fig = 1, prop_height_fig = 1)
 .serac(name, model, Cher, NWT, Hemisphere, FF,
@@ -96,7 +97,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
        coring_yr, plot_Am, plot_Cs, plot_Pb,
        plot_Pb_inst_deposit, plot_CFCS_regression,
        varves, dmin, dmax, sedchange,
-       min_yr, SML, stepout, mycex,
+       error_DBD, min_yr, SML, stepout, mycex,
        archive_metadata, save_code,
        prop_width_fig, prop_height_fig)
 
@@ -111,7 +112,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                    coring_yr, plot_Am, plot_Cs, plot_Pb,
                    plot_Pb_inst_deposit, plot_CFCS_regression,
                    varves, dmin, dmax, sedchange,
-                   min_yr, SML, stepout, mycex,
+                   error_DBD, min_yr, SML, stepout, mycex,
                    archive_metadata, save_code,
                    prop_width_fig, prop_height_fig) {
 
@@ -170,6 +171,12 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     if(length(age_forced_CRS) != length(depth_forced_CRS)) stop("\n Warning, age_forced_CRS and depth_forced_CRS must be vector of the same length. \n   (for every age_forced_CRS, one depth_forced_CRS)\n\n")
     if(is.null(age_forced_CRS)|is.null(depth_forced_CRS)) stop("\n Warning, if choosing to use the CRS piecewise model, you need to enter both an age and a depth to force the model.\n\n")
 
+  }
+
+  # Make sure that error_DBD is a percentage
+  if(length(error_DBD) !=1 || error_DBD < 0 || error_DBD > 1) {
+    error_DBD = 0.07
+    message(paste0("\n There was an error on your input for the error on dry bulk density (argument error_DBD). \n We set it to its default, 7%, following Appleby (2001).\n\n"))
   }
 
   #### 1. READ DATA ----
@@ -658,9 +665,9 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     # The inventory should account only for the continuous deposition:
     # [whichkeep] allows to keep only the data for the depth that are not in an instantaneous deposit
     Activity_Bq_m2 <- complete_core_Pbex[whichkeep]*complete_core_density[whichkeep]*complete_core_thickness[whichkeep]
-    # Appleby (2001) suggest a 7% error on DBD, which is the 0.07 in the equation below
+    # Appleby (2001) suggest a 7% error on DBD, which is the 0.07 (error_DBD, specified by the user) in the equation below
     #  Err(A)=A*sqrt((errC/C)^2+0.07^2) with C being activity in mBq.g-1
-    Activity_Bq_m2_error <- Activity_Bq_m2 * sqrt((complete_core_Pbex_err[whichkeep]/complete_core_Pbex[whichkeep])^2+0.07^2)
+    Activity_Bq_m2_error <- Activity_Bq_m2 * sqrt((complete_core_Pbex_err[whichkeep]/complete_core_Pbex[whichkeep])^2+error_DBD^2)
     Activity_Bq_m2_error[is.na(Activity_Bq_m2_error)] <- 0
     # Inventory: sum from depth to the bottom
     Inventory_CRS <- Inventory_CRS_error <- rep(NA, length(Activity_Bq_m2))
@@ -703,8 +710,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       # Print sed rate and error
       if (max(sedchange)==0) {
         if(!mass_depth) {
-          cat(paste("\n Sediment accumulation rate (CFCS model): SAR= ", abs(round(sr_sed1, 3)), " mm/yr, R2= ", round(summary(lm_sed1)$r.squared, 4), "\n", sep=""))
-          cat(paste("                          Error:     +/- ", abs(round(sr_sed1_err, 3)), " mm/yr\n", sep=""))
+          cat(paste("\n Sediment accumulation rate (CFCS model): SAR= ", abs(round(sr_sed1, 2)), " mm/yr, R2= ", round(summary(lm_sed1)$r.squared, 4), "\n", sep=""))
+          cat(paste("                          Error:     +/- ", abs(round(sr_sed1_err, 2)), " mm/yr\n", sep=""))
         } else {
           cat(paste("\n Mass accumulation rate (CFCS model): MAR= ", abs(round(sr_sed1, 3)), " g/cm2/yr, R2= ", round(summary(lm_sed1)$r.squared, 4), "\n", sep=""))
           cat(paste("                              Error:     +/- ", abs(round(sr_sed1_err, 3)), " g/cm2/yr\n", sep=""))
@@ -720,10 +727,10 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
           # Print sed rate and error
           if(!mass_depth) {
-            cat(paste("\n Sediment accumulation rate (CFCS model) ", SML, "-", sedchange[1], "mm: SAR= ", abs(round(sr_sed1, 3)), " mm/yr, R2= ", round(summary(lm_sed1)$r.squared, 4), "\n", sep=""))
-            cat(paste("                          Error:     +/- ", abs(round(sr_sed1_err, 3)), " mm/yr\n", sep=""))
-            cat(paste("\n Sediment accumulation rate (CFCS model) ", sedchange[1], "mm-bottom", ": SAR= ", abs(round(sr_sed2, 3)), " mm/yr, R2= ", round(summary(lm_sed2)$r.squared, 4), "\n", sep=""))
-            cat(paste("                          Error:     +/- ", abs(round(sr_sed2_err, 3)), " mm/yr\n", sep=""))
+            cat(paste("\n Sediment accumulation rate (CFCS model) ", SML, "-", sedchange[1], "mm: SAR= ", abs(round(sr_sed1, 2)), " mm/yr, R2= ", round(summary(lm_sed1)$r.squared, 4), "\n", sep=""))
+            cat(paste("                          Error:     +/- ", abs(round(sr_sed1_err, 2)), " mm/yr\n", sep=""))
+            cat(paste("\n Sediment accumulation rate (CFCS model) ", sedchange[1], "mm-bottom", ": SAR= ", abs(round(sr_sed2, 2)), " mm/yr, R2= ", round(summary(lm_sed2)$r.squared, 4), "\n", sep=""))
+            cat(paste("                          Error:     +/- ", abs(round(sr_sed2_err, 2)), " mm/yr\n", sep=""))
           } else {
             cat(paste("\n Mass accumulation rate (CFCS model) ", SML, "-", sedchange[1], "mm: MAR= ", abs(round(sr_sed1, 3)), " g/cm2/yr, R2= ", round(summary(lm_sed1)$r.squared, 4), "\n", sep=""))
             cat(paste("                              Error:     +/- ", abs(round(sr_sed1_err, 3)), " g/cm2/yr\n", sep=""))
@@ -757,12 +764,12 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
           # Print sed rate and error
           if (!mass_depth) {
-            cat(paste("\n Sediment accumulation rate (CFCS model) ", SML, "-", sedchange[1], "mm: SAR= ", abs(round(sr_sed1, 3)), " mm/yr, R2= ", round(summary(lm_sed1)$r.squared, 4), "\n", sep=""))
-            cat(paste("                          Error:     +/- ", abs(round(sr_sed1_err, 3)), " mm/yr\n", sep=""))
-            cat(paste("\n Sediment accumulation rate (CFCS model) ", sedchange[1], "-", sedchange[2], "mm: SAR= ", abs(round(sr_sed2, 3)), " mm/yr, R2= ", round(summary(lm_sed2)$r.squared, 4), "\n", sep=""))
-            cat(paste("                          Error:     +/- ", abs(round(sr_sed2_err, 3)), " mm/yr\n", sep=""))
-            cat(paste("\n Sediment accumulation rate (CFCS model) ", sedchange[2], "mm-bottom", ": SAR= ", abs(round(sr_sed3, 3)), " mm/yr, R2= ", round(summary(lm_sed3)$r.squared, 4), "\n", sep=""))
-            cat(paste("                          Error:     +/- ", abs(round(sr_sed3_err, 3)), " mm/yr\n", sep=""))
+            cat(paste("\n Sediment accumulation rate (CFCS model) ", SML, "-", sedchange[1], "mm: SAR= ", abs(round(sr_sed1, 2)), " mm/yr, R2= ", round(summary(lm_sed1)$r.squared, 4), "\n", sep=""))
+            cat(paste("                          Error:     +/- ", abs(round(sr_sed1_err, 2)), " mm/yr\n", sep=""))
+            cat(paste("\n Sediment accumulation rate (CFCS model) ", sedchange[1], "-", sedchange[2], "mm: SAR= ", abs(round(sr_sed2, 2)), " mm/yr, R2= ", round(summary(lm_sed2)$r.squared, 4), "\n", sep=""))
+            cat(paste("                          Error:     +/- ", abs(round(sr_sed2_err, 2)), " mm/yr\n", sep=""))
+            cat(paste("\n Sediment accumulation rate (CFCS model) ", sedchange[2], "mm-bottom", ": SAR= ", abs(round(sr_sed3, 2)), " mm/yr, R2= ", round(summary(lm_sed3)$r.squared, 4), "\n", sep=""))
+            cat(paste("                          Error:     +/- ", abs(round(sr_sed3_err, 2)), " mm/yr\n", sep=""))
           } else {
             cat(paste("\n Mass accumulation rate (CFCS model) ", SML, "-", sedchange[1], "mm: MAR= ", abs(round(sr_sed1, 3)), " g/cm2/yr, R2= ", round(summary(lm_sed1)$r.squared, 4), "\n", sep=""))
             cat(paste("                              Error:     +/- ", abs(round(sr_sed1_err, 3)), " g/cm2/yr\n", sep=""))
@@ -838,7 +845,6 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           if(sr_CIC[i] != Inf) {
             mar_CIC <- c(mar_CIC,
                          sr_CIC[i] / 10 * complete_core_density[whichkeep][i])
-            # Appleby (2001) suggest a 7% error on DBD, which is the 0.07 in the equation below
             # delta(MAR)=MAR*racine(delta(T1)^2+delta(T2)^2)/(T2-T1)
             if(i == 1) {
               MAR_CIC_err <- c(MAR_CIC_err,
@@ -858,8 +864,6 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         sr_CIC <- mar_CIC
         sr_CIC_err <- MAR_CIC_err
       }
-
-
 
       # Print message
       if(!mass_depth) {
@@ -919,8 +923,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       if(!mass_depth) {
         sar_CRS = sr_CRS * 10 / complete_core_density[whichkeep]
         # SAR_error = SAR * sqrt[(MAR_error/MAR)^2+0.07^2]
-        # Appleby (2001) suggest a 7% error on DBD, which is the 0.07 in the equation below
-        sr_CRS_err = sar_CRS * sqrt((sr_CRS_err / sr_CRS)^2 + 0.07^2)
+        # Appleby (2001) suggest a 7% error on DBD, which is the 0.07 (error_DBD, specified by the user) in the equation below
+        sr_CRS_err = sar_CRS * sqrt((sr_CRS_err / sr_CRS)^2 + error_DBD^2)
 
         sr_CRS <- sar_CRS
         rm(sar_CRS)
@@ -1206,7 +1210,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       if(!mass_depth) {
         #SAR=MAR*10/DBD
         sar_CRS_pw = sr_CRS_pw *10 / complete_core_density[whichkeep]
-        sar_CRS_pw_err = sar_CRS_pw * sqrt((sr_CRS_pw_err / sr_CRS_pw)^2 + 0.07^2)
+        sar_CRS_pw_err = sar_CRS_pw * sqrt((sr_CRS_pw_err / sr_CRS_pw)^2 + error_DBD^2)
         sr_CRS_pw <- sar_CRS_pw
         sr_CRS_pw_err <- sar_CRS_pw_err
       }
@@ -1732,7 +1736,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     # The inventory should account only for the continuous deposition:
     # [whichkeep] allows to keep only the data for the depth that are not in an instantaneous deposit
     Activity_Cesium <- complete_core_Cs[whichkeep]*complete_core_density[whichkeep]*complete_core_thickness[whichkeep]
-    Activity_Cesium_err <- complete_core_Cs[whichkeep] * sqrt((complete_core_Cs_err[whichkeep]/complete_core_Cs[whichkeep])^2+0.07^2)
+    Activity_Cesium_err <- complete_core_Cs[whichkeep] * sqrt((complete_core_Cs_err[whichkeep]/complete_core_Cs[whichkeep])^2+error_DBD^2)
     # Inventory: sum from depth to the bottom
     Inventory_Cesium <- Inventory_Cesium_error <- rep(NA, length(Activity_Cesium))
     for(i in 1:length(Activity_Cesium)) {
