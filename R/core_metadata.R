@@ -181,7 +181,6 @@ core_metadata <- function(name=c())
         if(answer3=="n") answer3="N" # change to upper case in case the user used lower case
         if(answer3=="y") answer3="Y" # change to upper case in case the user used lower case
       } else {answer3="Y"}
-      if(answer3=="N")
       if(answer3=="Y") {
         message("  Enter additional comments:")
         additional_comments <- readline()
