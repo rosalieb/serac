@@ -40,11 +40,10 @@ core_metadata <- function(name=c())
         if(answer3=="n") answer3="N" # change to upper case in case the user used lower case
         if(answer3=="y") answer3="Y" # change to upper case in case the user used lower case
       } else {answer3="Y"}
-      if(answer3=="N") ISGN <- paste(suppmetadata[b,2])
       if(answer3=="Y") {
         message("  Enter ISGN:")
         ISGN <- readline()
-      }
+      } else ISGN <- paste(suppmetadata[b,2])
       b=b+1
 
       # Date sample core
@@ -55,11 +54,10 @@ core_metadata <- function(name=c())
         if(answer3=="n") answer3="N" # change to upper case in case the user used lower case
         if(answer3=="y") answer3="Y" # change to upper case in case the user used lower case
       } else {answer3="Y"}
-      if(answer3=="N") sample_date <- paste(suppmetadata[b,2])
       if(answer3=="Y") {
         message("  Enter sample date (YYYY-MM-DD):")
         sample_date <- readline()
-      }
+      } else sample_date <- paste(suppmetadata[b,2])
       b=b+1
 
       # Coordinates
@@ -71,11 +69,10 @@ core_metadata <- function(name=c())
         if(answer3=="n") answer3="N" # change to upper case in case the user used lower case
         if(answer3=="y") answer3="Y" # change to upper case in case the user used lower case
       } else {answer3="Y"}
-      if(answer3=="N") coring_coordinates_y <- paste(suppmetadata[b,2])
       if(answer3=="Y") {
         message("  Enter latitude:")
         coring_coordinates_y <- readline()
-      }
+      } else coring_coordinates_y <- paste(suppmetadata[b,2])
       b=b+1
 
       # y
@@ -86,11 +83,10 @@ core_metadata <- function(name=c())
         if(answer3=="n") answer3="N" # change to upper case in case the user used lower case
         if(answer3=="y") answer3="Y" # change to upper case in case the user used lower case
       } else {answer3="Y"}
-      if(answer3=="N") coring_coordinates_x <- paste(suppmetadata[b,2])
       if(answer3=="Y") {
         message("  Enter longitude:")
         coring_coordinates_x <- readline()
-      }
+      } else coring_coordinates_x <- paste(suppmetadata[b,2])
       b=b+1
 
       # Coring method
@@ -101,11 +97,10 @@ core_metadata <- function(name=c())
         if(answer3=="n") answer3="N" # change to upper case in case the user used lower case
         if(answer3=="y") answer3="Y" # change to upper case in case the user used lower case
       } else {answer3="Y"}
-      if(answer3=="N") coring_method <- paste(suppmetadata[b,2])
       if(answer3=="Y") {
         message("  Enter coring method:")
         coring_method <- readline()
-      }
+      } else coring_method <- paste(suppmetadata[b,2])
       b=b+1
 
       # Laboratory subsampling method
@@ -116,11 +111,10 @@ core_metadata <- function(name=c())
         if(answer3=="n") answer3="N" # change to upper case in case the user used lower case
         if(answer3=="y") answer3="Y" # change to upper case in case the user used lower case
       } else {answer3="Y"}
-      if(answer3=="N") laboratory_subsampling_method <- paste(suppmetadata[b,2])
       if(answer3=="Y") {
         message("  Enter subsampling method:")
         laboratory_subsampling_method <- readline()
-      }
+      } else laboratory_subsampling_method <- paste(suppmetadata[b,2])
       b=b+1
 
       # Lab where measurements where carried out
@@ -131,11 +125,10 @@ core_metadata <- function(name=c())
         if(answer3=="n") answer3="N" # change to upper case in case the user used lower case
         if(answer3=="y") answer3="Y" # change to upper case in case the user used lower case
       } else {answer3="Y"}
-      if(answer3=="N") laboratory <- paste(suppmetadata[b,2])
       if(answer3=="Y") {
         message("  Enter laboratory name:")
         laboratory <- readline()
-      }
+      } else laboratory <- paste(suppmetadata[b,2])
       b=b+1
 
       # Instrument type
@@ -146,11 +139,10 @@ core_metadata <- function(name=c())
         if(answer3=="n") answer3="N" # change to upper case in case the user used lower case
         if(answer3=="y") answer3="Y" # change to upper case in case the user used lower case
       } else {answer3="Y"}
-      if(answer3=="N") instrument_type <- paste(suppmetadata[b,2])
       if(answer3=="Y") {
         message("  Enter instrument type:")
         instrument_type <- readline()
-      }
+      } else instrument_type <- paste(suppmetadata[b,2])
       b=b+1
 
       # Start of the measurements
@@ -161,11 +153,10 @@ core_metadata <- function(name=c())
         if(answer3=="n") answer3="N" # change to upper case in case the user used lower case
         if(answer3=="y") answer3="Y" # change to upper case in case the user used lower case
       } else {answer3="Y"}
-      if(answer3=="N") measurement_startdate <- paste(suppmetadata[b,2])
       if(answer3=="Y") {
         message("  Enter start of the measurements:")
         measurement_startdate <- readline()
-      }
+      } else measurement_startdate <- paste(suppmetadata[b,2])
       b=b+1
 
       # End of the measurements
@@ -176,11 +167,10 @@ core_metadata <- function(name=c())
         if(answer3=="n") answer3="N" # change to upper case in case the user used lower case
         if(answer3=="y") answer3="Y" # change to upper case in case the user used lower case
       } else {answer3="Y"}
-      if(answer3=="N") measurement_enddate <- paste(suppmetadata[b,2])
       if(answer3=="Y") {
         message("  Enter end of the measurements:")
         measurement_enddate <- readline()
-      }
+      } else measurement_enddate <- paste(suppmetadata[b,2])
       b=b+1
 
       # Any additional comments?
@@ -191,11 +181,11 @@ core_metadata <- function(name=c())
         if(answer3=="n") answer3="N" # change to upper case in case the user used lower case
         if(answer3=="y") answer3="Y" # change to upper case in case the user used lower case
       } else {answer3="Y"}
-      if(answer3=="N") additional_comments <- paste(suppmetadata[b,2])
+      if(answer3=="N")
       if(answer3=="Y") {
         message("  Enter additional comments:")
         additional_comments <- readline()
-      }
+      } else additional_comments <- paste(suppmetadata[b,2])
 
       # Write file
       suppmetadata <- matrix(c("Parameter","Answer given",
