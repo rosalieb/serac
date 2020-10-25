@@ -16,6 +16,7 @@ Authors@R: c(
 Maintainer: Rosalie Bruel <rosaliebruel@gmail.com>
 Description: serac allows the user to compute age-depth model and provide an output graph, as well as age model in a text file and metadata, on the free open-source statistical software R.
     serac ensure the reproducibility of age-depth model, and grant the possibility to test several 210Pbex models (CFCS, CIC, CRS) and sedimentation hypotheses (change in sedimentation rates, instantaneous deposits, varved sedimentation, etc.).
+Date/Publication: 2020-10-24 18:30:02 UTC
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
