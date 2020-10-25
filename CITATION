@@ -1,4 +1,4 @@
-year <- sub("-.*", "", meta$Date)
+year <- 2020
 note <- sprintf("R package version %s", meta$Version)
 
 citHeader("serac: A R package for ShortlivEd RAdionuclide chronology of recent sediment cores")
