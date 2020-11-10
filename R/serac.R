@@ -2628,9 +2628,9 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       axis(2, at = -(pretty(seq(dmin, dmax, 5))), labels=pretty(seq(dmin, dmax, 5)), cex.axis=cex_2)
       mtext(text = "Depth (mm)", side = 2, line=2.2, cex=cex_1)
 
+      if(inst_deposit_present) rect(xleft = -2, ybottom = -dmax*1.2, xright = 3, ytop = -dmax, col = "white", border = "white", density = 1)
       par(xpd=TRUE)
       if(inst_deposit_present) for (i in 1:nrow(inst_deposit)) rect(xleft = .5, ybottom = -inst_deposit[i, 2], xright = 3, ytop = -inst_deposit[i, 1], col=inst_depositcol, border=inst_depositcol, lwd=.4)
-      if(inst_deposit_present) rect(xleft = -2, ybottom = -dmax*1.2, xright = 3, ytop = -dmax, col = "white", border = "white", density = 1)
       if(SML>0) rect(xleft = .5, ybottom = -SML, xright = 3, ytop = 0, col=grey(0.97), border=NA)
       par(xpd=FALSE)
 
@@ -2832,7 +2832,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           lines(x = c(rep(-historic_a[i], 2)), y = c(20, -(historic_d_dt[i, 1])), lty=3)
           par(xpd=T)
           if (!is.na(historic_n[i])) {
-            shadowtext(-(min_yr+(coring_yr-min_yr)*.15), -mean(historic_d_dt[i, ], na.rm=T),
+            shadowtext(-(min_yr+(coring_yr-min_yr)*.17), -mean(historic_d_dt[i, ], na.rm=T),
                        labels = as.character(historic_n[i]), col="black", bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex = 1*mycex)
           }
           par(xpd=F)
@@ -2853,7 +2853,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
     # Save the plot to tiff
     if(plottiff) {
-      tiff(file = paste(getwd(), "/Cores/", name, "/", name, ".tiff", sep=""), width = (300+1300*nwindows)*prop_width_fig, height = 3000*prop_height_fig, units = "px", res = 800)
+      tiff(file = paste(getwd(), "/Cores/", name, "/", name, ".tiff", sep=""), width = (300+1300*nwindows)*prop_width_fig, height = 3000*prop_height_fig, units = "px", res = 700)
       replayPlot(out_list$plot)
       dev.off()
     }
