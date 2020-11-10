@@ -2031,7 +2031,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         points(dt_suppdescriptor[, 3], -dt_suppdescriptor[, 1], pch=20, cex=.95, col="white")
         axis(1)
         mtext(text = descriptor_lab[2], side = 1, line=2.2, cex=cex_1)
-        legend("bottomright", legend = descriptor_lab, bty="n", pch=c(16, 1), col=suppdescriptorcol, cex=mycex)
+        legend("bottomright", legend = descriptor_lab, bty="n", pch=c(16, 1), col=suppdescriptorcol, cex=mycex, y.intersp = 1.8)
       }
     }
 
@@ -2590,7 +2590,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
       # 6.5. 241Am ####
       if (plot_Am) {
-        legend("bottomright", legend = c("Cesium", "Americium"), bty="n", pch=c(16, 1), cex=mycex)
+        legend("bottomright", legend = c("Cesium", "Americium"), bty="n", pch=c(16, 1), cex=mycex, y.intersp = 1.8)
         par(new=T, mar=c(4.1, 1.1, 4.1, 6.1))
         myxlim_max <- max(dt$Am, na.rm=T)*1.2+max(dt$Am_er, na.rm=T)
         myxlim_min <- min(dt$Am, na.rm=T)-max(dt$Am_er, na.rm=T)
@@ -2686,7 +2686,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         points(dt_suppdescriptor[, 3], -dt_suppdescriptor[, 1], pch=20, cex=.95, col="white")
         axis(1)
         mtext(text = descriptor_lab[2], side = 1, line=2.2, cex=cex_1)
-        legend("bottomright", legend = descriptor_lab, bty="n", pch=c(16, 1), col=suppdescriptorcol, cex=mycex)
+        legend("bottomright", legend = descriptor_lab, bty="n", pch=c(16, 1), col=suppdescriptorcol, cex=mycex, y.intersp = 1.8)
       }
     }
 
