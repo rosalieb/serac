@@ -2821,7 +2821,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
     # Plot legend
     if(length(model)>1|varves|(mass_depth&any(!is.na(Cher), !is.na(NWT), !is.na(FF)))) {
-      legend("bottomleft", legend = mylegend, pch = mypchlegend, lty = myltylegend, col = mycollegend, bty='n', cex=mycex)
+      legend("bottomleft", legend = mylegend, pch = mypchlegend, lty = myltylegend, col = mycollegend, bty='n', cex=mycex,
+             y.intersp = abs(dmax-dmin) * .1)
     }
 
     # 6.8.b Plot historic event on age model ####
