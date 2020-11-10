@@ -1973,9 +1973,9 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       axis(2, at = -(pretty(seq(dmin, dmax, 5))), labels=pretty(seq(dmin, dmax, 5)), cex.axis=cex_2)
       mtext(text = "Depth (mm)", side = 2, line=2.2, cex=cex_1)
 
+      if(inst_deposit_present) rect(xleft = -2, ybottom = -dmax*1.2, xright = 3, ytop = -dmax, col = "white", border = "white", density = 1)
       par(xpd=TRUE)
       if(inst_deposit_present) for (i in 1:nrow(inst_deposit)) rect(xleft = .5, ybottom = -inst_deposit[i, 2], xright = 3, ytop = -inst_deposit[i, 1], col=inst_depositcol, border=inst_depositcol, lwd=.4)
-      if(inst_deposit_present) rect(xleft = -2, ybottom = -dmax*1.2, xright = 3, ytop = -dmax, col = "white", border = "white", density = 1)
       if(SML>0) rect(xleft = .5, ybottom = -SML, xright = 3, ytop = 0, col=grey(0.97), border=NA)
       par(xpd=FALSE)
 
