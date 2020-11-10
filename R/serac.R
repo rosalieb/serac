@@ -2853,7 +2853,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
     # Save the plot to tiff
     if(plottiff) {
-      tiff(file = paste(getwd(), "/Cores/", name, "/", name, ".tiff", sep=""), width = (300+800*nwindows)*prop_width_fig, height = 3200*prop_height_fig, units = "px", res = 800)
+      tiff(file = paste(getwd(), "/Cores/", name, "/", name, ".tiff", sep=""), width = (300+900*nwindows)*prop_width_fig, height = 3200*prop_height_fig, units = "px", res = 800)
       replayPlot(out_list$plot)
       dev.off()
     }
