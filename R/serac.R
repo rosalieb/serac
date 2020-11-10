@@ -15,7 +15,8 @@
 #' @param inst_deposit Upper and lower depths (in mm) of sections of abrupt accumulation that inst_deposit c() should be excised, e.g., c(100, 120, 185, 195) for two sections of 10.0-12.0 cm and 18.5-19.5 cm depth
 #' @param input_depth_mm Units for SML, radionuclides peaks (Chernobyl, Nuclear War Tests, and First Fallouts), instantaneous deposits, depths to ignore. Default is TRUE, and inputs must be in mm - unless "input_depth_mm=F". If turned to FALSE, input can be given in g/cm2.
 #' @param ignore The depth (in mm - unless "input_depth_mm=F") of any sample that should be ignored from the age-depth model computation, e.g., c(55) will remove the measurement done at 5.5 cm. The data will be ploted by default in grey on the output graph (you can change this with the inst_depositcol argument)
-#' @param plotpdf Logical argument to indicate whether you want the output graph to be saved to your folder.
+#' @param plotpdf Logical argument to indicate whether you want the output graph to be saved to your folder in pdf format. We recommend the plottiff (plot in tiff) for publication.
+#' @param plottiff Logical argument to indicate whether you want the output graph to be saved to your folder in tiff format. While taking more space on the disk, we recommend this option for publication because we found some polygons to be missing on some computers. We will update the code as we learn more about that issue.
 #' @param preview Logical argument to indicate whether you want the output graph to be ploted. Default is TRUE, and the graph is ploted within your R session. It might be convenient to turn this argument to FALSE if errors keep coming telling you your R window is too small.
 #' @param plotphoto Logical argument to indicate whether you want to plot the photo of the core along your age-model. If plotphoto=TRUE, you need to indicate the upper and lower limit of the photo in mm - unless "input_depth_mm=F" in following arguments.
 #' @param minphoto Mandatory if plotphoto=TRUE. Lower limit of the core photo in mm - unless "input_depth_mm=F", e.g., minphoto=0 indicates that the photo starts at 0 mm. The photo will automatically be truncated acording to the minimum and maximum depth of the age model given in other arguments.
@@ -75,7 +76,7 @@
 serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere = NA, FF = NA,
                   age_forced_CRS = NULL, depth_forced_CRS = NULL, inst_deposit = c(0),
                   input_depth_mm = T, ignore = c(), mass_depth = FALSE,
-                  plotpdf = FALSE, preview = TRUE, plotphoto = FALSE, minphoto = c(), maxphoto = c(),
+                  plotpdf = FALSE, plottiff = FALSE, preview = TRUE, plotphoto = FALSE, minphoto = c(), maxphoto = c(),
                   Pbcol = c("black", "midnightblue", "darkgreen"), inst_depositcol = grey(0.85),
                   modelcol = c("black", "#DDA0DD", "red", "darkorange"),
                   historic_d = NA, historic_a = NA, historic_n = NA, historic_test = NA,
@@ -89,7 +90,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 .serac(name, model, Cher, NWT, Hemisphere, FF,
        age_forced_CRS, depth_forced_CRS, inst_deposit,
        input_depth_mm, ignore, mass_depth,
-       plotpdf, preview, plotphoto, minphoto, maxphoto,
+       plotpdf, plottiff, preview, plotphoto, minphoto, maxphoto,
        Pbcol, inst_depositcol,
        modelcol,
        historic_d, historic_a, historic_n, historic_test,
@@ -104,7 +105,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 .serac <- function(name, model, Cher, NWT, Hemisphere, FF,
                    age_forced_CRS, depth_forced_CRS, inst_deposit,
                    input_depth_mm, ignore, mass_depth,
-                   plotpdf, preview, plotphoto, minphoto, maxphoto,
+                   plotpdf, plottiff, preview, plotphoto, minphoto, maxphoto,
                    Pbcol, inst_depositcol,
                    modelcol,
                    historic_d, historic_a, historic_n, historic_test,
@@ -2846,6 +2847,13 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     # Save the plot to pdf
     if(plotpdf) {
       pdf(paste(getwd(), "/Cores/", name, "/", name, ".pdf", sep=""), width = (1.2+1.8*nwindows)*prop_width_fig, height = 5*prop_height_fig, family = "Helvetica")
+      replayPlot(out_list$plot)
+      dev.off()
+    }
+
+    # Save the plot to tiff
+    if(plottiff) {
+      tiff(file = paste(getwd(), "/Cores/", name, "/", name, ".tiff", sep=""), width = (1100+2200*nwindows)*prop_width_fig, height = 4000*prop_height_fig, units = "px", res = 800)
       replayPlot(out_list$plot)
       dev.off()
     }
