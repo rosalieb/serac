@@ -1923,7 +1923,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
 
   #### 6. FINAL PLOT -----
-  if(preview|plotpdf) {
+  if(preview|plotpdf|plottiff) {
     # First, to avoid any potential issue or past parameters from the user, create and delete a plot
     {plot(0, 0, axes=F, xlab="", ylab="", pch=NA); dev.off(); dev.new()}
     # size for output plot
