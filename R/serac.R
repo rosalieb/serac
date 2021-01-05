@@ -2173,7 +2173,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
         axis(2, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 20), n=40), labels = NA, cex.axis=cex_2, lwd=.5)
         axis(2, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 5)), labels=-(pretty(seq(myylim_md[1], myylim_md[2], length.out = 5))), cex.axis=cex_2)
-        mtext(text = bquote("Mass depth (g.cm"*~""^-2*")"), side = 2, line=2.2, cex=cex_1)
+        mtext(text = bquote("Mass depth (g cm"*~""^-2*")"), side = 2, line=2.2, cex=cex_1)
 
 
         par(new=T)
@@ -2227,7 +2227,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       label[grep("1", power, invert = TRUE)] <- NA
       axis(3, at=log(power[power<exp(myxlim_max)]), labels=label[power<exp(myxlim_max)])
       # axis label
-      mtext(text = bquote(~""^210*Pb[ex]*" (mBq/g)"), side = 3, line=2.2, cex=cex_1)
+      mtext(text = bquote(~""^210*Pb[ex]*" (mBq " ~ g^-1 ~ ")"), side = 3, line=2.2, cex=cex_1)
 
     }
 
@@ -2344,7 +2344,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
             axis(2, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 20), n=40), labels = NA, cex.axis=cex_2, lwd=.5)
             axis(2, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 5)), labels=-(pretty(seq(myylim_md[1], myylim_md[2], length.out = 5))), cex.axis=cex_2)
-            mtext(text = bquote("Mass depth (g.cm"*~""^-2*")"), side = 2, line=2.2, cex=cex_1)
+            mtext(text = bquote("Mass depth (g cm"*~""^-2*")"), side = 2, line=2.2, cex=cex_1)
 
           }
         }
@@ -2406,14 +2406,14 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         label[grep("1", power, invert = TRUE)] <- NA
         axis(3, at=log(power[power<exp(myxlim_max)]), labels=label[power<exp(myxlim_max)])
         # Axis label
-        mtext(text = bquote(~""^210*Pb[ex]*" (mBq/g)"), side = 3, line=2.2, cex=cex_1)
+        mtext(text = bquote(~""^210*Pb[ex]*" (mBq " ~ g^-1 ~ ")"), side = 3, line=2.2, cex=cex_1)
 
         #Add depth label if last plot
         if(!plot_Cs&mass_depth) {
           #par(xpd=T)
           axis(4, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 20), n=40), labels = NA, cex.axis=cex_2, lwd=.5, line=1.1)
           axis(4, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 5)), labels=-(pretty(seq(myylim_md[1], myylim_md[2], length.out = 5))), cex.axis=cex_2, line=1.1)
-          mtext(text = bquote("Mass depth (g.cm"*~""^-2*")"), side = 4, line=3.3, cex=cex_1)
+          mtext(text = bquote("Mass depth (g cm"*~""^-2*")"), side = 4, line=3.3, cex=cex_1)
           #par(xpd=F)
         }
       }
@@ -2452,11 +2452,11 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         if(!mass_depth) {
           d_legend <- mean(c(min(dt_sed1$d, na.rm = T), max(dt_sed1$d, na.rm = T)))*.8
           shadowtext(x = 0, y = -d_legend-.06*dmax, labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed1)$r.squared, 3))), pos = 4, col=Pbcol[1], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
-          shadowtext(x = 0, y = -d_legend, labels = bquote(SAR ~ "=" ~ .(abs(round(sr_sed1, 2))) ~ mm.yr^-1), pos = 4, col=Pbcol[1], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
+          shadowtext(x = 0, y = -d_legend, labels = bquote(SAR ~ "=" ~ .(abs(round(sr_sed1, 2))) ~ "mm" ~ year^-1), pos = 4, col=Pbcol[1], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
         } else {
           d_legend <- mean(c(min(dt_sed1$mass_depth_avg_corr, na.rm = T), max(dt_sed1$mass_depth_avg_corr, na.rm = T)))*.8
           shadowtext(x = 0, y = -d_legend+.06*myylim_md[1], labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed1)$r.squared, 3))), pos = 4, col=Pbcol[1], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4*.9)
-          shadowtext(x = 0, y = -d_legend, labels = bquote(MAR ~ "=" ~ .(abs(round(sr_sed1, 3))) ~ g.cm^-2*.yr^-1), pos = 4, col=Pbcol[1], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4*.9)
+          shadowtext(x = 0, y = -d_legend, labels = bquote(MAR ~ "=" ~ .(abs(round(sr_sed1, 3))) ~ "g" ~ cm^-2*" "*year^-1), pos = 4, col=Pbcol[1], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4*.9)
         }
 
         if (max(sedchange)>0) {
@@ -2466,13 +2466,13 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
               if (length(ignore)>0 && max(dt_sed2$depth_avg, na.rm = T) <= max(ignore, na.rm=T)) lines(c(-min(dt_sed2$d, na.rm = T), -max(dt$d[!dt$depth_avg %in% ignore], na.rm=T))~ c(lm_sed2$coefficients[1]+min(dt_sed2$d, na.rm = T)*lm_sed2$coefficients[2], lm_sed2$coefficients[1]+max(dt$d[!dt$depth_avg %in% ignore], na.rm=T)*lm_sed2$coefficients[2]), lwd=2, col=Pbcol[2])
               d_legend <- mean(c(min(dt_sed2$d, na.rm = T), max(dt_sed2$d, na.rm = T)))*.8
               shadowtext(x = 0, y = -d_legend-.06*dmax, labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed2)$r.squared, 3))), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
-              shadowtext(x = 0, y = -d_legend, labels = bquote(SAR ~ "=" ~ .(abs(round(sr_sed2, 2))) ~ mm.yr^-1), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
+              shadowtext(x = 0, y = -d_legend, labels = bquote(SAR ~ "=" ~ .(abs(round(sr_sed2, 2))) ~ "mm" ~ year^-1), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
             } else {
               if (is.null(ignore) || !is.null(is.null(ignore)) && max(dt_sed2$depth_avg, na.rm = T) > max(ignore, na.rm=T)) lines(c(-min(dt_sed2$mass_depth_avg_corr, na.rm = T), -max(dt_sed2$mass_depth_avg_corr, na.rm = T))~ c(lm_sed2$coefficients[1]+min(dt_sed2$mass_depth_avg_corr, na.rm = T)*lm_sed2$coefficients[2], lm_sed2$coefficients[1]+max(dt_sed2$mass_depth_avg_corr, na.rm = T)*lm_sed2$coefficients[2]), lwd=2, col=Pbcol[2])
               if (length(ignore)>0 && max(dt_sed2$mass_depth_avg_corr, na.rm = T) <= max(ignore, na.rm=T)) lines(c(-min(dt_sed2$mass_depth_avg_corr, na.rm = T), -max(dt$mass_depth_avg_corr[!dt$depth_avg %in% ignore], na.rm=T))~ c(lm_sed2$coefficients[1]+min(dt_sed2$mass_depth_avg_corr, na.rm = T)*lm_sed2$coefficients[2], lm_sed2$coefficients[1]+max(dt$mass_depth_avg_corr[!dt$depth_avg %in% ignore], na.rm=T)*lm_sed2$coefficients[2]), lwd=2, col=Pbcol[2])
               d_legend <- mean(c(min(dt_sed2$mass_depth_avg_corr, na.rm = T), max(dt_sed2$mass_depth_avg_corr, na.rm = T)))*.8
               shadowtext(x = 0, y = -d_legend+.06*myylim_md[1], labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed2)$r.squared, 3))), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4*.9)
-              shadowtext(x = 0, y = -d_legend, labels = bquote(MAR ~ "=" ~ .(abs(round(sr_sed2, 3))) ~ g.cm^-2*.yr^-1), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4*.9)
+              shadowtext(x = 0, y = -d_legend, labels = bquote(MAR ~ "=" ~ .(abs(round(sr_sed2, 3))) ~ "g" ~ cm^-2*" "*year^-1), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4*.9)
             }
           }
           if(length(sedchange)==2) {
@@ -2480,24 +2480,24 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
               lines(c(-min(dt_sed2$d, na.rm = T), -max(dt_sed2$d, na.rm = T))~ c(lm_sed2$coefficients[1]+min(dt_sed2$d, na.rm = T)*lm_sed2$coefficients[2], lm_sed2$coefficients[1]+max(dt_sed2$d, na.rm = T)*lm_sed2$coefficients[2]), lwd=2, col=Pbcol[2])
               d_legend <- mean(c(min(dt_sed2$d, na.rm = T), max(dt_sed2$d, na.rm = T)))*.8
               shadowtext(x = 0, y = -d_legend-.06*dmax, labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed2)$r.squared, 3))), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1)
-              shadowtext(x = 0, y = -d_legend, labels = bquote(SAR ~ "=" ~ .(abs(round(sr_sed2, 2))) ~ mm.yr^-1), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1)
+              shadowtext(x = 0, y = -d_legend, labels = bquote(SAR ~ "=" ~ .(abs(round(sr_sed2, 2))) ~ "mm" ~ year^-1), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1)
 
               if (is.null(ignore) || !is.null(is.null(ignore)) && max(dt_sed3$depth_avg, na.rm = T) > max(ignore, na.rm=T))  lines(c(-min(dt_sed3$d, na.rm = T), -max(dt_sed3$d, na.rm = T))~ c(lm_sed3$coefficients[1]+min(dt_sed3$d, na.rm = T)*lm_sed3$coefficients[2], lm_sed3$coefficients[1]+max(dt_sed3$d, na.rm = T)*lm_sed3$coefficients[2]), lwd=2, col=Pbcol[3])
               if (length(ignore)>0 && max(dt_sed3$depth_avg, na.rm = T) <= max(ignore, na.rm=T)) lines(c(-min(dt_sed3$d, na.rm = T), -max(dt$d[!dt$depth_avg %in% ignore], na.rm=T))~ c(lm_sed3$coefficients[1]+min(dt_sed3$d, na.rm = T)*lm_sed3$coefficients[2], lm_sed3$coefficients[1]+max(dt$d[!dt$depth_avg %in% ignore], na.rm=T)*lm_sed3$coefficients[2]), lwd=2, col=Pbcol[3])
               d_legend <- mean(c(min(dt_sed3$d, na.rm = T), max(dt_sed3$d, na.rm = T)))*.8
               shadowtext(x = 0, y = -d_legend-.06*dmax, labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed3)$r.squared, 3))), pos = 4, col=Pbcol[3], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
-              shadowtext(x = 0, y = -d_legend, labels = bquote(SAR ~ "=" ~ .(abs(round(sr_sed3, 2))) ~ mm.yr^-1), pos = 4, col=Pbcol[3], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
+              shadowtext(x = 0, y = -d_legend, labels = bquote(SAR ~ "=" ~ .(abs(round(sr_sed3, 2))) ~ "mm" ~ year^-1), pos = 4, col=Pbcol[3], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4)
             } else {
               lines(c(-min(dt_sed2$mass_depth_avg_corr, na.rm = T), -max(dt_sed2$mass_depth_avg_corr, na.rm = T))~ c(lm_sed2$coefficients[1]+min(dt_sed2$mass_depth_avg_corr, na.rm = T)*lm_sed2$coefficients[2], lm_sed2$coefficients[1]+max(dt_sed2$mass_depth_avg_corr, na.rm = T)*lm_sed2$coefficients[2]), lwd=2, col=Pbcol[2])
               d_legend <- mean(c(min(dt_sed2$mass_depth_avg_corr, na.rm = T), max(dt_sed2$mass_depth_avg_corr, na.rm = T)))*.8
               shadowtext(x = 0, y = -d_legend+.06*myylim_md[1], labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed2)$r.squared, 3))), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4*.9)
-              shadowtext(x = 0, y = -d_legend, labels = bquote(MAR ~ "=" ~ .(abs(round(sr_sed2, 3))) ~ g.cm^-2*.yr^-1), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4*.9)
+              shadowtext(x = 0, y = -d_legend, labels = bquote(MAR ~ "=" ~ .(abs(round(sr_sed2, 3))) ~ "g" ~ cm^-2*" "*year^-1), pos = 4, col=Pbcol[2], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4*.9)
 
               if (is.null(ignore) || !is.null(is.null(ignore)) && max(dt_sed3$depth_avg, na.rm = T) > max(ignore, na.rm=T))  lines(c(-min(dt_sed3$mass_depth_avg_corr, na.rm = T), -max(dt_sed3$mass_depth_avg_corr, na.rm = T))~ c(lm_sed3$coefficients[1]+min(dt_sed3$mass_depth_avg_corr, na.rm = T)*lm_sed3$coefficients[2], lm_sed3$coefficients[1]+max(dt_sed3$mass_depth_avg_corr, na.rm = T)*lm_sed3$coefficients[2]), lwd=2, col=Pbcol[3])
               if (length(ignore)>0 && max(dt_sed3$depth_avg, na.rm = T) <= max(ignore, na.rm=T)) lines(c(-min(dt_sed3$mass_depth_avg_corr, na.rm = T), -max(dt$mass_depth_avg_corr[!dt$depth_avg %in% ignore], na.rm=T))~ c(lm_sed3$coefficients[1]+min(dt_sed3$mass_depth_avg_corr, na.rm = T)*lm_sed3$coefficients[2], lm_sed3$coefficients[1]+max(dt$mass_depth_avg_corr[!dt$depth_avg %in% ignore], na.rm=T)*lm_sed3$coefficients[2]), lwd=2, col=Pbcol[2])
               d_legend <- mean(c(min(dt_sed3$mass_depth_avg_corr, na.rm = T), max(dt_sed3$mass_depth_avg_corr, na.rm = T)))*.8
               shadowtext(x = 0, y = -d_legend+.06*myylim_md[1], labels = bquote(r^2 ~ "=" ~ .(round(summary(lm_sed3)$r.squared, 3))), pos = 4, col=Pbcol[3], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4*.9)
-              shadowtext(x = 0, y = -d_legend, labels = bquote(MAR ~ "=" ~ .(abs(round(sr_sed3, 3))) ~ g.cm^-2*.yr^-1), pos = 4, col=Pbcol[3], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4*.9)
+              shadowtext(x = 0, y = -d_legend, labels = bquote(MAR ~ "=" ~ .(abs(round(sr_sed3, 3))) ~ "g" ~ cm^-2*" "*year^-1), pos = 4, col=Pbcol[3], bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=cex_4*.9)
             }
           }
         }
@@ -2572,14 +2572,14 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       lines(dt$Cs[which(dt$depth_avg>=SML)], -which_scale[which(dt$depth_avg>=SML)])
 
       axis(3,  cex.axis=cex_2)
-      mtext(text = bquote(~""^137*"Cs (mBq/g)"), side = 3, line=2.2, cex=cex_1)
+      mtext(text = bquote(~""^137*"Cs (mBq " ~ g^-1), side = 3, line=2.2, cex=cex_1)
 
       #Add depth label if last plot
       if(mass_depth) {
         #par(xpd=T)
         axis(4, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 20), n=40), labels = NA, cex.axis=cex_2, lwd=.5, line=1.1)
         axis(4, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 5)), labels=-(pretty(seq(myylim_md[1], myylim_md[2], length.out = 5))), cex.axis=cex_2, line=1.1)
-        mtext(text = bquote("Mass depth (g.cm"*~""^-2*")"), side = 4, line=3.3, cex=cex_1)
+        mtext(text = bquote("Mass depth (g cm"*~""^-2*")"), side = 4, line=3.3, cex=cex_1)
         #par(xpd=F)
       }
 
@@ -2648,7 +2648,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         }
         axis(1, cex.axis=cex_2)
         if(mass_depth)  which_scale=dt$mass_depth_avg else which_scale=dt$depth_avg
-        mtext(text = bquote(~""^241*"Am (mBq/g)"), side = 1, line=2.4, cex=cex_1)
+        mtext(text = bquote(~""^241*"Am (mBq " ~ g^-1), side = 1, line=2.4, cex=cex_1)
         for (i in which(dt$Am>0 & !is.na(dt$Am_er) & dt$depth_avg>SML)) {
           lines(c(dt$Am[i]+dt$Am_er[i], dt$Am[i]-dt$Am_er[i]),
                 rep(-which_scale[i], 2), type="o", pch="|", cex=.5, col=Pbcol[1])
