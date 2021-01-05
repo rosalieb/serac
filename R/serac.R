@@ -2572,7 +2572,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       lines(dt$Cs[which(dt$depth_avg>=SML)], -which_scale[which(dt$depth_avg>=SML)])
 
       axis(3,  cex.axis=cex_2)
-      mtext(text = bquote(~""^137*"Cs (mBq " ~ g^-1), side = 3, line=2.2, cex=cex_1)
+      mtext(text = bquote(~""^137*"Cs (mBq " ~ g^-1 ~ ")"), side = 3, line=2.2, cex=cex_1)
 
       #Add depth label if last plot
       if(mass_depth) {
@@ -2648,7 +2648,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         }
         axis(1, cex.axis=cex_2)
         if(mass_depth)  which_scale=dt$mass_depth_avg else which_scale=dt$depth_avg
-        mtext(text = bquote(~""^241*"Am (mBq " ~ g^-1), side = 1, line=2.4, cex=cex_1)
+        mtext(text = bquote(~""^241*"Am (mBq " ~ g^-1 ~ ")"), side = 1, line=2.4, cex=cex_1)
         for (i in which(dt$Am>0 & !is.na(dt$Am_er) & dt$depth_avg>SML)) {
           lines(c(dt$Am[i]+dt$Am_er[i], dt$Am[i]-dt$Am_er[i]),
                 rep(-which_scale[i], 2), type="o", pch="|", cex=.5, col=Pbcol[1])
