@@ -4,7 +4,8 @@
 #'
 #' @export
 #' @param name Name of the core, given using quotes. Defaults to the core provided with serac. Use preferably the published name of the core for traceability.
-#' @param coring_yr Year of coring.
+#' @param coring_yr Year of coring. Alternate spelling of the argument: coring_year. Fill one or the other.
+#' @param coring_yr Year of coring. Alternate spelling of the argument: coring_yr. Fill one or the other.
 #' @param model Select 1 to 4 item between c("CFCS", "CIC", "CRS", "CRS_pw"). If several models are selected, they will all be plotted together in the last window.
 #' @param Cher If 137Cs measurement were done, where do you detect the Chernobyl peak? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the 1986 Chernobyl event. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty. Note that the two depths needs to represent a sample, or more than a sample.
 #' @param NWT If 137Cs measurement were done, where do you detect the Nuclear Weapon Test peak? The argument is a vector of two depth given in millimeters giving the top and bottom threshold for the 1960s Nuclear Weapon Test event. The user can run the model without giving any specification before making a decision. In such case, leave the argument empty. Note that the two depths needs to represent a sample, or more than a sample.
@@ -81,7 +82,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                   modelcol = c("black", "#DDA0DD", "red", "darkorange"),
                   historic_d = NA, historic_a = NA, historic_n = NA, historic_test = NA,
                   suppdescriptor = FALSE, descriptor_lab = c(), suppdescriptorcol = c("black", "purple"),
-                  coring_yr = c(), plot_Am = FALSE, plot_Cs = FALSE, plot_Pb = TRUE,
+                  coring_yr = c(), coring_year = c(), plot_Am = FALSE, plot_Cs = FALSE, plot_Pb = TRUE,
                   plot_Pb_inst_deposit = FALSE, plot_CFCS_regression = c(),
                   varves = FALSE, dmin = c(), dmax = c(), sedchange = c(0),
                   error_DBD = 0.07, min_yr = 1880, SML = c(0), stepout = 5, mycex = 1,
@@ -95,7 +96,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
        modelcol,
        historic_d, historic_a, historic_n, historic_test,
        suppdescriptor, descriptor_lab, suppdescriptorcol,
-       coring_yr, plot_Am, plot_Cs, plot_Pb,
+       coring_yr, coring_year, plot_Am, plot_Cs, plot_Pb,
        plot_Pb_inst_deposit, plot_CFCS_regression,
        varves, dmin, dmax, sedchange,
        error_DBD, min_yr, SML, stepout, mycex,
@@ -110,7 +111,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                    modelcol,
                    historic_d, historic_a, historic_n, historic_test,
                    suppdescriptor, descriptor_lab, suppdescriptorcol,
-                   coring_yr, plot_Am, plot_Cs, plot_Pb,
+                   coring_yr, coring_year, plot_Am, plot_Cs, plot_Pb,
                    plot_Pb_inst_deposit, plot_CFCS_regression,
                    varves, dmin, dmax, sedchange,
                    error_DBD, min_yr, SML, stepout, mycex,
@@ -135,6 +136,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
   # warn and stop if abnormal settings are provided
   # coring year is one of the two mandatory argument
+  if(is.null(coring_yr) & !is.null(coring_year)) coring_yr = coring_year
   if(is.null(coring_yr))     stop("\n Warning, please enter the 'coring_yr'.\n\n")
 
   # serac support 2 changes in sedimentation rates maximum
