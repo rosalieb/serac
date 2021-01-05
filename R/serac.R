@@ -1608,7 +1608,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     }
 
     output_agemodel_CRS <- as.data.frame(matrix(c(
-      c(0, ifelse(!inst_deposit_present, complete_core_depth_top[order(complete_core_depth_top, decreasing = F)][whichkeep]), new_y_CRS),
+      c(0, ifelse(!inst_deposit_present, complete_core_depth_top[order(complete_core_depth_top, decreasing = F)][whichkeep], new_y_CRS)),
       c(coring_yr, ifelse(!inst_deposit_present, m_CRS, new_x_CRS)),
       c(coring_yr, ifelse(!inst_deposit_present, m_CRS_low, new_x_CRS_low)),
       c(coring_yr, ifelse(!inst_deposit_present, m_CRS_high, new_x_CRS_high)),
@@ -1676,13 +1676,13 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                   xout = new_y_CRS_pw_corr, rule = 2, ties = mean)$y
     }
 
-    output_agemodel_CRS_pw <- as.data.frame(matrix(c(0, ifelse(!inst_deposit_present, complete_core_depth_top[order(complete_core_depth_top, decreasing = F)][whichkeep], new_y_CRS_pw),
-                                                     c(coring_yr, ifelse(!inst_deposit_present, m_CRS_pw, new_x_CRS_pw)),
-                                                     c(coring_yr, ifelse(!inst_deposit_present, m_CRS_pw_low, new_x_CRS_pw_low)),
-                                                     c(coring_yr, ifelse(!inst_deposit_present, m_CRS_pw_high, new_x_CRS_pw_high)),
-                                                     c(0, ifelse(!inst_deposit_present, sr_CRS_pw, new_sr_CRS_pw)),
-                                                     c(0, ifelse(!inst_deposit_present, sr_CRS_pw_err, new_sr_CRS_pw_err))
-    ), byrow = F, ncol=6))
+    output_agemodel_CRS_pw <- as.data.frame(matrix(c(0, ifelse(!inst_deposit_present, complete_core_depth_top[order(complete_core_depth_top, decreasing = F)][whichkeep], new_y_CRS_pw)),
+                                                   c(coring_yr, ifelse(!inst_deposit_present, m_CRS_pw, new_x_CRS_pw)),
+                                                   c(coring_yr, ifelse(!inst_deposit_present, m_CRS_pw_low, new_x_CRS_pw_low)),
+                                                   c(coring_yr, ifelse(!inst_deposit_present, m_CRS_pw_high, new_x_CRS_pw_high)),
+                                                   c(0, ifelse(!inst_deposit_present, sr_CRS_pw, new_sr_CRS_pw)),
+                                                   c(0, ifelse(!inst_deposit_present, sr_CRS_pw_err, new_sr_CRS_pw_err))
+    ), byrow = F, ncol=6)
     if(!mass_depth) {
       colnames(output_agemodel_CRS_pw) <- c("depth_avg_mm", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "SAR_CRS_pw_mm.yr", "SAR_CRS_pw_err_mm.yr")
     } else {
