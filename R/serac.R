@@ -1701,13 +1701,13 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       c(0, new_sr_CRS_err)),
       byrow = F, ncol=6))
 
-    output_agemodel_CRS_pw <- as.data.frame(matrix(c(0, new_y_CRS_pw),
-                                                   c(coring_yr, new_x_CRS_pw),
-                                                   c(coring_yr, new_x_CRS_pw_low),
-                                                   c(coring_yr, new_x_CRS_pw_high),
-                                                   c(0, new_sr_CRS_pw),
-                                                   c(0, new_sr_CRS_pw_err)
-    ), byrow = F, ncol=6)
+    output_agemodel_CRS_pw <- as.data.frame(matrix(c(c(0, new_y_CRS_pw),
+                                                     c(coring_yr, new_x_CRS_pw),
+                                                     c(coring_yr, new_x_CRS_pw_low),
+                                                     c(coring_yr, new_x_CRS_pw_high),
+                                                     c(0, new_sr_CRS_pw),
+                                                     c(0, new_sr_CRS_pw_err)),
+                                                   byrow = F, ncol=6))
     if(!mass_depth) {
       colnames(output_agemodel_CRS_pw) <- c("depth_avg_mm", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "SAR_CRS_pw_mm.yr", "SAR_CRS_pw_err_mm.yr")
     } else {
