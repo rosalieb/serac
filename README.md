@@ -1,5 +1,5 @@
 # serac
-a R package for ShortlivEd RAdionuclide Chronology of recent sediment cores.
+an R package for ShortlivEd RAdionuclide Chronology of recent sediment cores.
 
 
 To report a problem, email me or use the Github "Issues" tool.
