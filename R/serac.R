@@ -1565,8 +1565,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     } else {
       colnames(output_agemodel_CIC_inter) <- c("depth_avg_mm", "mass_depth_g.cm.2","BestAD_CIC", "MinAD_CIC", "MaxAD_CIC", "MAR_CIC_g.cm.2.yr", "MAR_CIC_err_g.cm.2.yr")
     }
-    write.table(x = output_agemodel_CIC[order(output_agemodel_CIC$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CIC.txt", sep = ""), col.names = T, row.names = T)
-    write.table(x = output_agemodel_CIC_inter[order(output_agemodel_CIC_inter$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CIC_interpolation.txt", sep = ""), col.names = T, row.names = T)
+    write.table(x = output_agemodel_CIC[order(output_agemodel_CIC$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CIC.txt", sep = ""), col.names = T, row.names = F)
+    write.table(x = output_agemodel_CIC_inter[order(output_agemodel_CIC_inter$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CIC_interpolation.txt", sep = ""), col.names = T, row.names = F)
 
     # Save output in the list
     out_list$'CIC age-depth model interpolated' <- output_agemodel_CIC_inter
@@ -1642,8 +1642,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     } else {
       colnames(output_agemodel_CRS_inter) <- c("depth_avg_mm",  "mass_depth_g.cm.2", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "MAR_CRS_g.cm.2.yr", "MAR_CRS_err_g.cm.2.yr")
     }
-    write.table(x = output_agemodel_CRS[order(output_agemodel_CRS$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS.txt", sep = ""), col.names = T, row.names = T)
-    write.table(x = output_agemodel_CRS_inter[order(output_agemodel_CRS_inter$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_interpolation.txt", sep = ""), col.names = T, row.names = T)
+    write.table(x = output_agemodel_CRS[order(output_agemodel_CRS$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS.txt", sep = ""), col.names = T, row.names = F)
+    write.table(x = output_agemodel_CRS_inter[order(output_agemodel_CRS_inter$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_interpolation.txt", sep = ""), col.names = T, row.names = F)
 
     # Save output in the list
     out_list$'CRS age-depth model interpolated' <- output_agemodel_CRS_inter
@@ -1727,8 +1727,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     } else {
       colnames(output_agemodel_CRS_pw_inter) <- c("depth_avg_mm", "mass_depth_g.cm.2", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "MAR_CRS_pw_g.cm.2.yr", "MAR_CRS_pw_err_g.cm.2.yr")
     }
-    write.table(x = output_agemodel_CRS_pw[order(output_agemodel_CRS_pw$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_pw.txt", sep = ""), col.names = T, row.names = T)
-    write.table(x = output_agemodel_CRS_pw_inter[order(output_agemodel_CRS_pw_inter$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_pw_interpolation.txt", sep = ""), col.names = T, row.names = T)
+    write.table(x = output_agemodel_CRS_pw[order(output_agemodel_CRS_pw$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_pw.txt", sep = ""), col.names = T, row.names = F)
+    write.table(x = output_agemodel_CRS_pw_inter[order(output_agemodel_CRS_pw_inter$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_pw_interpolation.txt", sep = ""), col.names = T, row.names = F)
 
     # Save output in the list
     out_list$'CRS piecewise model age-depth model interpolated' <- output_agemodel_CRS_pw_inter
