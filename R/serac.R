@@ -136,8 +136,9 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
   # warn and stop if abnormal settings are provided
   # coring year is one of the two mandatory argument
-  if(is.null(coring_yr) & !is.null(coring_year)) coring_yr = coring_year
-  if(is.null(coring_yr))     stop("\n Warning, please enter the 'coring_yr'.\n\n")
+  if(is.null(coring_yr)) {
+    if(exists("coring_year") && !is.null(coring_year)) coring_yr = coring_year else stop("\n Warning, please enter the 'coring_yr'.\n\n")
+  }
 
   # serac support 2 changes in sedimentation rates maximum
   if(length(sedchange)>2)    stop("\n Warning, serac only support two changes in sedimentation rate. Please check the manual.\n\n", call.=FALSE)
@@ -276,6 +277,11 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   if(!is.null(dt$density) && !all(test1==0)) {
     packageStartupMessage(paste0("\n Warning, density is not given continuously for the whole core.\n Inventories, CRS model, and mass accumulation rate should be\n interpreted very carefully. Alternatively, enter the density\n for the whole core.\n Density is missing for ", length(test1[test1!=0]), " layer(s): "))
     packageStartupMessage(paste0("     - ", dt$depth_bottom[which(test1>0)], "-", dt$depth_top[which(test1>0)+1], " mm \n"))
+  }
+
+  # Warning, if CRS_pw is selected, then depth forced cannot be max or min depth of a section (ideally, it is a mid-section, but we have a warning message for that later)
+  if(depth_forced_CRS %in% c(dt$depth_min, dt$depth_max)) {
+    stop("\n Warning: depth_forced_CRS cannot be the min or max depth of a layer.\n    Add or remove 0.1 mm to your depth_forced_CRS to run the code.")
   }
 
   # 1.3 Complete core vector ####
