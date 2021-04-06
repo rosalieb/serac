@@ -280,7 +280,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   }
 
   # Warning, if CRS_pw is selected, then depth forced cannot be max or min depth of a section (ideally, it is a mid-section, but we have a warning message for that later)
-  if(any(model %in% c("CRS_pw"))) if(depth_forced_CRS %in% c(dt$depth_min, dt$depth_max)) {
+  if(any(model %in% c("CRS_pw"))) if(any(depth_forced_CRS %in% c(dt$depth_min, dt$depth_max))) {
     stop("\n Warning: depth_forced_CRS cannot be the min or max depth of a layer.\n    Add or remove 0.1 mm to your depth_forced_CRS to run the code.")
   }
 
