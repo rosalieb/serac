@@ -1698,14 +1698,6 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       new_y_CRS_pw_massdepth <- dt$mass_depth_avg_corr[whichkeep]
     }
 
-    output_agemodel_CRS <- as.data.frame(matrix(c(
-      c(0, new_y_CRS),
-      c(coring_yr, new_x_CRS),
-      c(coring_yr, new_x_CRS_low),
-      c(coring_yr, new_x_CRS_high),
-      c(0, new_sr_CRS),
-      c(0, new_sr_CRS_err)),
-      byrow = F, ncol=6))
 
     output_agemodel_CRS_pw <- as.data.frame(matrix(c(c(0, new_y_CRS_pw),
                                                      c(coring_yr, new_x_CRS_pw),
