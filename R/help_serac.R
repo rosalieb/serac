@@ -1,6 +1,6 @@
 #' serac help
 #'
-#' Give a help message
+#' @description Give a help message
 #'
 #' @export
 #' @keywords age-depth modelling

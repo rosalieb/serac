@@ -1,6 +1,6 @@
 #' Lake Allos shortlived radionuclide and proxy data
 #'
-#' Example of data used for serac
+#' @description Example of data used for serac
 #'
 #' @docType data
 #'

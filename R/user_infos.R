@@ -1,6 +1,6 @@
 #' Information on the user
 #'
-#' Question the user on professional ID (name, ORCID, email, Institute), the first time serac is used.. These metadata are then included in the general metadata file output every time a model is created.
+#' @description Question the user on professional ID (name, ORCID, email, Institute), the first time serac is used.. These metadata are then included in the general metadata file output every time a model is created.
 #'
 #' @export
 #' @keywords age-depth modelling

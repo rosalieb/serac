@@ -1,6 +1,6 @@
 #' Test package availability
 #'
-#' Question the user on core International Geo Sample Number, sampling number, etc.
+#' @description Question the user on core International Geo Sample Number, sampling number, etc.
 #'
 #' @export
 #' @examples pkgTest('vegan')
