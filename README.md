@@ -1,4 +1,4 @@
-# serac <a href="https://github.com/rosalieb/serac" target="_blank"><img src="man/figures/hex-serac.png" align="right" height="220" width="190" ></a>
+# serac <a href="https://github.com/rosalieb/serac" target="_blank"><img src="vignettes/figures/hex-serac.png" align="right" height="220" width="190" ></a>
 
 an R package for ShortlivEd RAdionuclide Chronology of recent sediment cores.
 
