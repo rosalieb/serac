@@ -141,6 +141,27 @@ model_ALO09P12_mass_depth$plot
 ```
 
 
+## 2.4 Add varves counting
+
+If varves counting are available, you can display the dates on the age-depth model.
+
+To do so, include in your project's folder a text file (tab delimited) with two columns: "Age" and "Depth". Depths must be entered in mm. The file must be named with the name of your sediment core (e.g., "MyCore"), and the append "_varves.txt". 
+
+For example, for the example core *serac_example_ALO09P12*, you would need to include in the serac_example_ALO09P12 folder a file named *serac_example_ALO09P12_varves.txt*. Below is an example of what the file would look like:
+
+|  Age   |  Depth  |
+|--------|---------|
+| 2009   |  0      |
+| 2008   | 5       |
+| 2007   | 10      |
+| 2006   | 15      |
+| 2005   | 20      |
+| 2004   | 30      |
+| 2003   | 35      |
+| 2002   | 40      |
+| 2001   | 45      |
+
+
 # 3 Explore outputs
 Files with age-depth model and metadata are automatically saved in your working folder. If you assign your function to an object, serac will return a list with the parameters.
 
