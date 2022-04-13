@@ -648,12 +648,15 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                    "inst_deposit", "ignore_depths",
                                    "historic_depth", "historic_age", "historic_name",
                                    "suppdescriptor", "descriptor_lab",
-                                   "varves", "sedchange", "SML", "age_forced_CRS_pwosite", "depth_forced_CRS_pwosite")
+                                   "varves", "sedchange", "SML", "age_forced_CRS_pw", "depth_forced_CRS_pw")
   # First, check whether a file already exists
   if(length(list.files(paste(getwd(), "/Cores/", name, "/", sep=""), pattern="serac_model_history*", full.names=TRUE))==1) {
-    # read previous file
+    # Read previous file
     code_history <- read.delim(list.files(paste(getwd(), "/Cores/", name, "/", sep=""), pattern="serac_model_history*", full.names=TRUE))
-    # increment new code
+    # If previous compilation was done prior to 2022-04-13, there may have been a typo in the code history file. Correct it here
+    colnames(code_history)[colnames(code_history) == c("age_forced_CRS_pwosite")] <- "age_forced_CRS_pw"
+    colnames(code_history)[colnames(code_history) == c("depth_forced_CRS_pwosite")] <- "depth_forced_CRS_pw"
+    # Increment new code
     if(ncol(code_history) == ncol(this_code_history))
       code_history <- rbind(code_history, this_code_history) else
         code_history <- this_code_history
@@ -1829,8 +1832,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                        "Nuclear_War_Test", paste(paste(NWT, collapse = "-"), " (", Hemisphere, ")", sep=""),
                        "First_Fallout", paste(FF, collapse = "-"),
                        "Surface_Mixed_Layer", paste(SML, collapse = ""),
-                       "Age_forced_for_CRS_pwosite", ifelse(!is.null(age_forced_CRS), paste(age_forced_CRS, collapse = ", "), "NA - CRS piecewise model was not selected"),
-                       "Depth_forced_for_CRS_pwosite", ifelse(!is.null(age_forced_CRS), paste(depth_forced_CRS, collapse = ", "), "NA - CRS piecewise model was not selected"),
+                       "Age_forced_for_CRS_piecewise", ifelse(!is.null(age_forced_CRS), paste(age_forced_CRS, collapse = ", "), "NA - CRS piecewise model was not selected"),
+                       "Depth_forced_for_CRS_piecewise", ifelse(!is.null(age_forced_CRS), paste(depth_forced_CRS, collapse = ", "), "NA - CRS piecewise model was not selected"),
                        "Instantaneous_deposit_up_and_low_limits", paste(inst_deposit, collapse = ", "),
                        "Ignore_up_and_low_limits", paste(inst_deposit, collapse = ", "),
                        "Supplementary_descriptor", paste(descriptor_lab, collapse = ", "),
