@@ -1615,7 +1615,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                y = m_CRS_high,
                                xout = new_y_CRS_corr, rule = 2, ties = mean)$y
     } else {
-      new_y_CRS <- complete_core_depth_corr[order(complete_core_depth_corr, decreasing = F)][whichkeep]
+      new_y_CRS <- complete_core_depth_top[order(complete_core_depth_top, decreasing = F)][whichkeep]
       new_x_CRS <- m_CRS
       new_x_CRS_low <- m_CRS_low
       new_x_CRS_high <- m_CRS_high
@@ -1692,7 +1692,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                   y = m_CRS_pw_high,
                                   xout = new_y_CRS_pw_corr, rule = 2, ties = mean)$y
     } else {
-      new_y_CRS_pw <- complete_core_depth_corr[order(complete_core_depth_corr, decreasing = F)][whichkeep]
+      new_y_CRS_pw <- complete_core_depth_top[order(complete_core_depth_top, decreasing = F)][whichkeep]
       new_x_CRS_pw <- m_CRS_pw
       new_x_CRS_pw_low <- m_CRS_pw_low
       new_x_CRS_pw_high <- m_CRS_pw_high
@@ -2424,11 +2424,11 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     if(any(model=="CFCS")) {
       # Warning, you shouldn't plot the linear regression on the point without instantaneous deposit while you mentioned there were some
       if(exists("inst_deposit")&length(inst_deposit)>1&min(inst_deposit)<max(dt$depth_avg)&plot_Pb_inst_deposit==F&plot_CFCS_regression==F) {
-        packageStartupMessage("\n Warning. You are trying to visualise the linear regression between raw 210Pbex\n and depth calculated with the CFCS model, while you identified instantaneous\n deposits. Add the argument plot_Pb_inst_deposit=TRUE to visualise the regression\n line on the corrected 210Pbex profile (i.e., instantaneous deposits removed).\n Keep in mind the regression line won't necesseraly match the points.\n\n")
+        packageStartupMessage("\n Warning. It is not possible to visualise the linear regression calculated from\n the CFCS model on the 210Pbex curve without instantaneous deposits, on the\n initial depth. Add the argument plot_Pb_inst_deposit=TRUE to visualise the\n regression line on 210Pbex profile corrected from instananeous events.\n Keep in mind the regression line won't necesseraly match the points.\n\n")
       }
       # If you decide to do it anyway, this message will display
       if(exists("inst_deposit")&length(inst_deposit)>1&min(inst_deposit)<max(dt$depth_avg)&plot_Pb_inst_deposit==F&plot_CFCS_regression==T) {
-        packageStartupMessage("\n Warning. It seems you requested to visualise the linear regression between\n 210Pbex and depth calculated with the CFCS model, without instantaneous\n deposits, while you specified there were some.\n Please bear in mind the linear regression does not correspond to the points. \n Turn plot_Pb_inst_deposit to TRUE or plot_CFCS_regression to FALSE.\n\n")
+        packageStartupMessage("\n Warning. It seems you requested to visualise the linear regression calculated\n from the CFCS model on the 210Pbex curve without instantaneous deposits, \n while you specified there were some.\n Please bear in mind the linear regression does not correspond to the points. \n Turn plot_Pb_inst_deposit to TRUE or plot_CFCS_regression to FALSE.\n\n")
       }
       if(plot_Pb & plot_CFCS_regression | plot_Pb_inst_deposit & plot_CFCS_regression) {
 
