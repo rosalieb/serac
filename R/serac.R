@@ -415,8 +415,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     md_interp     <- c(seq(min(c(dt$depth_top, dt$depth_bottom), na.rm=T), max(c(dt$depth_top, dt$depth_bottom), na.rm=T), by = step_out_md))
     md_interp     <- matrix(c(md_interp, rep(NA, length(md_interp)*3)), ncol = 4)
     md_interp[, 2] <- approx(x= dt$depth_top, dt$mass_depth_top, xout= md_interp[, 1], rule=2, ties = mean)$y
-    md_interp[, 3] <- approx(x= dt$depth_bottom, dt$mass_depth_top, xout= md_interp[, 1], rule=2, ties = mean)$y
-    md_interp[, 4] <- approx(x= dt$depth_avg, dt$mass_depth_top, xout= md_interp[, 1], rule=2, ties = mean)$y
+    md_interp[, 3] <- approx(x= dt$depth_bottom, dt$mass_depth_bottom, xout= md_interp[, 1], rule=2, ties = mean)$y
+    md_interp[, 4] <- approx(x= dt$depth_avg, dt$mass_depth_avg, xout= md_interp[, 1], rule=2, ties = mean)$y
     md_interp     <- as.data.frame(md_interp)
     colnames(md_interp) <- c("depth_mm", "md_top", "md_bott", "md_avg")
   }
