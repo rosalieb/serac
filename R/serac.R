@@ -884,23 +884,23 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         cat(paste("\n Mass accumulation rate (CIC model): see output file.\n", sep=""))
       }
 
-      # Save output
-      if(!mass_depth) {
-        out_list$`CIC model` <- data.frame("depth_avg_mm"  = dt$depth_avg[!is.na(dt$Pbex)],
-                                           "m_CIC"      = m_CIC,
-                                           "m_CIC_low"  = m_CIC_low,
-                                           "m_CIC_high" = m_CIC_high,
-                                           "SAR_CIC_mm.yr"     = sr_CIC,
-                                           "SAR_CIC_err_mm.yr" = sr_CIC_err)
-      } else {
-        out_list$`CIC model` <- data.frame("depth_avg_mm"  = dt$depth_avg[!is.na(dt$Pbex)],
-                                           "mass_depth_g.cm.2" = dt$mass_depth_avg[!is.na(dt$Pbex)],
-                                           "m_CIC"      = m_CIC,
-                                           "m_CIC_low"  = m_CIC_low,
-                                           "m_CIC_high" = m_CIC_high,
-                                           "MAR_CIC_g.cm-2.yr"     = sr_CIC,
-                                           "MAR_CIC_err_g.cm-2.yr" = sr_CIC_err)
-      }
+      # # Save output - this is commented because I am saving the output at the same time as I am saving the interpolated output. I am keeping this here because this details nicely the variables names.
+      # if(!mass_depth) {
+      #   out_list$`CIC model` <- data.frame("depth_avg_mm"  = dt$depth_avg[!is.na(dt$Pbex)],
+      #                                      "m_CIC"      = m_CIC,
+      #                                      "m_CIC_low"  = m_CIC_low,
+      #                                      "m_CIC_high" = m_CIC_high,
+      #                                      "SAR_CIC_mm.yr"     = sr_CIC,
+      #                                      "SAR_CIC_err_mm.yr" = sr_CIC_err)
+      # } else {
+      #   out_list$`CIC model` <- data.frame("depth_avg_mm"  = dt$depth_avg[!is.na(dt$Pbex)],
+      #                                      "mass_depth_g.cm.2" = dt$mass_depth_avg[!is.na(dt$Pbex)],
+      #                                      "m_CIC"      = m_CIC,
+      #                                      "m_CIC_low"  = m_CIC_low,
+      #                                      "m_CIC_high" = m_CIC_high,
+      #                                      "MAR_CIC_g.cm-2.yr"     = sr_CIC,
+      #                                      "MAR_CIC_err_g.cm-2.yr" = sr_CIC_err)
+      # }
 
     }
 
@@ -949,23 +949,23 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         cat(paste("\n Mass accumulation rate (CRS model): see output file.\n", sep=""))
       }
 
-      # Save output
-      if(!mass_depth) {
-        out_list$`CRS model` <- data.frame("depth_avg_mm"  = dt$depth_avg[whichkeep],
-                                           "m_CRS"      = m_CRS,
-                                           "m_CRS_low"  = m_CRS_low,
-                                           "m_CRS_high" = m_CRS_high,
-                                           "SAR_CRS_mm.yr"     = sr_CRS,
-                                           "SAR_CRS_err_mm.yr" = sr_CRS_err)
-      } else {
-        out_list$`CRS model` <- data.frame("depth_avg_mm"  = dt$depth_avg[whichkeep],
-                                           "mass_depth_g.cm.2" = dt$mass_depth_avg[whichkeep],
-                                           "m_CRS"      = m_CRS,
-                                           "m_CRS_low"  = m_CRS_low,
-                                           "m_CRS_high" = m_CRS_high,
-                                           "MAR_CRS_g.cm-2.yr"     = sr_CRS,
-                                           "MAR_CRS_err_g.cm-2.yr" = sr_CRS_err)
-      }
+      # # Save output - this is commented because I am saving the output at the same time as I am saving the interpolated output. I am keeping this here because this details nicely the variables names.
+      # if(!mass_depth) {
+      #   out_list$`CRS model` <- data.frame("depth_avg_mm"  = dt$depth_avg[whichkeep],
+      #                                      "m_CRS"      = m_CRS,
+      #                                      "m_CRS_low"  = m_CRS_low,
+      #                                      "m_CRS_high" = m_CRS_high,
+      #                                      "SAR_CRS_mm.yr"     = sr_CRS,
+      #                                      "SAR_CRS_err_mm.yr" = sr_CRS_err)
+      # } else {
+      #   out_list$`CRS model` <- data.frame("depth_avg_mm"  = dt$depth_avg[whichkeep],
+      #                                      "mass_depth_g.cm.2" = dt$mass_depth_avg[whichkeep],
+      #                                      "m_CRS"      = m_CRS,
+      #                                      "m_CRS_low"  = m_CRS_low,
+      #                                      "m_CRS_high" = m_CRS_high,
+      #                                      "MAR_CRS_g.cm-2.yr"     = sr_CRS,
+      #                                      "MAR_CRS_err_g.cm-2.yr" = sr_CRS_err)
+      # }
     }
 
     if(any(model=="CRS_pw")) {
@@ -1234,25 +1234,25 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         cat(paste("\n Mass accumulation rate (CRS piecewise model): see output file.\n", sep=""))
       }
 
-      # Save output
-      if(!mass_depth) {
-        out_list$`CRS piecewise model` <- data.frame(
-          "depth_avg_mm"        = complete_core_depth[whichkeep],
-          "m_CRS_pw"      = m_CRS_pw,
-          "m_CRS_pw_low"  = m_CRS_pw_low,
-          "m_CRS_pw_high" = m_CRS_pw_high,
-          "SAR_CRS_pw_mm.yr"     = sr_CRS_pw,
-          "SAR_CRS_pw_err_mm.yr" = sr_CRS_pw_err)
-      } else {
-        out_list$`CRS piecewise model` <- data.frame(
-          "depth_avg_mm"        = complete_core_depth[whichkeep],
-          "mass_depth_g.cm.2" = dt$mass_depth_avg[whichkeep],
-          "m_CRS_pw"      = m_CRS_pw,
-          "m_CRS_pw_low"  = m_CRS_pw_low,
-          "m_CRS_pw_high" = m_CRS_pw_high,
-          "MAR_CRS_pw_g.cm-2.yr"     = sr_CRS_pw,
-          "MAR_CRS_pw_err_g.cm-2.yr" = sr_CRS_pw_err)
-      }
+      # # Save output - this is commented because I am saving the output at the same time as I am saving the interpolated output. I am keeping this here because this details nicely the variables names.
+      # if(!mass_depth) {
+      #   out_list$`CRS piecewise model` <- data.frame(
+      #     "depth_avg_mm"        = complete_core_depth[whichkeep],
+      #     "m_CRS_pw"      = m_CRS_pw,
+      #     "m_CRS_pw_low"  = m_CRS_pw_low,
+      #     "m_CRS_pw_high" = m_CRS_pw_high,
+      #     "SAR_CRS_pw_mm.yr"     = sr_CRS_pw,
+      #     "SAR_CRS_pw_err_mm.yr" = sr_CRS_pw_err)
+      # } else {
+      #   out_list$`CRS piecewise model` <- data.frame(
+      #     "depth_avg_mm"        = complete_core_depth[whichkeep],
+      #     "mass_depth_g.cm.2" = dt$mass_depth_avg[whichkeep],
+      #     "m_CRS_pw"      = m_CRS_pw,
+      #     "m_CRS_pw_low"  = m_CRS_pw_low,
+      #     "m_CRS_pw_high" = m_CRS_pw_high,
+      #     "MAR_CRS_pw_g.cm-2.yr"     = sr_CRS_pw,
+      #     "MAR_CRS_pw_err_g.cm-2.yr" = sr_CRS_pw_err)
+      # }
     }
   }
 
@@ -1529,14 +1529,13 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
     colnames(output_agemodel_CFCS)[1] <- colnames(output_agemodel_CFCS_inter)[1] <- "depth_avg_mm"
 
-    # Save output in the list
-    out_list$'CFCS age-depth model' <- output_agemodel_CFCS
-    out_list$'CFCS age-depth model interpolated' <- output_agemodel_CFCS_inter
-
     # Save output in file
     write.table(x = output_agemodel_CFCS[order(output_agemodel_CFCS$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CFCS.txt", sep = ""), col.names = T, row.names = F)
     write.table(x = output_agemodel_CFCS_inter[order(output_agemodel_CFCS_inter$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CFCS_interpolation.txt", sep = ""), col.names = T, row.names = F)
 
+    # Save output in the list
+    out_list$`CFCS age-depth model` <- output_agemodel_CFCS
+    out_list$`CFCS age-depth model interpolated` <- output_agemodel_CFCS_inter
 
     # Parameters for legend
     mylegend <- c(mylegend, "CFCS")
@@ -1578,7 +1577,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     write.table(x = output_agemodel_CIC_inter[order(output_agemodel_CIC_inter$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CIC_interpolation.txt", sep = ""), col.names = T, row.names = F)
 
     # Save output in the list
-    out_list$'CIC age-depth model interpolated' <- output_agemodel_CIC_inter
+    out_list$`CIC model` <- output_agemodel_CIC[order(output_agemodel_CIC$depth_avg_mm, decreasing = F), ]
+    out_list$`CIC age-depth model interpolated` <- output_agemodel_CIC_inter[order(output_agemodel_CIC_inter$depth_avg_mm, decreasing = F), ]
 
     # Parameters for legend
     mylegend <- c(mylegend, "CIC")
@@ -1655,7 +1655,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     write.table(x = output_agemodel_CRS_inter[order(output_agemodel_CRS_inter$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_interpolation.txt", sep = ""), col.names = T, row.names = F)
 
     # Save output in the list
-    out_list$'CRS age-depth model interpolated' <- output_agemodel_CRS_inter
+    out_list$`CRS model` <- output_agemodel_CRS[order(output_agemodel_CRS$depth_avg_mm, decreasing = F), ]
+    out_list$`CRS age-depth model interpolated` <- output_agemodel_CRS_inter[order(output_agemodel_CRS_inter$depth_avg_mm, decreasing = F), ]
 
     # Parameters for legend
     mylegend <- c(mylegend, "CRS")
@@ -1732,7 +1733,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     write.table(x = output_agemodel_CRS_pw_inter[order(output_agemodel_CRS_pw_inter$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_pw_interpolation.txt", sep = ""), col.names = T, row.names = F)
 
     # Save output in the list
-    out_list$'CRS piecewise model age-depth model interpolated' <- output_agemodel_CRS_pw_inter
+    out_list$`CRS piecewise model` <- output_agemodel_CRS_pw[order(output_agemodel_CRS_pw$depth_avg_mm, decreasing = F), ]
+    out_list$`CRS piecewise model age-depth model interpolated` <- output_agemodel_CRS_pw_inter[order(output_agemodel_CRS_pw_inter$depth_avg_mm, decreasing = F), ]
 
     # Parameters for legend
     mylegend <- c(mylegend, "CRS piecewise model")
