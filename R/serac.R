@@ -654,8 +654,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     # Read previous file
     code_history <- read.delim(list.files(paste(getwd(), "/Cores/", name, "/", sep=""), pattern="serac_model_history*", full.names=TRUE))
     # If previous compilation was done prior to 2022-04-13, there may have been a typo in the code history file. Correct it here
-    colnames(code_history)[colnames(code_history) == c("age_forced_CRS_pwosite")] <- "age_forced_CRS_pw"
-    colnames(code_history)[colnames(code_history) == c("depth_forced_CRS_pwosite")] <- "depth_forced_CRS_pw"
+    colnames(code_history)[colnames(code_history) %in% c("age_forced_CRS_pwosite", "age_forced_CRS_composite")] <- "age_forced_CRS_pw"
+    colnames(code_history)[colnames(code_history) %in% c("depth_forced_CRS_pwosite", "depth_forced_CRS_composite")] <- "depth_forced_CRS_pw"
     # Increment new code
     if(ncol(code_history) == ncol(this_code_history))
       code_history <- rbind(code_history, this_code_history) else
