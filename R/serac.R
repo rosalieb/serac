@@ -564,7 +564,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   d_for_CFCS <- unique(c(inst_deposit, max(dt$depth_avg[!is.na(dt$d)])))
   if(SML!=0) d_for_CFCS <- c(d_for_CFCS, SML)
   if(mass_depth) {
-    d_for_CFCS <- c(d_for_CFCS, dt$depth_bottom[!is.na(dt$mass_depth_bottom)])
+    d_for_CFCS <- c(d_for_CFCS, dt$depth_avg[!is.na(dt$mass_depth_avg)])
     d_for_CFCS <- unique(d_for_CFCS)
   }
   d_for_CFCS <- c(0, d_for_CFCS, sedchange, dmax)
