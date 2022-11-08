@@ -48,19 +48,19 @@ Which folder are your currently working in?
 getwd()
 ```
 
-If you want to work in another folder, change it with setwd(""), e.g.:
+If you want to work in another folder, change it with `setwd()`, e.g.:
 
 ```{r setwd, eval=FALSE}
 setwd("~/myProject/Age depth model")
 ```
 
 
-Line below will create the 'Cores' folder if it doesn't exist already
+Line below will create the _Cores_ folder if it does not exist already
 ```{r create core folder,  eval=TRUE}
 dir.create(file.path(getwd(), 'Cores'), showWarnings = FALSE)
 ```
 
-Within the 'Cores' folder, user needs to create one folder per core.
+Within the _Cores_ folder, user needs to create one folder per core.
 ```{r create example data folder, eval=TRUE}
 dir.create(file.path(paste0(getwd(),'/Cores'), 'serac_example_ALO09P12'), showWarnings = FALSE)
 ```
@@ -89,11 +89,11 @@ user_infos()
 
 # 2 Run serac
 ## 2.1 Minimum arguments
-At the minimum, your function will be need the name of the core and the coring year. In the example below, I included the **save_code** argument because Rmarkdown doesn't save code history the way the code can use it. Unless you're including a plot in a Rmarkdown, I recommend you do not specify this argument, or turn it to its default, i.e., TRUE. That way, you can go back and see your code.
+At the minimum, your function will be need the name of the core and the coring year. In the example below, I included the **save_code** argument because Rmarkdown does not save code history the way the code can use it. Unless you are including a plot in a Rmarkdown, I recommend you do not specify this argument, or turn it to its default, i.e., TRUE. That way, you can go back and see your code.
 
 ```{r model 1, eval=FALSE}
 serac(name="serac_example_ALO09P12",coring_yr=2009,
-      save_code=FALSE) #do not include 'save_code' if you're working outside a Rmarkdown document
+      save_code=FALSE) #do not include 'save_code' if you are working outside a Rmarkdown document
 ```
 
 ## 2.2 Final model
@@ -124,7 +124,7 @@ model_ALO09P12$plot
 
 ## 2.3 Plot against mass_depth
 The plotting options are quite flexible (colors, text size). <br>
-We also offer the possibility to plot the figure against mass depth, using mass accumulation rate instead of sediment accumulation rate for the CFCS model. The code is similar to what we used previously, you just need to add **'mass_depth = TRUE'** to your function.
+We also offer the possibility to plot the figure against mass depth, using mass accumulation rate instead of sediment accumulation rate for the CFCS model. The code is similar to what we used previously, you just need to add `mass_depth = TRUE` to your function.
 
 ```{r plot in mass depth}
 model_ALO09P12_mass_depth <-
@@ -195,7 +195,7 @@ dev.off()
 Another way to read some help.
 
 ## 4.2 serac_input_formatting() <a name="#serac_input_formatting"></a>
-If you unsure about the input format of your core (if you have depth in mm, or column names that don't follow our example), you can use the function *serac_input_formatting(name = "MyCore")* (MyCore being the name of your core and folder in which the data are located) and follow the steps.
+If you unsure about the input format of your core (if you have depth in mm, or column names that do not follow our example), you can use the function *serac_input_formatting(name = "MyCore")* (MyCore being the name of your core and folder in which the data are located) and follow the steps.
 
 ## 4.3 core_metadata()
 Enter here a more extensive list of parameters associated to your core. Current list of parameters includes:<br>
@@ -232,5 +232,5 @@ unlink(paste0(getwd(),"/Cores"), recursive = TRUE)
 
 If you use _serac_, please cite our paper describing the package:
 
-Bruel, R., Sabatier, P., 2020. serac: A R package for ShortlivEd RAdionuclide chronology of recent sediment cores. Journal of Environmental Radioactivity 225, 106449. https://doi.org/10.1016/j.jenvrad.2020.106449 
+Bruel, R., Sabatier, P., 2020. serac: an R package for ShortlivEd RAdionuclide chronology of recent sediment cores. Journal of Environmental Radioactivity 225, 106449. https://doi.org/10.1016/j.jenvrad.2020.106449 
 
