@@ -753,11 +753,15 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           # Save output
           if(!mass_depth) { # default
             out_list$`CFCS sediment accumulation rate` <- rbind(out_list$`CFCS sediment accumulation rate`,
-                                                                c(min(dt_sed2$depth_top), max(dt_sed2$depth_bottom), as.numeric(sr_sed2), as.numeric(sr_sed2_err), summary(lm_sed2)$r.squared))
+                                                                c(min(dt_sed2$depth_avg), max(dt_sed2$depth_bottom), as.numeric(sr_sed2), as.numeric(sr_sed2_err), summary(lm_sed2)$r.squared))
+            # Switching the "depth_max" for the previous sed change to the sediment change depth
+            out_list$`CFCS sediment accumulation rate`[1,2] <- max(dt_sed1$depth_avg)
             rownames(out_list$`CFCS sediment accumulation rate`) <- c("sedchange1", "sedchange2")
           } else {
             out_list$`CFCS mass accumulation rate` <- rbind(out_list$`CFCS mass accumulation rate`,
-                                                            c(min(dt_sed2$depth_top), max(dt_sed2$depth_bottom), as.numeric(sr_sed2), as.numeric(sr_sed2_err), summary(lm_sed2)$r.squared))
+                                                            c(min(dt_sed2$depth_avg), max(dt_sed2$depth_bottom), as.numeric(sr_sed2), as.numeric(sr_sed2_err), summary(lm_sed2)$r.squared))
+            # Switching the "depth_max" for the previous sed change to the sediment change depth
+            out_list$`CFCS mass accumulation rate`[1,2] <- max(dt_sed1$depth_avg)
             rownames(out_list$`CFCS mass accumulation rate`) <- c("sedchange1", "sedchange2")
           }
         }
@@ -794,15 +798,19 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           # Save output
           if(!mass_depth) {
             out_list$`CFCS sediment accumulation rate` <- rbind(out_list$`CFCS sediment accumulation rate`,
-                                                                c(min(dt_sed2$depth_top), max(dt_sed2$depth_bottom), as.numeric(sr_sed2), as.numeric(sr_sed2_err), summary(lm_sed2)$r.squared))
+                                                                c(min(dt_sed2$depth_avg), max(dt_sed2$depth_avg), as.numeric(sr_sed2), as.numeric(sr_sed2_err), summary(lm_sed2)$r.squared))
             out_list$`CFCS sediment accumulation rate` <- rbind(out_list$`CFCS sediment accumulation rate`,
-                                                                c(min(dt_sed3$depth_top), max(dt_sed3$depth_bottom), as.numeric(sr_sed3), as.numeric(sr_sed3_err), summary(lm_sed3)$r.squared))
+                                                                c(min(dt_sed3$depth_avg), max(dt_sed3$depth_bottom), as.numeric(sr_sed3), as.numeric(sr_sed3_err), summary(lm_sed3)$r.squared))
+            # Switching the "depth_max" for the first sed change to the sediment change depth
+            out_list$`CFCS sediment accumulation rate`[1,2] <- max(dt_sed1$depth_avg)
             rownames(out_list$`CFCS sediment accumulation rate`) <- c("sedchange1", "sedchange2", "sedchange3")
           } else {
             out_list$`CFCS mass accumulation rate` <- rbind(out_list$`CFCS mass accumulation rate`,
-                                                            c(min(dt_sed2$depth_top), max(dt_sed2$depth_bottom), as.numeric(sr_sed2), as.numeric(sr_sed2_err), summary(lm_sed2)$r.squared))
+                                                            c(min(dt_sed2$depth_avg), max(dt_sed2$depth_avg), as.numeric(sr_sed2), as.numeric(sr_sed2_err), summary(lm_sed2)$r.squared))
             out_list$`CFCS mass accumulation rate` <- rbind(out_list$`CFCS mass accumulation rate`,
-                                                            c(min(dt_sed3$depth_top), max(dt_sed3$depth_bottom), as.numeric(sr_sed3), as.numeric(sr_sed3_err), summary(lm_sed3)$r.squared))
+                                                            c(min(dt_sed3$depth_avg), max(dt_sed3$depth_bottom), as.numeric(sr_sed3), as.numeric(sr_sed3_err), summary(lm_sed3)$r.squared))
+            # Switching the "depth_max" for the first sed change to the sediment change depth
+            out_list$`CFCS mass accumulation rate`[1,2] <- max(dt_sed1$depth_avg)
             rownames(out_list$`CFCS mass accumulation rate`) <- c("sedchange1", "sedchange2", "sedchange3")
           }
         }
