@@ -35,7 +35,7 @@ library(serac)
 
 ```
 
-The present vignette helps you compute your first age-depth model with _serac_, a R package for ShortlivEd RAdionuclide Chronology of recent sediment cores. <a href="https://github.com/rosalieb/serac" target="_blank"><img src="figures/hex-serac.png" align="right" height="220" width="190" ></a>
+The present vignette helps you compute your first age-depth model with _serac_, an R package for ShortlivEd RAdionuclide Chronology of recent sediment cores. <a href="https://github.com/rosalieb/serac" target="_blank"><img src="figures/hex-serac.png" align="right" height="220" width="190" ></a>
 
 
 # 1 First time user
