@@ -144,7 +144,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   if(length(sedchange)>2)    stop("\n Warning, serac only support two changes in sedimentation rate. Please check the manual.\n\n", call.=FALSE)
 
   # Chernobyl fallouts are dated at different years depending on the hemisphere
-  if(!is.na(Cher) && (Hemisphere=="NH"|Hemisphere=="SH")==FALSE)  stop("\n Warning, please select the hemisphere where your system is located.\n 'NH' or 'SH' for Northern/Southern Hemisphere.\n\n")
+  if(!all(is.na(Cher)) && (Hemisphere=="NH"|Hemisphere=="SH")==FALSE)  stop("\n Warning, please select the hemisphere where your system is located.\n 'NH' or 'SH' for Northern/Southern Hemisphere.\n\n")
 
   # if the argument plotphoto is true, then a photo with the exact same name and the extension .jpg must be provided in the folder
   # min and max depth must be provided so the image is automatically cropped.
@@ -184,492 +184,608 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   }
 
   #### 1. READ DATA ----
-  dt <- read.delim(file = paste(getwd(), "/Cores/", name, "/", name, ".txt", sep=""))
-  dt <- dt[, colSums(is.na(dt))<nrow(dt)]
-  if(plotphoto) photo <- readJPEG(paste(getwd(), "/Cores/", name, "/", name, ".jpg", sep=""))
-  if(varves) varve <- read.delim(file = paste(getwd(), "/Cores/", name, "/", name, "_varves.txt", sep=""))
-  if(suppdescriptor) dt_suppdescriptor <- read.delim(file = paste(getwd(), "/Cores/", name, "/", name, "_proxy.txt", sep=""))
+  {
+    dt <- read.delim(file = paste(getwd(), "/Cores/", name, "/", name, ".txt", sep=""))
+    dt <- dt[, colSums(is.na(dt))<nrow(dt)]
+    if(plotphoto) photo <- readJPEG(paste(getwd(), "/Cores/", name, "/", name, ".jpg", sep=""))
+    if(varves) varve <- read.delim(file = paste(getwd(), "/Cores/", name, "/", name, "_varves.txt", sep=""))
+    if(suppdescriptor) dt_suppdescriptor <- read.delim(file = paste(getwd(), "/Cores/", name, "/", name, "_proxy.txt", sep=""))
 
-  # 1.1 Flexibility in input columns format ####
-  # I'm adding '[1]' at the end of each grep expressions, in case several column carry the name
-  # This shouldn't ever cause an issue to the user, as long as they use a clean input data file
-  #         (without overlap in column names - there should be only one column with the 'key'
-  #         informations). Any other column can be added and won't be read by serac if they
-  #         don't contain the keywords used below.
-  # Depth columns
-  if (length(intersect(grep("epth|EPTH", colnames(dt)), grep("top|bottom|min|max|mass", colnames(dt), invert=TRUE)))>=1){
-    dt$depth_avg <- dt[, intersect(grep("epth|EPTH", colnames(dt)), grep("top|bottom|min|max|mass", colnames(dt), invert=TRUE))[1]]
-  }
-  if (length(grep("hickness|HICKNESS", colnames(dt))>=1)) {
-    dt$thickness <- dt[, grep("hickness|HICKNESS", colnames(dt))[1]]
-  }
-
-  # For 210Pbex
-  if(length(grep("Pb", colnames(dt)))>1) {
-    dt$Pbex <- dt[, intersect(intersect(grep("Pb", colnames(dt)), grep("ex", colnames(dt))), grep("er", colnames(dt), invert=TRUE))[1]]
-    dt$Pbex_er <- dt[, intersect(intersect(grep("Pb", colnames(dt)), grep("ex", colnames(dt))), grep("er", colnames(dt)))[1]]
-    Pb_exists = T
-  } else {
-    Pb_exists = F
-    if(plot_Pb|plot_Pb_inst_deposit) packageStartupMessage("\n Warning. We did not find the Lead column (+ error) in the input file.\n\n")
-  }
-  # For 137Cs
-  if(length(grep("Cs", colnames(dt)))>1) {
-    dt$Cs <- dt[, intersect(grep("Cs", colnames(dt)), grep("er", colnames(dt), invert=TRUE))[1]]
-    dt$Cs_er <- dt[, intersect(grep("Cs", colnames(dt)), grep("er", colnames(dt)))[1]]
-    Cs_exists = T
-  } else {
-    dt$Cs <- rep(NA, nrow(dt))
-    dt$Cs_er <- rep(NA, nrow(dt))
-    Cs_exists = F
-    if(plot_Cs) packageStartupMessage("\n Warning. We did not find the Cesium column (+ error) in the input file.\n\n")
-  }
-  # For 241Am
-  if(length(grep("Am", colnames(dt)))>1) {
-    dt$Am <- dt[, intersect(grep("Am", colnames(dt)), grep("er", colnames(dt), invert=TRUE))[1]]
-    dt$Am_er <- dt[, intersect(grep("Am", colnames(dt)), grep("er", colnames(dt)))[1]]
-  } else {
-    dt$Am <- rep(NA, nrow(dt))
-    dt$Am_er <- rep(NA, nrow(dt))
-    if(plot_Am) packageStartupMessage("\n Warning. We did not find the Americium column (+ error) in the input file.\n\n")
-  }
-
-  # 1.2 Calculate thickness if missing, or conversely calculate upper and lower depth of samples ####
-  if(is.null(dt$thickness) & is.null(dt$depth_top) & is.null(dt$depth_bottom) & is.null(dt$depth_min) & is.null(dt$depth_max)) stop("\n Warning, please indicate the thickness of each sample in mm or the top and \nbottom section of each sample so we can compute it for you.\n\n")
-
-  # Change dt$depth_min/dt$depth_max by top and bottom - correction to international format
-  if(length(dt$depth_min)==nrow(dt)) dt$depth_top <- dt$depth_min
-  if(length(dt$depth_max)==nrow(dt)) dt$depth_bottom <- dt$depth_max
-
-  if(length(dt$depth_avg)<nrow(dt)) dt$depth_avg <- (dt$depth_top+dt$depth_bottom)/2
-
-  if(length(dt$thickness)<nrow(dt)) {
-    dt$thickness <- rep(NA, nrow(dt))
-    for (i in 1:nrow(dt)) dt$thickness[i] <- (abs(dt$depth_top[i]-dt$depth_bottom[i]))
-  }
-
-  if(is.null(dt$depth_top))         dt$depth_top <- dt$depth_avg-dt$thickness/2
-  if(is.null(dt$depth_bottom))      dt$depth_bottom <- dt$depth_avg+dt$thickness/2
-
-  # Same for varves file, if present
-  if(varves) {
-    varve$depth_avg <- varve[, grep("epth", colnames(varve))]
-    varve$thickness <- varve[, grep("hickness", colnames(varve))]
-
-    if(is.null(varve$thickness) & is.null(varve$depth_top) & is.null(varve$depth_bottom)) stop("\n Warning, please indicate in the 'varves' input data file the thickness \nof each sample in mm or the top and bottom section of each sample so \nwe can compute it for you.\n\n")
-
-    if(is.null(varve$thickness)) {
-      varve$thickness <- rep(NA, nrow(varve))
-      for (i in 1:nrow(varve)) varve$thickness[i] <- (abs(varve$depth_top[i]-varve$depth_bottom[i]))
+    # 1.1 Flexibility in input columns format ####
+    # I'm adding '[1]' at the end of each grep expressions, in case several column carry the name
+    # This shouldn't ever cause an issue to the user, as long as they use a clean input data file
+    #         (without overlap in column names - there should be only one column with the 'key'
+    #         informations). Any other column can be added and won't be read by serac if they
+    #         don't contain the keywords used below.
+    # Depth columns
+    if (length(intersect(grep("epth|EPTH", colnames(dt)), grep("top|bottom|min|max|mass", colnames(dt), invert=TRUE)))>=1){
+      dt$depth_avg <- dt[, intersect(grep("epth|EPTH", colnames(dt)), grep("top|bottom|min|max|mass", colnames(dt), invert=TRUE))[1]]
     }
-  }
-
-  # Additional warning not so related to this section
-  # If density is missing, cannot calculate CRS
-  if(any(model %in% c("CRS", "CRS_pw"))) if(is.null(dt$density)) stop("\n Warning, you need to include the density in g/cm2 for each sample to compute CRS model.\n\n")
-  if(mass_depth) if(is.null(dt$density)) stop("\n Warning, you need to include the density in g/cm2 for each sample to calculate mass accumulation rate.\n\n")
-
-  # Additional warning if density is not given continuously
-  for (i in 2:nrow(dt)) {
-    if(i==2) test1<-NULL
-    test1 <- c(test1, dt$depth_top[i]-dt$depth_bottom[i-1])
-  }
-  if(!is.null(dt$density) && !all(test1==0)) {
-    packageStartupMessage(paste0("\n Warning, density is not given continuously for the whole core.\n Inventories, CRS model, and mass accumulation rate should be\n interpreted very carefully. Alternatively, enter the density\n for the whole core.\n Density is missing for ", length(test1[test1!=0]), " layer(s): "))
-    packageStartupMessage(paste0("     - ", dt$depth_bottom[which(test1>0)], "-", dt$depth_top[which(test1>0)+1], " mm \n"))
-  }
-
-  # Warning, if CRS_pw is selected, then depth forced cannot be max or min depth of a section (ideally, it is a mid-section, but we have a warning message for that later)
-  if(any(model %in% c("CRS_pw"))) if(any(depth_forced_CRS %in% c(dt$depth_min, dt$depth_max))) {
-    stop("\n Warning: depth_forced_CRS cannot be the min or max depth of a layer.\n    Add or remove 0.1 mm to your depth_forced_CRS to run the code.")
-  }
-
-  # 1.3 Complete core vector ####
-  # Create the vector complete_core_depth when the measurements haven't been done for all the layers.
-  # Necessary for inventory for instance.
-  complete_core_temporary <- c(0, dt$depth_top, dt$depth_bottom, inst_deposit)
-  # Remove the instantaneous deposit depth deeper than measured depth.
-  # We do not want to extrapolate 210Pbex and 137Cs below the actual measurement.
-  complete_core_temporary <- complete_core_temporary[complete_core_temporary<=max(dt$depth_bottom, na.rm=T)]
-  complete_core_temporary <- unique(complete_core_temporary)
-  complete_core_temporary <- complete_core_temporary[order(complete_core_temporary, decreasing = F)]
-  complete_core_thickness <- NULL
-  complete_core_depth <- NULL
-  complete_core_depth_top <- NULL
-  complete_core_depth_bottom <- NULL
-  for (i in 2:length(complete_core_temporary)) {
-    complete_core_thickness <- c(complete_core_thickness, complete_core_temporary[i]-complete_core_temporary[i-1])
-    complete_core_depth <- c(complete_core_depth, complete_core_temporary[i]-complete_core_thickness[i-1]/2)
-    complete_core_depth_top <- c(complete_core_depth_top, complete_core_temporary[i-1])
-    complete_core_depth_bottom <- c(complete_core_depth_bottom, complete_core_temporary[i])
-  }
-  rm(complete_core_temporary)
-
-  # Generated the complete 210Pbex and 137Cs profile (in case the sampling was not continuous)
-  complete_core_Pbex <- approx(x= dt$depth_avg, dt$Pbex, xout= complete_core_depth, rule = 2, ties = mean)$y
-  complete_core_Pbex_err <- approx(x= dt$depth_avg, dt$Pbex_er, xout= complete_core_depth, rule = 2, ties = mean)$y
-  # Case when there are some NAs for Cs
-  if(any(!is.na(dt$Cs))) complete_core_Cs <- approx(x= dt$depth_avg, dt$Cs, xout= complete_core_depth, rule = 2, ties = mean)$y
-  if(any(!is.na(dt$Cs))) complete_core_Cs_err <- approx(x= dt$depth_avg, dt$Cs_er, xout= complete_core_depth, rule = 2, ties = mean)$y
-  # Case when there are only NAs for Cs
-  if(all(is.na(dt$Cs))) complete_core_Cs <- rep(NA, length(complete_core_depth))
-  if(all(is.na(dt$Cs))) complete_core_Cs_err <- rep(NA, length(complete_core_depth))
-
-  # Generate the complete density (in case the sampling was not continuous).
-  # It is just a linear interpolation.
-  if(length(grep("density", x = colnames(dt)))>=1) complete_core_density <- approx(x= dt$depth_avg, dt$density, xout= complete_core_depth, rule = 2, ties = mean)$y
-
-  # 1.4 Which keep ####
-  # When calculating the inventories, we don't want to take in account the depth included
-  # in a instantaneous deposit, or the depth explicitely 'ignored' by the operator.
-  # Here, I'm creating an index of data that will be ignored from the inventory calculation.
-  myvec <- 1:length(complete_core_depth)
-  whichkeep <- NULL
-  if(exists("inst_deposit") && max(length(inst_deposit))>0 && length(inst_deposit) %% 2 == 0){
-    # Not the best way to do it but I need this vector early
-    myseq <- seq(1, length(inst_deposit), by = 2)
-    for (i in seq(1, length(inst_deposit), by = 2)) {
-      if (i == myseq[1]) whichkeep <- c(whichkeep, myvec[complete_core_depth<inst_deposit[i]])
-      whichkeep <- c(whichkeep, myvec[complete_core_depth>inst_deposit[i-1] & complete_core_depth<inst_deposit[i]])
-      if (i == rev(myseq)[1]) whichkeep <- c(whichkeep, myvec[complete_core_depth>inst_deposit[i+1]])
+    if (length(grep("hickness|HICKNESS", colnames(dt))>=1)) {
+      dt$thickness <- dt[, grep("hickness|HICKNESS", colnames(dt))[1]]
     }
-    rm(myseq)
-  } else whichkeep <- myvec
-  whichkeep <- whichkeep[!whichkeep %in% which(complete_core_depth %in% ignore)]
-  #whichkeep <- whichkeep[!whichkeep %in% which(complete_core_depth %in% dt$depth_avg[is.na(dt$Pbex)])]
-  rm(myvec)
-  whichkeep <- whichkeep[!is.na(whichkeep)]
-  # whichkeep tells you which "complete_core_depth" are not in an instantaneous deposit
-  # Only these depths will be included when computing the inventory
 
-  # Create the complete core depth 2 (for CRS calculations)
-  # Everything but ignore
-  complete_core_depth_2 <- complete_core_depth
-  complete_core_depth_2[!complete_core_depth_2 %in% complete_core_depth_2[whichkeep]] <- NA
+    # For 210Pbex
+    if(length(grep("Pb", colnames(dt)))>1) {
+      dt$Pbex <- dt[, intersect(intersect(grep("Pb", colnames(dt)), grep("ex", colnames(dt))), grep("er", colnames(dt), invert=TRUE))[1]]
+      dt$Pbex_er <- dt[, intersect(intersect(grep("Pb", colnames(dt)), grep("ex", colnames(dt))), grep("er", colnames(dt)))[1]]
+      Pb_exists = T
+    } else {
+      Pb_exists = F
+      if(plot_Pb|plot_Pb_inst_deposit) packageStartupMessage("\n Warning. We did not find the Lead column (+ error) in the input file.\n\n")
+    }
+    # For 137Cs
+    if(length(grep("Cs", colnames(dt)))>1) {
+      dt$Cs <- dt[, intersect(grep("Cs", colnames(dt)), grep("er", colnames(dt), invert=TRUE))[1]]
+      dt$Cs_er <- dt[, intersect(grep("Cs", colnames(dt)), grep("er", colnames(dt)))[1]]
+      Cs_exists = T
+    } else {
+      dt$Cs <- rep(NA, nrow(dt))
+      dt$Cs_er <- rep(NA, nrow(dt))
+      Cs_exists = F
+      if(plot_Cs) packageStartupMessage("\n Warning. We did not find the Cesium column (+ error) in the input file.\n\n")
+    }
+    # For 241Am
+    if(length(grep("Am", colnames(dt)))>1) {
+      dt$Am <- dt[, intersect(grep("Am", colnames(dt)), grep("er", colnames(dt), invert=TRUE))[1]]
+      dt$Am_er <- dt[, intersect(grep("Am", colnames(dt)), grep("er", colnames(dt)))[1]]
+    } else {
+      dt$Am <- rep(NA, nrow(dt))
+      dt$Am_er <- rep(NA, nrow(dt))
+      if(plot_Am) packageStartupMessage("\n Warning. We did not find the Americium column (+ error) in the input file.\n\n")
+    }
 
-  # 1.5 Set some parameters ####
-  if(!is.na(NWT) && Hemisphere=="NH") NWT_a <- 1963
-  if(!is.na(NWT) && Hemisphere=="SH") NWT_a <- 1965
-  if(is.null(dmin)) dmin <- min(dt$depth_avg, na.rm=T)
-  if(!is.null(dmax) && length(inst_deposit)>1 && dmax<max(inst_deposit)) dmax <- max(inst_deposit)
-  if(is.null(dmax)) if(exists("historic_d")) dmax <- max(c(dt$depth_avg, historic_d), na.rm=T) else dmax <- max(c(dt$depth_avg), na.rm=T)
-  if(is.null(sedchange)) sedchange <- 0
-  sedchange <- sedchange[order(sedchange)]
-  if(is.null(inst_deposit)) inst_deposit <- 0
-  if(is.null(SML)) SML=0
-  # Two next lines to prevent plotting the linear regression on raw 210Pb if instantaneous deposit are present
-  if(is.null(plot_CFCS_regression) & plot_Pb_inst_deposit) plot_CFCS_regression=TRUE
-  if(is.null(plot_CFCS_regression) & plot_Pb & length(inst_deposit) %% 2 != 1 & min(inst_deposit)<= max(dt$depth_avg)) plot_CFCS_regression=FALSE else plot_CFCS_regression=TRUE
-  myylim <- c(-mround(dmax, 10), -mround(dmin, 10)+10)
-  dates <- NULL
-  dates_depth_avg <- NULL
-  err_dated_depth_avg <- matrix(nrow=2)
-  err_dates_avg <- NULL
-  mtext_Cs <- NULL # text legend in case mass_depth=T and there are some peaks detected
-  mylegend <- NULL
-  mypchlegend <- NULL
-  myltylegend <- NULL
-  mycollegend <- NULL
+    # 1.2 Calculate thickness if missing, or conversely calculate upper and lower depth of samples ####
+    if(is.null(dt$thickness) & is.null(dt$depth_top) & is.null(dt$depth_bottom) & is.null(dt$depth_min) & is.null(dt$depth_max)) stop("\n Warning, please indicate the thickness of each sample in mm or the top and \nbottom section of each sample so we can compute it for you.\n\n")
 
-  # 1.6 Mass depth - create mass depth vector and interpolation ####
-  if(mass_depth) {
-    # 1.6.1 mass_depth - Create the composite mass depth ####
-    # Step 1.1: mass thickness (epaisseur massique)
-    dt$mass_depth_top    <- rep(NA, nrow(dt))
-    dt$mass_depth_bottom <- dt$density/10 * (dt$depth_bottom - dt$depth_top)
-    for(i in 2:nrow(dt)) {
-      if(dt$depth_top[i]==dt$depth_bottom[i-1]) {
-        dt$mass_depth_top[i] = dt$mass_depth_bottom[i-1]
-      } else {
-        dt$mass_depth_top[i] = complete_core_density[which(complete_core_depth_bottom==dt$depth_top[i])] *
-          (complete_core_depth_bottom[which(complete_core_depth_bottom==dt$depth_top[i])] - complete_core_depth_top[which(complete_core_depth_bottom==dt$depth_top[i])])
+    # Change dt$depth_min/dt$depth_max by top and bottom - correction to international format
+    if(length(dt$depth_min)==nrow(dt)) dt$depth_top <- dt$depth_min
+    if(length(dt$depth_max)==nrow(dt)) dt$depth_bottom <- dt$depth_max
+
+    if(length(dt$depth_avg)<nrow(dt)) dt$depth_avg <- (dt$depth_top+dt$depth_bottom)/2
+
+    if(length(dt$thickness)<nrow(dt)) {
+      dt$thickness <- rep(NA, nrow(dt))
+      for (i in 1:nrow(dt)) dt$thickness[i] <- (abs(dt$depth_top[i]-dt$depth_bottom[i]))
+    }
+
+    if(is.null(dt$depth_top))         dt$depth_top <- dt$depth_avg-dt$thickness/2
+    if(is.null(dt$depth_bottom))      dt$depth_bottom <- dt$depth_avg+dt$thickness/2
+
+    # Same for varves file, if present
+    if(varves) {
+      varve$depth_avg <- varve[, grep("epth", colnames(varve))]
+      varve$thickness <- varve[, grep("hickness", colnames(varve))]
+
+      if(is.null(varve$thickness) & is.null(varve$depth_top) & is.null(varve$depth_bottom)) stop("\n Warning, please indicate in the 'varves' input data file the thickness \nof each sample in mm or the top and bottom section of each sample so \nwe can compute it for you.\n\n")
+
+      if(is.null(varve$thickness)) {
+        varve$thickness <- rep(NA, nrow(varve))
+        for (i in 1:nrow(varve)) varve$thickness[i] <- (abs(varve$depth_top[i]-varve$depth_bottom[i]))
       }
     }
-    dt$mass_depth_top[1]=0
-    if(dt$depth_top[1]!=0) packageStartupMessage(paste0("\n Warning. Mass depth for your first sample (", dt$depth_top[1], "-", dt$depth_bottom[1], " mm) was set\n to 0 to allow further calculation, but you did not provide\n density for the surface layer (0-", dt$depth_top[1], " mm). Include density for\n the surface layer if you can, or interpret the results with care.\n\n"))
 
-    # Save these for later if inst_deposit_present
-    md_top <- dt$mass_depth_top
-    md_bot <- dt$mass_depth_bottom
+    # Additional warning not so related to this section
+    # If density is missing, cannot calculate CRS
+    if(any(model %in% c("CRS", "CRS_pw"))) if(is.null(dt$density)) stop("\n Warning, you need to include the density in g/cm2 for each sample to compute CRS model.\n\n")
+    if(mass_depth) if(is.null(dt$density)) stop("\n Warning, you need to include the density in g/cm2 for each sample to calculate mass accumulation rate.\n\n")
 
-
-    dt$mass_depth_avg         <- rep(NA, nrow(dt))
-
-    # Step 2: calculate actual mass depth, integral starting from the surface
-    for(i in 2:nrow(dt)) {
-      dt$mass_depth_top[i]    <- dt$mass_depth_top[i-1]    + dt$mass_depth_top[i]
-      dt$mass_depth_bottom[i] <- dt$mass_depth_bottom[i-1] + dt$mass_depth_bottom[i]
+    # Additional warning if density is not given continuously
+    for (i in 2:nrow(dt)) {
+      if(i==2) test1<-NULL
+      test1 <- c(test1, dt$depth_top[i]-dt$depth_bottom[i-1])
     }
-    dt$mass_depth_avg         <- (dt$mass_depth_bottom + dt$mass_depth_top)/2
-
-    # 1.6.2 mass_depth - Create an interpolated mass_depth vector ####
-    # If mass_depth=T, we'll need to match depths in g/cm2 to depths in mm.
-    # CFCS ages between two depths are easy to find (linear relationship)
-    # For mass_depth, if the interval is too big, we can really lose a lot
-    #      of info.
-    # This temporary vector will just interpolate mass_depth between two
-    #      calculated values.
-    # It's an apporximation; the higher the resolution of input data,
-    #      the better (less approximation are needed)
-    step_out_md   <- 1 # every mm
-    md_interp     <- c(seq(min(c(dt$depth_top, dt$depth_bottom), na.rm=T), max(c(dt$depth_top, dt$depth_bottom), na.rm=T), by = step_out_md))
-    md_interp     <- matrix(c(md_interp, rep(NA, length(md_interp)*3)), ncol = 4)
-    md_interp[, 2] <- approx(x= dt$depth_top, dt$mass_depth_top, xout= md_interp[, 1], rule=2, ties = mean)$y
-    md_interp[, 3] <- approx(x= dt$depth_bottom, dt$mass_depth_bottom, xout= md_interp[, 1], rule=2, ties = mean)$y
-    md_interp[, 4] <- approx(x= dt$depth_avg, dt$mass_depth_avg, xout= md_interp[, 1], rule=2, ties = mean)$y
-    md_interp     <- as.data.frame(md_interp)
-    colnames(md_interp) <- c("depth_mm", "md_top", "md_bott", "md_avg")
-  }
-  # 1.7 If scale was given in mass_depth, convert in mm so the rest of the script work####
-  if(input_depth_mm==F) {
-    # User gave the input in g/cm2. Converting it in mm, because the script was initially built that way.
-    # message if conversion
-    msg_conversion <- " (depth converted from g/cm2)\n     "
-    # sedchange
-    if(sedchange!=0) sedchange <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - sedchange))]
-    # SML
-    if(SML!=0) SML <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - SML))]
-    # Cher
-    if(!is.null(Cher)&&!is.na(Cher)) for(i in seq_along(Cher)) Cher[i] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - Cher[i]))]
-    # NWT
-    if(!is.null(NWT)&&!is.na(NWT))  for(i in seq_along(NWT))  NWT[i] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - NWT[i]))]
-    # FF
-    if(!is.null(FF)&&!is.na(FF))  for(i in seq_along(FF))    FF[i] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - FF[i]))]
-    # inst_deposit
-    if(max(inst_deposit>0))  {
-      for(i in seq_along(inst_deposit))    inst_deposit[i] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - inst_deposit[i]))]
+    if(!is.null(dt$density) && !all(test1==0)) {
+      packageStartupMessage(paste0("\n Warning, density is not given continuously for the whole core.\n Inventories, CRS model, and mass accumulation rate should be\n interpreted very carefully. Alternatively, enter the density\n for the whole core.\n Density is missing for ", length(test1[test1!=0]), " layer(s): "))
+      packageStartupMessage(paste0("     - ", dt$depth_bottom[which(test1>0)], "-", dt$depth_top[which(test1>0)+1], " mm \n"))
     }
-    # ignore
-    if(!is.null(ignore)&&!is.na(ignore))  for(i in seq_along(ignore))    ignore[i] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - ignore[i]))]
-  } else msg_conversion<-NULL
 
-
-  # 1.8 Create composite free depth_avg ####
-  ### Create the composite free depth_avg - step 1
-  if(!exists("ignore")) ignore <- NULL
-  if(SML>0) ignore <- c(ignore, dt$depth_avg[dt$depth_avg<=SML])
-
-  # For Iseo for example, some NA were added? Quick fix.
-  ignore <- ignore[!is.na(ignore)]
-  # It is very circular, but if creating that made ignore == logical(0),
-  #    then we just want it to be back at NULL. Very quick fix.
-  if(length(ignore)==0) ignore <- NULL
-
-  dt$depth_avg_2 <- rep(NA, nrow(dt))
-  for (i in 1:nrow(dt)) {
-    if(length(ignore)>0|max(inst_deposit)>0) {
-      if(any(ignore==dt$depth_avg[i])) {
-        dt$depth_avg_2[i] <- NA
-      } else {dt$depth_avg_2[i] <- dt$depth_avg[i]}
-    } else {dt$depth_avg_2[i] <- dt$depth_avg[i]}
-  }
-
-  ### Create the composite free depth_avg - step 2: inst_deposit
-  if (length(sedchange)==1 && sedchange == 0) sedchange_corr=max(dt$depth_avg, na.rm = T) else sedchange_corr=sedchange
-
-  if(exists("inst_deposit")&length(inst_deposit) > 1)
-  {
-    if(length(inst_deposit) %% 2 == 1) stop("\n Warning, inst_deposits need both upper and lower depths. Please check the manual.", call.=FALSE)
-    inst_deposit_present = TRUE # Argument inst_deposit_present = FALSE decided elsewhere if no inst_deposit
-    inst_deposit <- matrix(sort(inst_deposit), ncol=2, byrow=TRUE)
-    for(i in 1:nrow(inst_deposit)) {
-      if(length(dt$depth_avg[dt$depth_avg >= min(inst_deposit[i, ]) & dt$depth_avg <= max(inst_deposit[i, ])])>0) ignore <- c(ignore, dt$depth_avg[dt$depth_avg >= min(inst_deposit[i, ]) & dt$depth_avg <= max(inst_deposit[i, ])])
+    # Warning, if CRS_pw is selected, then depth forced cannot be max or min depth of a section (ideally, it is a mid-section, but we have a warning message for that later)
+    if(any(model %in% c("CRS_pw"))) if(any(depth_forced_CRS %in% c(dt$depth_min, dt$depth_max))) {
+      stop("\n Warning: depth_forced_CRS cannot be the min or max depth of a layer.\n    Add or remove 0.1 mm to your depth_forced_CRS to run the code.")
     }
-    if(length(ignore)>0) ignore <- ignore[!duplicated(ignore)]
-    if(length(ignore)>0) ignore <- ignore[order(ignore)]
+
+    # 1.3 Complete core vector ####
+    # Create the vector complete_core_depth when the measurements haven't been done for all the layers.
+    # Necessary for inventory for instance.
+    complete_core_temporary <- c(0, dt$depth_top, dt$depth_bottom, inst_deposit)
+    # Remove the instantaneous deposit depth deeper than measured depth.
+    # We do not want to extrapolate 210Pbex and 137Cs below the actual measurement.
+    complete_core_temporary <- complete_core_temporary[complete_core_temporary<=max(dt$depth_bottom, na.rm=T)]
+    complete_core_temporary <- unique(complete_core_temporary)
+    complete_core_temporary <- complete_core_temporary[order(complete_core_temporary, decreasing = F)]
+    complete_core_thickness <- NULL
+    complete_core_depth <- NULL
+    complete_core_depth_top <- NULL
+    complete_core_depth_bottom <- NULL
+    for (i in 2:length(complete_core_temporary)) {
+      complete_core_thickness <- c(complete_core_thickness, complete_core_temporary[i]-complete_core_temporary[i-1])
+      complete_core_depth <- c(complete_core_depth, complete_core_temporary[i]-complete_core_thickness[i-1]/2)
+      complete_core_depth_top <- c(complete_core_depth_top, complete_core_temporary[i-1])
+      complete_core_depth_bottom <- c(complete_core_depth_bottom, complete_core_temporary[i])
+    }
+    rm(complete_core_temporary)
+
+    # Generated the complete 210Pbex and 137Cs profile (in case the sampling was not continuous)
+    complete_core_Pbex <- approx(x= dt$depth_avg, dt$Pbex, xout= complete_core_depth, rule = 2, ties = mean)$y
+    complete_core_Pbex_err <- approx(x= dt$depth_avg, dt$Pbex_er, xout= complete_core_depth, rule = 2, ties = mean)$y
+    # Case when there are some NAs for Cs
+    if(any(!is.na(dt$Cs))) complete_core_Cs <- approx(x= dt$depth_avg, dt$Cs, xout= complete_core_depth, rule = 2, ties = mean)$y
+    if(any(!is.na(dt$Cs))) complete_core_Cs_err <- approx(x= dt$depth_avg, dt$Cs_er, xout= complete_core_depth, rule = 2, ties = mean)$y
+    # Case when there are only NAs for Cs
+    if(all(is.na(dt$Cs))) complete_core_Cs <- rep(NA, length(complete_core_depth))
+    if(all(is.na(dt$Cs))) complete_core_Cs_err <- rep(NA, length(complete_core_depth))
+
+    # Generate the complete density (in case the sampling was not continuous).
+    # It is just a linear interpolation.
+    if(length(grep("density", x = colnames(dt)))>=1) complete_core_density <- approx(x= dt$depth_avg, dt$density, xout= complete_core_depth, rule = 2, ties = mean)$y
+
+    # 1.4 Which keep ####
+    # When calculating the inventories, we don't want to take in account the depth included
+    # in a instantaneous deposit, or the depth explicitely 'ignored' by the operator.
+    # Here, I'm creating an index of data that will be ignored from the inventory calculation.
+    myvec <- 1:length(complete_core_depth)
+    whichkeep <- NULL
+    if(exists("inst_deposit") && max(length(inst_deposit))>0 && length(inst_deposit) %% 2 == 0){
+      # Not the best way to do it but I need this vector early
+      myseq <- seq(1, length(inst_deposit), by = 2)
+      for (i in seq(1, length(inst_deposit), by = 2)) {
+        if (i == myseq[1]) whichkeep <- c(whichkeep, myvec[complete_core_depth<inst_deposit[i]])
+        whichkeep <- c(whichkeep, myvec[complete_core_depth>inst_deposit[i-1] & complete_core_depth<inst_deposit[i]])
+        if (i == rev(myseq)[1]) whichkeep <- c(whichkeep, myvec[complete_core_depth>inst_deposit[i+1]])
+      }
+      rm(myseq)
+    } else whichkeep <- myvec
+    whichkeep <- whichkeep[!whichkeep %in% which(complete_core_depth %in% ignore)]
+    #whichkeep <- whichkeep[!whichkeep %in% which(complete_core_depth %in% dt$depth_avg[is.na(dt$Pbex)])]
+    rm(myvec)
+    whichkeep <- whichkeep[!is.na(whichkeep)]
+    # whichkeep tells you which "complete_core_depth" are not in an instantaneous deposit
+    # Only these depths will be included when computing the inventory
+
+    # Same process for top section, for CRS
+    myvec <- 1:length(complete_core_depth_top)
+    whichkeeptop <- NULL
+    if(exists("inst_deposit") && max(length(inst_deposit))>0 && length(inst_deposit) %% 2 == 0){
+      # Not the best way to do it but I need this vector early
+      myseq <- seq(1, length(inst_deposit), by = 2)
+      for (i in seq(1, length(inst_deposit), by = 2)) {
+        if (i == myseq[1]) whichkeeptop <- c(whichkeeptop, myvec[complete_core_depth_top<inst_deposit[i]])
+        whichkeeptop <- c(whichkeeptop, myvec[complete_core_depth_top>=inst_deposit[i-1] & complete_core_depth_top<inst_deposit[i]])
+        if (i == rev(myseq)[1]) whichkeeptop <- c(whichkeeptop, myvec[complete_core_depth_top>=inst_deposit[i+1]])
+      }
+      rm(myseq)
+    } else whichkeeptop <- myvec
+    whichkeeptop <- whichkeeptop[!whichkeeptop %in% which(complete_core_depth_top %in% ignore)]
+    #whichkeeptop <- whichkeeptop[!whichkeeptop %in% which(complete_core_depth %in% dt$depth_avg[is.na(dt$Pbex)])]
+    rm(myvec)
+    whichkeeptop <- whichkeeptop[!is.na(whichkeeptop)]
+
+    # Same process for bottom section - for constitency, doing it for all depths
+    myvec <- 1:length(complete_core_depth_bottom)
+    whichkeepbottom <- NULL
+    if(exists("inst_deposit") && max(length(inst_deposit))>0 && length(inst_deposit) %% 2 == 0){
+      # Not the best way to do it but I need this vector early
+      myseq <- seq(1, length(inst_deposit), by = 2)
+      for (i in seq(1, length(inst_deposit), by = 2)) {
+        if (i == myseq[1]) whichkeepbottom <- c(whichkeepbottom, myvec[complete_core_depth_bottom<=inst_deposit[i]])
+        whichkeepbottom <- c(whichkeepbottom, myvec[complete_core_depth_bottom>inst_deposit[i-1] & complete_core_depth_bottom<=inst_deposit[i]])
+        if (i == rev(myseq)[1]) whichkeepbottom <- c(whichkeepbottom, myvec[complete_core_depth_bottom>inst_deposit[i+1]])
+      }
+      rm(myseq)
+    } else whichkeepbottom <- myvec
+    whichkeepbottom <- whichkeepbottom[!whichkeepbottom %in% which(complete_core_depth_bottom %in% ignore)]
+    #whichkeepbottom <- whichkeepbottom[!whichkeepbottom %in% which(complete_core_depth %in% dt$depth_avg[is.na(dt$Pbex)])]
+    rm(myvec)
+    whichkeepbottom <- whichkeepbottom[!is.na(whichkeepbottom)]
+
+    # Create the complete core depth 2 (for CRS calculations)
+    # Everything but ignore
+    complete_core_depth_2 <- complete_core_depth
+    complete_core_depth_2[!complete_core_depth_2 %in% complete_core_depth_2[whichkeep]] <- NA
+
+    complete_core_depth_top_2 <- complete_core_depth_top
+    complete_core_depth_top_2[!complete_core_depth_top_2 %in% complete_core_depth_top_2[whichkeeptop]] <- NA
+
+    complete_core_depth_bottom_2 <- complete_core_depth_bottom
+    complete_core_depth_bottom_2[!complete_core_depth_bottom_2 %in% complete_core_depth_bottom_2[whichkeepbottom]] <- NA
+
+
+    # 1.5 Set some parameters ####
+    if(!all(is.na(NWT)) && Hemisphere=="NH") NWT_a <- 1963
+    if(!all(is.na(NWT)) && Hemisphere=="SH") NWT_a <- 1965
+    if(is.null(dmin)) dmin <- min(dt$depth_avg, na.rm=T)
+    if(!is.null(dmax) && length(inst_deposit)>1 && dmax<max(inst_deposit)) dmax <- max(inst_deposit)
+    if(is.null(dmax)) if(exists("historic_d")) dmax <- max(c(dt$depth_avg, historic_d), na.rm=T) else dmax <- max(c(dt$depth_avg), na.rm=T)
+    if(is.null(sedchange)) sedchange <- 0
+    sedchange <- sedchange[order(sedchange)]
+    if(is.null(inst_deposit)) inst_deposit <- 0
+    if(is.null(SML)) SML=0
+    # Two next lines to prevent plotting the linear regression on raw 210Pb if instantaneous deposit are present
+    if(is.null(plot_CFCS_regression) & plot_Pb_inst_deposit) plot_CFCS_regression=TRUE
+    if(is.null(plot_CFCS_regression) & plot_Pb & length(inst_deposit) %% 2 != 1 & min(inst_deposit)<= max(dt$depth_avg)) plot_CFCS_regression=FALSE else plot_CFCS_regression=TRUE
+    myylim <- c(-mround(dmax, 10), -mround(dmin, 10)+10)
+    dates <- NULL
+    dates_depth_avg <- NULL
+    err_dated_depth_avg <- matrix(nrow=2)
+    err_dates_avg <- NULL
+    mtext_Cs <- NULL # text legend in case mass_depth=T and there are some peaks detected
+    mylegend <- NULL
+    mypchlegend <- NULL
+    myltylegend <- NULL
+    mycollegend <- NULL
+
+    # 1.6 Mass depth - create mass depth vector and interpolation ####
+    if(mass_depth) {
+      # 1.6.1 mass_depth - Create the composite mass depth ####
+      # Step 1.1: mass thickness (epaisseur massique)
+      dt$mass_depth_top    <- rep(NA, nrow(dt))
+      dt$mass_depth_bottom <- dt$density/10 * (dt$depth_bottom - dt$depth_top)
+      for(i in 2:nrow(dt)) {
+        if(dt$depth_top[i]==dt$depth_bottom[i-1]) {
+          dt$mass_depth_top[i] = dt$mass_depth_bottom[i-1]
+        } else {
+          dt$mass_depth_top[i] = complete_core_density[which(complete_core_depth_bottom==dt$depth_top[i])] *
+            (complete_core_depth_bottom[which(complete_core_depth_bottom==dt$depth_top[i])] - complete_core_depth_top[which(complete_core_depth_bottom==dt$depth_top[i])])
+        }
+      }
+      dt$mass_depth_top[1]=0
+      if(dt$depth_top[1]!=0) packageStartupMessage(paste0("\n Warning. Mass depth for your first sample (", dt$depth_top[1], "-", dt$depth_bottom[1], " mm) was set\n to 0 to allow further calculation, but you did not provide\n density for the surface layer (0-", dt$depth_top[1], " mm). Include density for\n the surface layer if you can, or interpret the results with care.\n\n"))
+
+      # Save these for later if inst_deposit_present
+      md_top <- dt$mass_depth_top
+      md_bot <- dt$mass_depth_bottom
+
+
+      dt$mass_depth_avg         <- rep(NA, nrow(dt))
+
+      # Step 2: calculate actual mass depth, integral starting from the surface
+      for(i in 2:nrow(dt)) {
+        dt$mass_depth_top[i]    <- dt$mass_depth_top[i-1]    + dt$mass_depth_top[i]
+        dt$mass_depth_bottom[i] <- dt$mass_depth_bottom[i-1] + dt$mass_depth_bottom[i]
+      }
+      dt$mass_depth_avg         <- (dt$mass_depth_bottom + dt$mass_depth_top)/2
+
+      # 1.6.2 mass_depth - Create an interpolated mass_depth vector ####
+      # If mass_depth=T, we'll need to match depths in g/cm2 to depths in mm.
+      # CFCS ages between two depths are easy to find (linear relationship)
+      # For mass_depth, if the interval is too big, we can really lose a lot
+      #      of info.
+      # This temporary vector will just interpolate mass_depth between two
+      #      calculated values.
+      # It's an apporximation; the higher the resolution of input data,
+      #      the better (less approximation are needed)
+      step_out_md   <- 1 # every mm
+      md_interp     <- c(seq(min(c(dt$depth_top, dt$depth_bottom), na.rm=T), max(c(dt$depth_top, dt$depth_bottom), na.rm=T), by = step_out_md))
+      md_interp     <- matrix(c(md_interp, rep(NA, length(md_interp)*3)), ncol = 4)
+      md_interp[, 2] <- approx(x= dt$depth_top, dt$mass_depth_top, xout= md_interp[, 1], rule=2, ties = mean)$y
+      md_interp[, 3] <- approx(x= dt$depth_bottom, dt$mass_depth_bottom, xout= md_interp[, 1], rule=2, ties = mean)$y
+      md_interp[, 4] <- approx(x= dt$depth_avg, dt$mass_depth_avg, xout= md_interp[, 1], rule=2, ties = mean)$y
+      md_interp     <- as.data.frame(md_interp)
+      colnames(md_interp) <- c("depth_mm", "md_top", "md_bott", "md_avg")
+    }
+    # 1.7 If scale was given in mass_depth, convert in mm so the rest of the script work####
+    if(input_depth_mm==F) {
+      # User gave the input in g/cm2. Converting it in mm, because the script was initially built that way.
+      # message if conversion
+      msg_conversion <- " (depth converted from g/cm2)\n     "
+      # sedchange
+      if(sedchange!=0) sedchange <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - sedchange))]
+      # SML
+      if(SML!=0) SML <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - SML))]
+      # Cher
+      if(!is.null(Cher)&&!all(is.na(Cher))) for(i in seq_along(Cher)) Cher[i] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - Cher[i]))]
+      # NWT
+      if(!is.null(NWT)&&!all(is.na(NWT)))  for(i in seq_along(NWT))  NWT[i] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - NWT[i]))]
+      # FF
+      if(!is.null(FF)&&!all(is.na(FF)))  for(i in seq_along(FF))    FF[i] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - FF[i]))]
+      # inst_deposit
+      if(max(inst_deposit>0))  {
+        for(i in seq_along(inst_deposit))    inst_deposit[i] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - inst_deposit[i]))]
+      }
+      # ignore
+      if(!is.null(ignore)&&!all(is.na(ignore)))  for(i in seq_along(ignore))    ignore[i] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - ignore[i]))]
+    } else msg_conversion<-NULL
+
+
+    # 1.8 Create composite free depth_avg ####
+    ### Create the composite free depth_avg - step 1: depths set to "ignore"
+    if(!exists("ignore")) ignore <- NULL
+    if(SML>0) ignore <- c(ignore, dt$depth_avg[dt$depth_avg<=SML])
+
+    # For Iseo for example, some NA were added? Quick fix.
+    ignore <- ignore[!is.na(ignore)]
+    # It is very circular, but if creating that made ignore == logical(0),
+    #    then we just want it to be back at NULL. Very quick fix.
+    if(length(ignore)==0) ignore <- NULL
+
+    dt$depth_avg_2 <- rep(NA, nrow(dt))
     for (i in 1:nrow(dt)) {
-      if((length(ignore)>0&&max(ignore, na.rm=T)>0)|(max(inst_deposit)>0)) {
-        if(length(ignore)>0&&any(ignore==dt$depth_avg[i])) {
+      if(length(ignore)>0|max(inst_deposit)>0) {
+        if(any(ignore==dt$depth_avg[i])) {
           dt$depth_avg_2[i] <- NA
         } else {dt$depth_avg_2[i] <- dt$depth_avg[i]}
       } else {dt$depth_avg_2[i] <- dt$depth_avg[i]}
     }
-    d <- dt$depth_avg_2[!is.na(dt$depth_avg_2)]
-    if(!is.na("historic_d")) dmax_corr=max(c(dt$depth_avg, historic_d), na.rm=T) else dmax_corr=max(c(dt$depth_avg), na.rm=T)
-    inst_deposit_corr <- inst_deposit
-    complete_core_depth_corr <- complete_core_depth[!is.na(complete_core_depth_2)]
-    if(inst_deposit_present) for(i in 1:nrow(inst_deposit))
+
+    # We are also creating a full vector of depths and the corrected match
+    depths_full <- seq(min(dt$depth_top, na.rm = TRUE), max(dt$depth_bottom, na.rm = FALSE), .1)
+    depths_without_events <- depths_full
+    ignore_full <- ignore
+
+    ### Create the composite free depth_avg - step 2: inst_deposit
+    if (length(sedchange)==1 && sedchange == 0) sedchange_corr=max(dt$depth_avg, na.rm = T) else sedchange_corr=sedchange
+
+    if(exists("inst_deposit")&length(inst_deposit) > 1)
     {
-      d[d > min(inst_deposit_corr[i, ])] <- d[d > min(inst_deposit_corr[i, ])] - (max(inst_deposit_corr[i, ]) - min(inst_deposit_corr[i, ]))
-      # The depth for CRS should also be corrected for instantaneous events
-      complete_core_depth_corr[complete_core_depth_corr > min(inst_deposit_corr[i, ])] <- complete_core_depth_corr[complete_core_depth_corr > min(inst_deposit_corr[i, ])] - (max(inst_deposit_corr[i, ]) - min(inst_deposit_corr[i, ]))
-
-      dmax_corr <- dmax_corr - (max(inst_deposit_corr[i, ])-min(inst_deposit_corr[i, ]))
-      for (n in seq_along(sedchange_corr)) {
-        if(sedchange_corr[n] > min(inst_deposit_corr[i, ], na.rm=T)) sedchange_corr[n] <- sedchange_corr[n][sedchange_corr[n] > min(inst_deposit_corr[i, ])] - (max(inst_deposit_corr[i, ]) - min(inst_deposit_corr[i, ]))
+      if(length(inst_deposit) %% 2 == 1) stop("\n Warning, inst_deposits need both upper and lower depths. Please check the manual.", call.=FALSE)
+      inst_deposit_present = TRUE # Argument inst_deposit_present = FALSE decided elsewhere if no inst_deposit
+      inst_deposit <- matrix(sort(inst_deposit), ncol=2, byrow=TRUE)
+      for(i in 1:nrow(inst_deposit)) {
+        if(length(dt$depth_avg[dt$depth_avg >= min(inst_deposit[i, ]) & dt$depth_avg <= max(inst_deposit[i, ])])>0) ignore <- c(ignore, dt$depth_avg[dt$depth_avg >= min(inst_deposit[i, ]) & dt$depth_avg <= max(inst_deposit[i, ])])
+        # For the full vector:
+        if(length(depths_full[depths_full >= min(inst_deposit[i, ]) & depths_full <= max(inst_deposit[i, ])])>0) ignore_full <- c(ignore_full, depths_full[depths_full >= min(inst_deposit[i, ]) & depths_full <= max(inst_deposit[i, ])])
       }
-      if((1+i)<=nrow(inst_deposit)) inst_deposit_corr[c(1+i):nrow(inst_deposit), ] <- inst_deposit_corr[c(1+i):nrow(inst_deposit), ] - (max(inst_deposit_corr[i, ])-min(inst_deposit_corr[i, ]))
-    }
-    dt <- dt[order(dt$depth_avg_2), ]
-    dt$d <- c(d, rep(NA, length(dt$depth_avg)-length(d)))
-    dt <- dt[order(dt$depth_avg), ]
-  } else {
-    inst_deposit_present = FALSE
-    dt$d=dt$depth_avg_2
-    complete_core_depth_corr <- complete_core_depth[!is.na(complete_core_depth_2)]
-  }
+      if(length(ignore)>0) ignore <- ignore[!duplicated(ignore)]
+      if(length(ignore)>0) ignore <- ignore[order(ignore)]
+      if(length(ignore_full)>0) ignore_full <- ignore_full[!duplicated(ignore_full)]
+      if(length(ignore_full)>0) ignore_full <- ignore_full[order(ignore_full)]
 
-  # By the end here, you should have 3 columns for depth_avg: 1 with original depth_avg, 1 with removed events + suspicious data, 1 with event free depth_avg
-
-  # 1.9 Create composite free mass_depth ####
-  if(mass_depth) {
-    # If inst deposit calculate corrected mass_depth
-    if(inst_deposit_present) { # If inst_deposit, create specific columns
-      # Start from same vectors
-      dt$mass_depth_top_corr    <- md_top
-      dt$mass_depth_bottom_corr <- md_bot
-      rm(md_top)
-      rm(md_bot)
-
-      # Replace depth in inst_deposit or to be ignored by NA
-      dt$mass_depth_top_corr[is.na(dt$depth_avg_2)]    <- NA
-      dt$mass_depth_bottom_corr[is.na(dt$depth_avg_2)] <- NA
-      dt <- dt[c(order(dt$depth_avg)[!is.na(dt$depth_avg_2)], which(is.na(dt$depth_avg_2))), ]
-
-      # Finally for the corrected vector, compute the actual mass depth (integral starting from the surface)
-      for(i in 2:nrow(dt[which(!is.na(dt$depth_avg_2)), ])) {
-        dt$mass_depth_top_corr[i]    <- dt$mass_depth_top_corr[i-1]    + dt$mass_depth_top_corr[i]
-        dt$mass_depth_bottom_corr[i] <- dt$mass_depth_bottom_corr[i-1] + dt$mass_depth_bottom_corr[i]
+      # Identify the depths to ignore
+      for (i in 1:nrow(dt)) {
+        if((length(ignore)>0&&max(ignore, na.rm=T)>0)|(max(inst_deposit)>0)) {
+          if(length(ignore)>0&&any(ignore==dt$depth_avg[i])) {
+            dt$depth_avg_2[i] <- NA
+          } else {dt$depth_avg_2[i] <- dt$depth_avg[i]}
+        } else {dt$depth_avg_2[i] <- dt$depth_avg[i]}
       }
-      dt$mass_depth_avg_corr         <- (dt$mass_depth_bottom_corr + dt$mass_depth_top_corr)/2
+
+      # Identify the depths to ignore for the full depth vector
+      for (i in seq_along(depths_full)) {
+        if((length(ignore_full)>0 && max(ignore_full, na.rm=T)>0)|(max(inst_deposit)>0)) {
+          if(length(ignore_full)>0 && any(ignore_full==depths_full[i])) {
+            depths_without_events[i] <- NA
+          } else {depths_without_events[i] <- depths_full[i]}
+        } else {depths_without_events[i] <- depths_full[i]}
+      }
+
+      # Now preparing a vector that will have corrected depths
+      # Creating a vector "d" that will be easier to call.
+      d <- dt$depth_avg_2[!is.na(dt$depth_avg_2)]
+      dfull <- depths_without_events[!is.na(depths_without_events)]
+      if(!is.na("historic_d")) dmax_corr=max(c(dt$depth_avg, historic_d), na.rm=T) else dmax_corr=max(c(dt$depth_avg), na.rm=T)
+      inst_deposit_corr <- inst_deposit
+      complete_core_depth_corr <- complete_core_depth[!is.na(complete_core_depth_2)]
+      complete_core_depth_top_corr <- complete_core_depth_top[!is.na(complete_core_depth_top_2)]
+      complete_core_depth_bottom_corr <- complete_core_depth_bottom[!is.na(complete_core_depth_bottom_2)]
+
+      if(inst_deposit_present) for(i in 1:nrow(inst_deposit))
+      {
+        d[d > min(inst_deposit_corr[i, ])] <- d[d > min(inst_deposit_corr[i, ])] - (max(inst_deposit_corr[i, ]) - min(inst_deposit_corr[i, ]))
+        dfull[dfull > min(inst_deposit_corr[i, ])] <- dfull[dfull > min(inst_deposit_corr[i, ])] - (max(inst_deposit_corr[i, ]) - min(inst_deposit_corr[i, ]))
+
+        # The depth for CRS should also be corrected for instantaneous events
+        # We could also extract these depths from the full_depths table we are about to create
+        # Leaving this here because the full_depths table is a later addition.
+        complete_core_depth_corr[complete_core_depth_corr > min(inst_deposit_corr[i, ])] <- complete_core_depth_corr[complete_core_depth_corr > min(inst_deposit_corr[i, ])] - (max(inst_deposit_corr[i, ]) - min(inst_deposit_corr[i, ]))
+        complete_core_depth_top_corr[complete_core_depth_top_corr > min(inst_deposit_corr[i, ])] <- complete_core_depth_top_corr[complete_core_depth_top_corr > min(inst_deposit_corr[i, ])] - (max(inst_deposit_corr[i, ]) - min(inst_deposit_corr[i, ]))
+        complete_core_depth_bottom_corr[complete_core_depth_bottom_corr > min(inst_deposit_corr[i, ])] <- complete_core_depth_bottom_corr[complete_core_depth_bottom_corr > min(inst_deposit_corr[i, ])] - (max(inst_deposit_corr[i, ]) - min(inst_deposit_corr[i, ]))
+
+        dmax_corr <- dmax_corr - (max(inst_deposit_corr[i, ])-min(inst_deposit_corr[i, ]))
+        for (n in seq_along(sedchange_corr)) {
+          if(sedchange_corr[n] > min(inst_deposit_corr[i, ], na.rm=T)) sedchange_corr[n] <- sedchange_corr[n][sedchange_corr[n] > min(inst_deposit_corr[i, ])] - (max(inst_deposit_corr[i, ]) - min(inst_deposit_corr[i, ]))
+        }
+        if((1+i)<=nrow(inst_deposit)) inst_deposit_corr[c(1+i):nrow(inst_deposit), ] <- inst_deposit_corr[c(1+i):nrow(inst_deposit), ] - (max(inst_deposit_corr[i, ])-min(inst_deposit_corr[i, ]))
+      }
+      # Ordering by the depths with events removed (all NAs will be on the last lines)
+      dt <- dt[order(dt$depth_avg_2), ]
+      # Pasting "d", the new vector with corrected depth, along with as many NA as depths to ignore
+      dt$d <- c(d, rep(NA, length(dt$depth_avg)-length(d)))
+      # Reordering the table the right way.
       dt <- dt[order(dt$depth_avg), ]
 
+      # Same for the full vector
+      full_depths <- data.frame(
+        full = depths_full,
+        without_events = depths_without_events
+      )
+      full_depths <- full_depths[order(full_depths$without_events), ]
+      full_depths$corrected = c(dfull, rep(NA, length(depths_full) - length(dfull)))
+      full_depths <- full_depths[order(full_depths$full), ]
     } else {
-      # If no inst deposit, we still need these vector for plotting
-      # Since there's no need to correct, create the corrected as the exact same than the normal
-      dt$mass_depth_top_corr    <- dt$mass_depth_top
-      dt$mass_depth_bottom_corr <- dt$mass_depth_bottom
-      dt$mass_depth_avg_corr    <- dt$mass_depth_avg
+      inst_deposit_present = FALSE
+      dt$d=dt$depth_avg_2
+      complete_core_depth_corr <- complete_core_depth[!is.na(complete_core_depth_2)]
 
-      rm(md_top)
-      rm(md_bot)
+      # For the full table
+      full_depths <- data.frame(
+        full = depths_full,
+        without_events = depths_without_events,
+        corrected = depths_without_events
+      )
     }
 
-    # Lastly, ylim for mass depth plots
-    myylim_md <- c(-ceiling(max(c(dt$mass_depth_bottom, dt$mass_depth_top), na.rm=T)), 0)
-  }
-  # By the end here, you should have 6 columns for mass_depth:
-  #    2 times 3 columns. The 3 columns are top, average, and bottom mass depth (done in a previous step above)
-  #    replicate because there's actual depth (for plot_Pb)
-  #    and depth with inst_deposit (for plot_Pb_inst_deposit)
+    # By the end here, you should have 3 columns for depth_avg: 1 with original depth_avg, 1 with removed events + suspicious data, 1 with event free depth_avg
 
-  # 1.10 Create an extra column 'which_scale' for depth, according to mass_depth==T/F ####
-  if(!mass_depth) dt$which_scale <- dt$d else dt$which_scale <- dt$mass_depth_avg_corr
-  # 1.11 Prepare depth vectors for CFCS model ####
-  # Step somehow related to the creation of the composite free depht_avg
-  # Here, we are looking to get two vectors:
-  #     - (a) One vector of the actual depths on the core we are trying to date (upper and lower limits of instantaneous deposit for instance)
-  #     - (b) The corrected version of this 1st vector, with instantaneous deposit removed
-  #     - (c) Depth vector that will be used to visualise CFCS model
-  d_for_CFCS <- unique(c(inst_deposit, max(dt$depth_avg[!is.na(dt$d)])))
-  if(SML!=0) d_for_CFCS <- c(d_for_CFCS, SML)
-  if(mass_depth) {
-    d_for_CFCS <- c(d_for_CFCS, dt$depth_avg[!is.na(dt$mass_depth_avg)])
+    # Now, matching the depth so that for each sample, we have its average, top and bottom section
+    temp_vec <- full_depths$corrected[full_depths$full %in% complete_core_depth[!is.na(complete_core_depth_2)]]
+    if(!all(temp_vec[!is.na(temp_vec)] %in% complete_core_depth_corr) ) {
+      warning("Check the depths corrected for instantaneous deposit.\nPlease contact rosaliebruel@gmail.com with your code and data for assistance.")
+    } # Else: ll good, the full method found the same depths
+
+    # # For top sections
+    # temp_vec <- full_depths$corrected[full_depths$full %in% complete_core_depth_top[!is.na(complete_core_depth_2)]]
+    # complete_core_depth_top_corr <- temp_vec[!is.na(temp_vec)]
+    #
+    # For bottom sections
+    temp_vec <- full_depths$corrected[full_depths$full %in% complete_core_depth_bottom[!is.na(complete_core_depth_2)]]
+    complete_core_depth_bottom_corr <- temp_vec[!is.na(temp_vec)]
+
+    rm(temp_vec)
+
+    # 1.9 Create composite free mass_depth ####
+    if(mass_depth) {
+      # If inst deposit calculate corrected mass_depth
+      if(inst_deposit_present) { # If inst_deposit, create specific columns
+        # Start from same vectors
+        dt$mass_depth_top_corr    <- md_top
+        dt$mass_depth_bottom_corr <- md_bot
+        rm(md_top)
+        rm(md_bot)
+
+        # Replace depth in inst_deposit or to be ignored by NA
+        dt$mass_depth_top_corr[is.na(dt$depth_avg_2)]    <- NA
+        dt$mass_depth_bottom_corr[is.na(dt$depth_avg_2)] <- NA
+        dt <- dt[c(order(dt$depth_avg)[!is.na(dt$depth_avg_2)], which(is.na(dt$depth_avg_2))), ]
+
+        # Finally for the corrected vector, compute the actual mass depth (integral starting from the surface)
+        for(i in 2:nrow(dt[which(!is.na(dt$depth_avg_2)), ])) {
+          dt$mass_depth_top_corr[i]    <- dt$mass_depth_top_corr[i-1]    + dt$mass_depth_top_corr[i]
+          dt$mass_depth_bottom_corr[i] <- dt$mass_depth_bottom_corr[i-1] + dt$mass_depth_bottom_corr[i]
+        }
+        dt$mass_depth_avg_corr         <- (dt$mass_depth_bottom_corr + dt$mass_depth_top_corr)/2
+        dt <- dt[order(dt$depth_avg), ]
+
+      } else {
+        # If no inst deposit, we still need these vector for plotting
+        # Since there's no need to correct, create the corrected as the exact same than the normal
+        dt$mass_depth_top_corr    <- dt$mass_depth_top
+        dt$mass_depth_bottom_corr <- dt$mass_depth_bottom
+        dt$mass_depth_avg_corr    <- dt$mass_depth_avg
+
+        rm(md_top)
+        rm(md_bot)
+      }
+
+      # Lastly, ylim for mass depth plots
+      myylim_md <- c(-ceiling(max(c(dt$mass_depth_bottom, dt$mass_depth_top), na.rm=T)), 0)
+    }
+    # By the end here, you should have 6 columns for mass_depth:
+    #    2 times 3 columns. The 3 columns are top, average, and bottom mass depth (done in a previous step above)
+    #    replicate because there's actual depth (for plot_Pb)
+    #    and depth with inst_deposit (for plot_Pb_inst_deposit)
+
+    # 1.10 Create an extra column 'which_scale' for depth, according to mass_depth==T/F ####
+    if(!mass_depth) dt$which_scale <- dt$d else dt$which_scale <- dt$mass_depth_avg_corr
+    # 1.11 Prepare depth vectors for CFCS model ####
+    # Step somehow related to the creation of the composite free depht_avg
+    # Here, we are looking to get two vectors:
+    #     - (a) One vector of the actual depths on the core we are trying to date (upper and lower limits of instantaneous deposit for instance)
+    #     - (b) The corrected version of this 1st vector, with instantaneous deposit removed
+    #     - (c) Depth vector that will be used to visualise CFCS model
+    d_for_CFCS <- unique(c(inst_deposit, max(dt$depth_avg[!is.na(dt$d)])))
+    if(SML!=0) d_for_CFCS <- c(d_for_CFCS, SML)
+    if(mass_depth) {
+      d_for_CFCS <- c(d_for_CFCS, dt$depth_avg[!is.na(dt$mass_depth_avg)])
+      d_for_CFCS <- unique(d_for_CFCS)
+    }
+    d_for_CFCS <- c(0, d_for_CFCS, sedchange, dmax)
+    #Also add the last depth before sedchange to get a better estimate of age_err.
+    if(max(sedchange)>0) {
+      d_for_CFCS <- c(d_for_CFCS, rev(dt$depth_avg[dt$depth_avg<sedchange[1]])[1])
+      if(length(sedchange)==2) d_for_CFCS <- c(d_for_CFCS, rev(dt$depth_avg[dt$depth_avg<sedchange[2]])[1])
+    }
     d_for_CFCS <- unique(d_for_CFCS)
-  }
-  d_for_CFCS <- c(0, d_for_CFCS, sedchange, dmax)
-  #Also add the last depth before sedchange to get a better estimate of age_err.
-  if(max(sedchange)>0) {
-    d_for_CFCS <- c(d_for_CFCS, rev(dt$depth_avg[dt$depth_avg<sedchange[1]])[1])
-    if(length(sedchange)==2) d_for_CFCS <- c(d_for_CFCS, rev(dt$depth_avg[dt$depth_avg<sedchange[2]])[1])
-  }
-  d_for_CFCS <- unique(d_for_CFCS)
-  d_for_CFCS <- d_for_CFCS[order(d_for_CFCS)]
+    d_for_CFCS <- d_for_CFCS[order(d_for_CFCS)]
 
-  # (a) Final vector of depths that will be used for linear model (This is the 1/2 vector we're creating in this section)
-  depth_avg_to_date <- d_for_CFCS
+    # (a) Final vector of depths that will be used for linear model (This is the 1/2 vector we're creating in this section)
+    depth_avg_to_date <- d_for_CFCS
 
-  # The next steps are for the corrected vector (b)
-  # When there is an instantaneous deposit, the top depth is used.
-  if(max(inst_deposit, na.rm = T)>0) {
-    for(r in 1:nrow(inst_deposit)) {
-      d_for_CFCS[d_for_CFCS > min(inst_deposit[r, ]) & d_for_CFCS <= max(inst_deposit[r, ])]  <- d_for_CFCS[d_for_CFCS == min(inst_deposit[r, ])]
-    }
-  }
-
-  # (c) d_for_CFCS will be the vector used for visualization
-  # (b) depth_avg_to_date_corr will be the totally corrected vector, and is created in the next steps.
-  depth_avg_to_date_corr <- d_for_CFCS[order(d_for_CFCS)]
-
-  # If there are more than 1 change in sedimentation rate, we also need to
-  #   substract the sediment layer to the corrected depth average to date
-  #   vector 'depth_avg_to_date_corr'
-  # Create a corrected table of inst_deposit that take in account instantaneous deposits
-  inst_deposit_corr2 <- inst_deposit
-  if(inst_deposit_present)
-    for(i in 1:nrow(inst_deposit)) {
-      depth_avg_to_date_corr[depth_avg_to_date_corr>min(inst_deposit_corr2[i, ])] <-
-        depth_avg_to_date_corr[depth_avg_to_date_corr>min(inst_deposit_corr2[i, ])] - (max(inst_deposit_corr2[i, ])-min(inst_deposit_corr2[i, ]))
-      if((1+i)<=nrow(inst_deposit))  {
-        inst_deposit_corr2[c(1+i):nrow(inst_deposit), ] <-
-          inst_deposit_corr2[c(1+i):nrow(inst_deposit), ] - (max(inst_deposit_corr[i, ])-min(inst_deposit_corr[i, ]))
+    # The next steps are for the corrected vector (b)
+    # When there is an instantaneous deposit, the top depth is used.
+    if(max(inst_deposit, na.rm = T)>0) {
+      for(r in 1:nrow(inst_deposit)) {
+        d_for_CFCS[d_for_CFCS > min(inst_deposit[r, ]) & d_for_CFCS <= max(inst_deposit[r, ])]  <- d_for_CFCS[d_for_CFCS == min(inst_deposit[r, ])]
       }
     }
-  rm(inst_deposit_corr2)
 
-  # 1.12 Create separate datasets for different sedimentation rates ####
-  if(length(sedchange)==1 && sedchange==0) {dt_sed1=dt} else {
-    if(length(sedchange)==1) {
-      dt_sed1 <- dt[dt$depth_avg<=sedchange, ]
-      dt_sed2 <- dt[dt$depth_avg>=sedchange, ]
-    } else {
-      dt_sed1 <- dt[dt$depth_avg<=min(sedchange), ]
-      dt_sed2 <- dt[dt$depth_avg>=min(sedchange) & dt$depth_avg<=max(sedchange), ]
-      dt_sed3 <- dt[dt$depth_avg>=max(sedchange), ]
+    # (c) d_for_CFCS will be the vector used for visualization
+    # (b) depth_avg_to_date_corr will be the totally corrected vector, and is created in the next steps.
+    depth_avg_to_date_corr <- d_for_CFCS[order(d_for_CFCS)]
+
+    # If there are more than 1 change in sedimentation rate, we also need to
+    #   substract the sediment layer to the corrected depth average to date
+    #   vector 'depth_avg_to_date_corr'
+    # Create a corrected table of inst_deposit that take in account instantaneous deposits
+    inst_deposit_corr2 <- inst_deposit
+    if(inst_deposit_present)
+      for(i in 1:nrow(inst_deposit)) {
+        depth_avg_to_date_corr[depth_avg_to_date_corr>min(inst_deposit_corr2[i, ])] <-
+          depth_avg_to_date_corr[depth_avg_to_date_corr>min(inst_deposit_corr2[i, ])] - (max(inst_deposit_corr2[i, ])-min(inst_deposit_corr2[i, ]))
+        if((1+i)<=nrow(inst_deposit))  {
+          inst_deposit_corr2[c(1+i):nrow(inst_deposit), ] <-
+            inst_deposit_corr2[c(1+i):nrow(inst_deposit), ] - (max(inst_deposit_corr[i, ])-min(inst_deposit_corr[i, ]))
+        }
+      }
+    rm(inst_deposit_corr2)
+
+    # 1.12 Create separate datasets for different sedimentation rates ####
+    if(length(sedchange)==1 && sedchange==0) {dt_sed1=dt} else {
+      if(length(sedchange)==1) {
+        dt_sed1 <- dt[dt$depth_avg<=sedchange, ]
+        dt_sed2 <- dt[dt$depth_avg>=sedchange, ]
+      } else {
+        dt_sed1 <- dt[dt$depth_avg<=min(sedchange), ]
+        dt_sed2 <- dt[dt$depth_avg>=min(sedchange) & dt$depth_avg<=max(sedchange), ]
+        dt_sed3 <- dt[dt$depth_avg>=max(sedchange), ]
+      }
     }
-  }
 
-  # 1.13 Save data to the output list ####
-  out_list$data <- dt[-grep("which_scale", colnames(dt))]
-  if(suppdescriptor) out_list$data_suppdescriptor <- dt_suppdescriptor
-  if(varves) out_list$data_varves <- varve
+    # 1.13 Save data to the output list ####
+    out_list$data <- dt[-which(colnames(dt) %in% c("which_scale", "depth_avg_2", "depth"))]
+    colnames(out_list$data)[colnames(out_list$data) == "d"] <- "depth_avg_event_corrected"
+    out_list$data <- out_list$data[, c(grep("depth", colnames(out_list$data)), grep("depth", colnames(out_list$data), invert = TRUE))]
+    if(suppdescriptor) out_list$data_suppdescriptor <- dt_suppdescriptor
+    if(varves) out_list$data_varves <- varve
 
-  # 1.14 Save the code to the output file with the code history ####
-  # save the model attempt in a file
-  # Row with all parameters that will be incremented:
-  this_code_history <- c(name, coring_yr, as.character(Sys.time()), paste(model, collapse = ", "),
-                         paste(Cher, collapse = ", "), paste(NWT, collapse = ", "), Hemisphere, paste(FF, collapse = ", "),
-                         paste(inst_deposit, collapse = ", "),
-                         paste(ignore, collapse = ", "),
-                         paste(historic_d, collapse = ", "),
-                         paste(historic_a, collapse = ", "),
-                         paste(historic_n, collapse = ", "),
-                         suppdescriptor,
-                         paste(descriptor_lab, collapse = ", "),
-                         varves,
-                         paste(sedchange, collapse = ", "),
-                         SML,
-                         ifelse(is.null(age_forced_CRS), NA, paste(age_forced_CRS, collapse = ", ")),
-                         ifelse(is.null(depth_forced_CRS), NA, paste(depth_forced_CRS, collapse = ", ")))
-  this_code_history[this_code_history==""]=NA
-  this_code_history<- as.data.frame(matrix(this_code_history, nrow=1))
-  colnames(this_code_history) <- c("name", "coring_yr", "date_computation", "model_tested",
-                                   "Chernobyl", "NWT", "Hemisphere", "FF",
-                                   "inst_deposit", "ignore_depths",
-                                   "historic_depth", "historic_age", "historic_name",
-                                   "suppdescriptor", "descriptor_lab",
-                                   "varves", "sedchange", "SML", "age_forced_CRS_pw", "depth_forced_CRS_pw")
-  # First, check whether a file already exists
-  if(length(list.files(paste(getwd(), "/Cores/", name, "/", sep=""), pattern="serac_model_history*", full.names=TRUE))==1) {
-    # Read previous file
+    # 1.14 Save the code to the output file with the code history ####
+    # save the model attempt in a file
+    # Row with all parameters that will be incremented:
+    this_code_history <- c(name, coring_yr, as.character(Sys.time()), paste(model, collapse = ", "),
+                           paste(Cher, collapse = ", "), paste(NWT, collapse = ", "), Hemisphere, paste(FF, collapse = ", "),
+                           paste(inst_deposit, collapse = ", "),
+                           paste(ignore, collapse = ", "),
+                           paste(historic_d, collapse = ", "),
+                           paste(historic_a, collapse = ", "),
+                           paste(historic_n, collapse = ", "),
+                           suppdescriptor,
+                           paste(descriptor_lab, collapse = ", "),
+                           varves,
+                           paste(sedchange, collapse = ", "),
+                           SML,
+                           ifelse(is.null(age_forced_CRS), NA, paste(age_forced_CRS, collapse = ", ")),
+                           ifelse(is.null(depth_forced_CRS), NA, paste(depth_forced_CRS, collapse = ", ")))
+    this_code_history[this_code_history==""]=NA
+    this_code_history<- as.data.frame(matrix(this_code_history, nrow=1))
+    colnames(this_code_history) <- c("name", "coring_yr", "date_computation", "model_tested",
+                                     "Chernobyl", "NWT", "Hemisphere", "FF",
+                                     "inst_deposit", "ignore_depths",
+                                     "historic_depth", "historic_age", "historic_name",
+                                     "suppdescriptor", "descriptor_lab",
+                                     "varves", "sedchange", "SML", "age_forced_CRS_pw", "depth_forced_CRS_pw")
+    # First, check whether a file already exists
+    if(length(list.files(paste(getwd(), "/Cores/", name, "/", sep=""), pattern="serac_model_history*", full.names=TRUE))==1) {
+      # Read previous file
+      code_history <- read.delim(list.files(paste(getwd(), "/Cores/", name, "/", sep=""), pattern="serac_model_history*", full.names=TRUE))
+      # If previous compilation was done prior to 2022-04-13, there may have been a typo in the code history file. Correct it here
+      colnames(code_history)[colnames(code_history) %in% c("age_forced_CRS_pwosite", "age_forced_CRS_composite")] <- "age_forced_CRS_pw"
+      colnames(code_history)[colnames(code_history) %in% c("depth_forced_CRS_pwosite", "depth_forced_CRS_composite")] <- "depth_forced_CRS_pw"
+      # Increment new code
+      if(ncol(code_history) == ncol(this_code_history))
+        code_history <- rbind(code_history, this_code_history) else
+          code_history <- this_code_history
+    } else {
+      code_history <- this_code_history
+    }
+    colnames(code_history) <- colnames(this_code_history)
+    write.table(x = code_history, file = paste0(getwd(), "/Cores/", name, "/serac_model_history_", name, ".txt"), col.names = T, row.names = F, sep = "\t")
+    #Check whether the code is a duplicate from a previous code (has this combination been tested before)
+    # First reread the file so all have the same format (some columns are turned in logical argument)
     code_history <- read.delim(list.files(paste(getwd(), "/Cores/", name, "/", sep=""), pattern="serac_model_history*", full.names=TRUE))
-    # If previous compilation was done prior to 2022-04-13, there may have been a typo in the code history file. Correct it here
-    colnames(code_history)[colnames(code_history) %in% c("age_forced_CRS_pwosite", "age_forced_CRS_composite")] <- "age_forced_CRS_pw"
-    colnames(code_history)[colnames(code_history) %in% c("depth_forced_CRS_pwosite", "depth_forced_CRS_composite")] <- "depth_forced_CRS_pw"
-    # Increment new code
-    if(ncol(code_history) == ncol(this_code_history))
-      code_history <- rbind(code_history, this_code_history) else
-        code_history <- this_code_history
-  } else {
-    code_history <- this_code_history
+    if(nrow(code_history)>1 && all(sapply(code_history, function(x) duplicated(x))[nrow(code_history), -3])==TRUE)
+      cat(paste0("\n General message: It seems you already tried this code combination. \n A historic of parameters tested can be looked up in the file\n 'serac_model_history_", name, ".txt' (in the core directory).\n ________________________\n \n\n"))
+
   }
-  colnames(code_history) <- colnames(this_code_history)
-  write.table(x = code_history, file = paste0(getwd(), "/Cores/", name, "/serac_model_history_", name, ".txt"), col.names = T, row.names = F, sep = "\t")
-  #Check whether the code is a duplicate from a previous code (has this combination been tested before)
-  # First reread the file so all have the same format (some columns are turned in logical argument)
-  code_history <- read.delim(list.files(paste(getwd(), "/Cores/", name, "/", sep=""), pattern="serac_model_history*", full.names=TRUE))
-  if(nrow(code_history)>1 && all(sapply(code_history, function(x) duplicated(x))[nrow(code_history), -3])==TRUE)
-    cat(paste0("\n General message: It seems you already tried this code combination. \n A historic of parameters tested can be looked up in the file\n 'serac_model_history_", name, ".txt' (in the core directory).\n ________________________\n \n\n"))
 
   #### 2. LEAD 210 MODEL -----
   if(length(grep("Pb", x = colnames(dt)))>1 & length(grep("density", x = colnames(dt)))>=1) {
@@ -1268,7 +1384,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   if(plot_Cs) {
 
     #Chernobyl
-    if (all(!is.na(Cher))) {
+    if (all(!all(is.na(Cher)))) {
       peakCher <- -mean(Cher)
       dates <- c(dates, 1986)
       dates_depth_avg <- c(dates_depth_avg, peakCher)
@@ -1277,7 +1393,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       if(mass_depth) mtext_Cs <- ("Cher")
     }
     #NWT
-    if (all(!is.na(NWT))) {
+    if (all(!all(is.na(NWT)))) {
       peakNWT <- -mean(NWT)
       dates <- c(dates, NWT_a)
       dates_depth_avg <- c(dates_depth_avg, peakNWT)
@@ -1318,7 +1434,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     depth_avg_to_date_corr_allscales <- NULL
     for(i in seq_along(depth_avg_to_date_corr)) depth_avg_to_date_corr_allscales <- c(depth_avg_to_date_corr_allscales, md_interp$md_avg[which.min(abs(md_interp$depth_mm - depth_avg_to_date_corr[i]))])
     depth_avg_to_date_corr_allscales[1] <- 0
-    if (all(!is.na(Cher))) {
+    if (!all(is.na(Cher))) {
       peakCher_allscales <- NULL
       for(i in seq_along(peakCher)) peakCher_allscales <- c(peakCher_allscales, -md_interp$md_avg[which.min(abs(md_interp$depth_mm + peakCher[i]))])
     }
@@ -1554,18 +1670,23 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
   if(any(model=="CIC")) {
     output_agemodel_CIC <- as.data.frame(matrix(c(
-      c(0, dt$depth_avg[!is.na(dt$Pbex)]),
-      c(coring_yr, m_CIC),
-      c(coring_yr, m_CIC_low),
-      c(coring_yr, m_CIC_high),
-      c(0, sr_CIC),
-      c(0, sr_CIC_err)),
+      # Removing here the first calculation each time, because CIC is calculated
+      #    for the average section. For the first section, we would get an age of
+      #    coring year, which is not possible
+      #    Therefore, for the output file, we are removing this depth and interpolating
+      #    later.
+      c(0, dt$depth_avg[-1][!is.na(dt$Pbex[-1])]),
+      c(coring_yr, m_CIC[-1]),
+      c(coring_yr, m_CIC_low[-1]),
+      c(coring_yr, m_CIC_high[-1]),
+      c(0, sr_CIC[-1]),
+      c(0, sr_CIC_err[-1])),
       byrow = F, ncol=6))
     if(!mass_depth) {
       colnames(output_agemodel_CIC) <- c("depth_avg_mm", "BestAD_CIC", "MinAD_CIC", "MaxAD_CIC", "SAR_CIC_mm.yr", "SAR_CIC_err_mm.yr")
     } else {
       colnames(output_agemodel_CIC) <- c("depth_avg_mm", "BestAD_CIC", "MinAD_CIC", "MaxAD_CIC", "MAR_CIC_g.cm.2.yr", "MAR_CIC_err_g.cm.2.yr")
-      output_agemodel_CIC$mass_depth_g.cm.2 <- c(0, dt$mass_depth_avg_corr[!is.na(dt$Pbex)])
+      output_agemodel_CIC$mass_depth_g.cm.2 <- c(0, dt$mass_depth_avg_corr[-1][!is.na(dt$Pbex[-1])])
       output_agemodel_CIC <- output_agemodel_CIC[ , c("depth_avg_mm", "mass_depth_g.cm.2","BestAD_CIC", "MinAD_CIC", "MaxAD_CIC", "MAR_CIC_g.cm.2.yr", "MAR_CIC_err_g.cm.2.yr")]
     }
 
@@ -1598,9 +1719,9 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   if(any(model=="CRS")) {
     if(inst_deposit_present) {
       # Create the depth for CRS model plotting
-      new_y_CRS <- c(complete_core_depth[!is.na(complete_core_depth_2)], as.vector(inst_deposit)[inst_deposit<=max(dt$depth_avg, na.rm=T)])
-      new_y_CRS_corr <- c(complete_core_depth_corr, inst_deposit_corr[, 1][inst_deposit[, 1]<=max(dt$depth_avg, na.rm=T)], inst_deposit_corr[, 1][inst_deposit[, 2]<=max(dt$depth_avg, na.rm=T)])
-      if(mass_depth) new_y_CRS_massdepth <- c(dt$mass_depth_avg_corr[whichkeep], rep(NA, length(as.vector(inst_deposit)[inst_deposit<=max(dt$depth_avg, na.rm=T)])))
+      new_y_CRS <- c(complete_core_depth_top[!is.na(complete_core_depth_top_2)], as.vector(inst_deposit)[inst_deposit<=max(dt$depth_avg, na.rm=T)])
+      new_y_CRS_corr <- c(complete_core_depth_top_corr, inst_deposit_corr[, 1][inst_deposit[, 1]<=max(dt$depth_avg, na.rm=T)], inst_deposit_corr[, 1][inst_deposit[, 2]<=max(dt$depth_avg, na.rm=T)])
+      if(mass_depth) new_y_CRS_massdepth <- c(dt$mass_depth_top_corr[whichkeep], rep(NA, length(as.vector(inst_deposit)[inst_deposit<=max(dt$depth_avg, na.rm=T)])))
       # Do the same for sedimentation rate
       new_sr_CRS <- c(sr_CRS, rep(0, nrow(inst_deposit)))
       new_sr_CRS_err <- c(sr_CRS_err, rep(0, nrow(inst_deposit)))
@@ -1613,58 +1734,68 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       new_y_CRS_corr <- new_y_CRS_corr[order(new_y_CRS_corr)]
 
       # Create the new ages
-      new_x_CRS <- approx(x = complete_core_depth_corr,
-                          y = m_CRS,
+      # Remove the first value for m_CRS, m_CRS_low, m_CRS_high
+      #    which correspond to the surface and
+      #    must be coring_yr all across
+      new_x_CRS <- approx(x = c(0, complete_core_depth_top_corr[order(complete_core_depth_top_corr, decreasing = F)][whichkeep][-1]),
+                          y = c(coring_yr, m_CRS[-1]),
                           xout = new_y_CRS_corr, rule = 2, ties = mean)$y
-      new_x_CRS_low <- approx(x = complete_core_depth_corr,
-                              y = m_CRS_low,
+      new_x_CRS_low <- approx(x =  c(0, complete_core_depth_top_corr[order(complete_core_depth_top_corr, decreasing = F)][whichkeep][-1]),
+                              y = c(coring_yr, m_CRS_low[-1]),
                               xout = new_y_CRS_corr, rule = 2, ties = mean)$y
-      new_x_CRS_high <- approx(x = complete_core_depth_corr,
-                               y = m_CRS_high,
+      new_x_CRS_high <- approx(x =  c(0, complete_core_depth_top_corr[order(complete_core_depth_top_corr, decreasing = F)][whichkeep][-1]),
+                               y = c(coring_yr, m_CRS_high[-1]),
                                xout = new_y_CRS_corr, rule = 2, ties = mean)$y
     } else {
-      new_y_CRS <- complete_core_depth_corr[order(complete_core_depth_corr, decreasing = F)][whichkeep]
-      new_x_CRS <- m_CRS
-      new_x_CRS_low <- m_CRS_low
-      new_x_CRS_high <- m_CRS_high
+      new_y_CRS <- complete_core_depth_top[order(complete_core_depth_top, decreasing = F)][whichkeep]
+      new_x_CRS <-  c(coring_yr, m_CRS[-1])
+      new_x_CRS_low <-  c(coring_yr, m_CRS_low[-1])
+      new_x_CRS_high <-  c(coring_yr, m_CRS_high[-1])
       new_sr_CRS <- sr_CRS
       new_sr_CRS_err <- sr_CRS_err
-      new_y_CRS_massdepth <- dt$mass_depth_avg_corr[whichkeep]
+      new_y_CRS_massdepth <- dt$mass_depth_top_corr[whichkeep]
     }
 
-    output_agemodel_CRS <- as.data.frame(matrix(c(
-      c(0, new_y_CRS),
-      c(coring_yr, new_x_CRS),
-      c(coring_yr, new_x_CRS_low),
-      c(coring_yr, new_x_CRS_high),
-      c(0, new_sr_CRS),
-      c(0, new_sr_CRS_err)),
-      byrow = F, ncol=6))
+    # Any NA in SR should be 0 (they are in events)
+    new_sr_CRS[is.na(new_sr_CRS)] <- 0
+    new_sr_CRS_err[is.na(new_sr_CRS_err)] <- 0
+
+    output_agemodel_CRS <- data.frame(
+      v1a = c(0, new_y_CRS[-1]),
+      #v1b =c(new_y_CRS[-1], max(dt$depth_bottom, na.rm = TRUE)),
+      v2 = c(coring_yr, new_x_CRS[-1]),
+      v3 = c(coring_yr, new_x_CRS_low[-1]),
+      v4 = c(coring_yr, new_x_CRS_high[-1]),
+      v5 = c(0, new_sr_CRS[-1]),
+      v6 = c(0, new_sr_CRS_err[-1]))
     if(!mass_depth) {
-      colnames(output_agemodel_CRS) <- c("depth_avg_mm", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "SAR_CRS_mm.yr", "SAR_CRS_err_mm.yr")
+      colnames(output_agemodel_CRS) <- c("depth_top_mm", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "SAR_CRS_mm.yr", "SAR_CRS_err_mm.yr")
+      output_agemodel_CRS <- output_agemodel_CRS[order(output_agemodel_CRS$depth_top_mm, output_agemodel_CRS$BestAD_CRS, output_agemodel_CRS$SAR_CRS_mm.yr),]
     } else {
-      colnames(output_agemodel_CRS) <- c("depth_avg_mm", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "MAR_CRS_g.cm.2.yr", "MAR_CRS_err_g.cm.2.yr")
-      output_agemodel_CRS$mass_depth_g.cm.2 <- c(0, new_y_CRS_massdepth)
-      output_agemodel_CRS <- output_agemodel_CRS[ , c("depth_avg_mm", "mass_depth_g.cm.2", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "MAR_CRS_g.cm.2.yr", "MAR_CRS_err_g.cm.2.yr")]
+      colnames(output_agemodel_CRS) <- c("depth_top_mm", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "MAR_CRS_g.cm.2.yr", "MAR_CRS_err_g.cm.2.yr")
+      output_agemodel_CRS$mass_depth_top_g.cm.2 <- c(0, new_y_CRS_massdepth[-1])
+      output_agemodel_CRS <- output_agemodel_CRS[ , c("depth_top_mm", "mass_depth_top_g.cm.2", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "MAR_CRS_g.cm.2.yr", "MAR_CRS_err_g.cm.2.yr")]
+      output_agemodel_CRS <- output_agemodel_CRS[order(output_agemodel_CRS$depth_top_mm, output_agemodel_CRS$BestAD_CRS, output_agemodel_CRS$MAR_CRS_g.cm.2.yr),]
     }
-    output_agemodel_CRS_inter <- as.data.frame(seq(0, max(output_agemodel_CRS$depth_avg_mm, na.rm = T), stepout))
-    if(mass_depth) output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth_avg_mm, output_agemodel_CRS$mass_depth_g.cm.2, xout= seq(0, max(output_agemodel_CRS$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
-    output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth_avg_mm, output_agemodel_CRS$BestAD_CRS, xout= seq(0, max(output_agemodel_CRS$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
-    output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth_avg_mm, output_agemodel_CRS$MinAD_CRS, xout= seq(0, max(output_agemodel_CRS$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
-    output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth_avg_mm, output_agemodel_CRS$MaxAD_CRS, xout= seq(0, max(output_agemodel_CRS$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
-    output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth_avg_mm, output_agemodel_CRS[,c(ncol(output_agemodel_CRS)-1)], xout= seq(0, max(output_agemodel_CRS$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
-    output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth_avg_mm, output_agemodel_CRS[,ncol(output_agemodel_CRS)], xout= seq(0, max(output_agemodel_CRS$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
+
+    output_agemodel_CRS_inter <- as.data.frame(seq(0, max(output_agemodel_CRS$depth_top_mm, na.rm = T), stepout))
+    if(mass_depth) output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth_top_mm, output_agemodel_CRS$mass_depth_g.cm.2, xout= seq(0, max(output_agemodel_CRS$depth_top_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth_top_mm, output_agemodel_CRS$BestAD_CRS, xout= seq(0, max(output_agemodel_CRS$depth_top_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth_top_mm, output_agemodel_CRS$MinAD_CRS, xout= seq(0, max(output_agemodel_CRS$depth_top_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth_top_mm, output_agemodel_CRS$MaxAD_CRS, xout= seq(0, max(output_agemodel_CRS$depth_top_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth_top_mm, output_agemodel_CRS[,c(ncol(output_agemodel_CRS)-1)], xout= seq(0, max(output_agemodel_CRS$depth_top_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_inter <- cbind(output_agemodel_CRS_inter, approx(x= output_agemodel_CRS$depth_top_mm, output_agemodel_CRS[,ncol(output_agemodel_CRS)], xout= seq(0, max(output_agemodel_CRS$depth_top_mm, na.rm = T), stepout), ties = mean)$y)
     if(!mass_depth) {
-      colnames(output_agemodel_CRS_inter) <- c("depth_avg_mm", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "SAR_CRS_mm.yr", "SAR_CRS_err_mm.yr")
+      colnames(output_agemodel_CRS_inter) <- c("depth_top_mm", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "SAR_CRS_mm.yr", "SAR_CRS_err_mm.yr")
     } else {
-      colnames(output_agemodel_CRS_inter) <- c("depth_avg_mm",  "mass_depth_g.cm.2", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "MAR_CRS_g.cm.2.yr", "MAR_CRS_err_g.cm.2.yr")
+      colnames(output_agemodel_CRS_inter) <- c("depth_top_mm",  "mass_depth_top_g.cm.2", "BestAD_CRS", "MinAD_CRS", "MaxAD_CRS", "MAR_CRS_g.cm.2.yr", "MAR_CRS_err_g.cm.2.yr")
     }
-    write.table(x = output_agemodel_CRS[order(output_agemodel_CRS$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS.txt", sep = ""), col.names = T, row.names = F)
-    write.table(x = output_agemodel_CRS_inter[order(output_agemodel_CRS_inter$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_interpolation.txt", sep = ""), col.names = T, row.names = F)
+    write.table(x = output_agemodel_CRS[order(output_agemodel_CRS$depth_top_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS.txt", sep = ""), col.names = T, row.names = F)
+    write.table(x = output_agemodel_CRS_inter[order(output_agemodel_CRS_inter$depth_top_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_interpolation.txt", sep = ""), col.names = T, row.names = F)
 
     # Save output in the list
-    out_list$`CRS model` <- output_agemodel_CRS[order(output_agemodel_CRS$depth_avg_mm, decreasing = F), ]
-    out_list$`CRS age-depth model interpolated` <- output_agemodel_CRS_inter[order(output_agemodel_CRS_inter$depth_avg_mm, decreasing = F), ]
+    out_list$`CRS model` <- output_agemodel_CRS[order(output_agemodel_CRS$depth_top_mm, decreasing = F), ]
+    out_list$`CRS age-depth model interpolated` <- output_agemodel_CRS_inter[order(output_agemodel_CRS_inter$depth_top_mm, decreasing = F), ]
 
     # Parameters for legend
     mylegend <- c(mylegend, "CRS")
@@ -1676,9 +1807,9 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   if(any(model=="CRS_pw")) {
     if(inst_deposit_present) {
       # Create the depth for CRS_pw model plotting
-      new_y_CRS_pw <- c(complete_core_depth[!is.na(complete_core_depth_2)], as.vector(inst_deposit)[inst_deposit<=max(dt$depth_avg, na.rm=T)])
-      new_y_CRS_pw_corr <- c(complete_core_depth_corr, inst_deposit_corr[, 1][inst_deposit[, 1]<=max(dt$depth_avg, na.rm=T)], inst_deposit_corr[, 1][inst_deposit[, 2]<=max(dt$depth_avg, na.rm=T)])
-      if(mass_depth) new_y_CRS_pw_massdepth <- c(dt$mass_depth_avg_corr[whichkeep], rep(NA, length(as.vector(inst_deposit)[inst_deposit<=max(dt$depth_avg, na.rm=T)])))
+      new_y_CRS_pw <- c(complete_core_depth_top[!is.na(complete_core_depth_2)], as.vector(inst_deposit)[inst_deposit<=max(dt$depth_avg, na.rm=T)])
+      new_y_CRS_pw_corr <- c(complete_core_depth_top_corr, inst_deposit_corr[, 1][inst_deposit[, 1]<=max(dt$depth_avg, na.rm=T)], inst_deposit_corr[, 1][inst_deposit[, 2]<=max(dt$depth_avg, na.rm=T)])
+      if(mass_depth) new_y_CRS_pw_massdepth <- c(dt$mass_depth_top_corr[whichkeep], rep(NA, length(as.vector(inst_deposit)[inst_deposit<=max(dt$depth_avg, na.rm=T)])))
       # Do the same for sedimentation rate
       new_sr_CRS_pw <- c(sr_CRS_pw, rep(0, nrow(inst_deposit)))
       new_sr_CRS_pw_err <- c(sr_CRS_pw_err, rep(0, nrow(inst_deposit)))
@@ -1691,25 +1822,28 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       new_y_CRS_pw_corr <- new_y_CRS_pw_corr[order(new_y_CRS_pw_corr)]
 
       # Create the new ages
-      new_x_CRS_pw <- approx(x = complete_core_depth_corr,
+      new_x_CRS_pw <- approx(x = complete_core_depth_top_corr,
                              y = m_CRS_pw,
                              xout = new_y_CRS_pw_corr, rule = 2, ties = mean)$y
-      new_x_CRS_pw_low <- approx(x = complete_core_depth_corr,
+      new_x_CRS_pw_low <- approx(x = complete_core_depth_top_corr,
                                  y = m_CRS_pw_low,
                                  xout = new_y_CRS_pw_corr, rule = 2, ties = mean)$y
-      new_x_CRS_pw_high <- approx(x = complete_core_depth_corr,
+      new_x_CRS_pw_high <- approx(x = complete_core_depth_top_corr,
                                   y = m_CRS_pw_high,
                                   xout = new_y_CRS_pw_corr, rule = 2, ties = mean)$y
     } else {
-      new_y_CRS_pw <- complete_core_depth_corr[order(complete_core_depth_corr, decreasing = F)][whichkeep]
+      new_y_CRS_pw <- complete_core_depth_top_corr[order(complete_core_depth_corr, decreasing = F)][whichkeep]
       new_x_CRS_pw <- m_CRS_pw
       new_x_CRS_pw_low <- m_CRS_pw_low
       new_x_CRS_pw_high <- m_CRS_pw_high
       new_sr_CRS_pw <- sr_CRS_pw
       new_sr_CRS_pw_err <- sr_CRS_pw_err
-      new_y_CRS_pw_massdepth <- dt$mass_depth_avg_corr[whichkeep]
+      new_y_CRS_pw_massdepth <- dt$mass_depth_top_corr[whichkeep]
     }
 
+    # Any NA in SR should be 0 (they are in events)
+    new_sr_CRS_pw[is.na(new_sr_CRS_pw)] <- 0
+    new_sr_CRS_pw_err[is.na(new_sr_CRS_pw_err)] <- 0
 
     output_agemodel_CRS_pw <- as.data.frame(matrix(c(c(0, new_y_CRS_pw),
                                                      c(coring_yr, new_x_CRS_pw),
@@ -1719,30 +1853,32 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                                      c(0, new_sr_CRS_pw_err)),
                                                    byrow = F, ncol=6))
     if(!mass_depth) {
-      colnames(output_agemodel_CRS_pw) <- c("depth_avg_mm", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "SAR_CRS_pw_mm.yr", "SAR_CRS_pw_err_mm.yr")
+      colnames(output_agemodel_CRS_pw) <- c("depth_top_mm", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "SAR_CRS_pw_mm.yr", "SAR_CRS_pw_err_mm.yr")
+      output_agemodel_CRS_pw <- output_agemodel_CRS_pw[order(output_agemodel_CRS_pw$depth_top_mm, output_agemodel_CRS_pw$BestAD_CRS_pw, output_agemodel_CRS_pw$SAR_CRS_pw_mm.yr),]
     } else {
-      colnames(output_agemodel_CRS_pw) <- c("depth_avg_mm", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "MAR_CRS_pw_g.cm.2.yr", "MAR_CRS_pw_err_g.cm.2.yr")
+      colnames(output_agemodel_CRS_pw) <- c("depth_top_mm", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "MAR_CRS_pw_g.cm.2.yr", "MAR_CRS_pw_err_g.cm.2.yr")
       output_agemodel_CRS_pw$mass_depth_g.cm.2 <- c(0, new_y_CRS_pw_massdepth)
-      output_agemodel_CRS_pw <- output_agemodel_CRS_pw[ , c("depth_avg_mm", "mass_depth_g.cm.2", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "MAR_CRS_pw_g.cm.2.yr", "MAR_CRS_pw_err_g.cm.2.yr")]
+      output_agemodel_CRS_pw <- output_agemodel_CRS_pw[ , c("depth_top_mm", "mass_depth_g.cm.2", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "MAR_CRS_pw_g.cm.2.yr", "MAR_CRS_pw_err_g.cm.2.yr")]
+      output_agemodel_CRS_pw <- output_agemodel_CRS_pw[order(output_agemodel_CRS_pw$depth_top_mm, output_agemodel_CRS_pw$BestAD_CRS_pw, output_agemodel_CRS_pw$MAR_CRS_pw_g.cm.2.yr),]
     }
-    output_agemodel_CRS_pw_inter <- as.data.frame(seq(0, max(output_agemodel_CRS_pw$depth_avg_mm, na.rm = T), stepout))
-    if(mass_depth) output_agemodel_CRS_pw_inter <- cbind(output_agemodel_CRS_pw_inter, approx(x= output_agemodel_CRS_pw$depth_avg_mm, output_agemodel_CRS_pw$mass_depth_g.cm.2, xout= seq(0, max(output_agemodel_CRS_pw$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
-    output_agemodel_CRS_pw_inter <- cbind(output_agemodel_CRS_pw_inter, approx(x= output_agemodel_CRS_pw$depth_avg_mm, output_agemodel_CRS_pw$BestAD_CRS_pw, xout= seq(0, max(output_agemodel_CRS_pw$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
-    output_agemodel_CRS_pw_inter <- cbind(output_agemodel_CRS_pw_inter, approx(x= output_agemodel_CRS_pw$depth_avg_mm, output_agemodel_CRS_pw$MinAD_CRS_pw, xout= seq(0, max(output_agemodel_CRS_pw$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
-    output_agemodel_CRS_pw_inter <- cbind(output_agemodel_CRS_pw_inter, approx(x= output_agemodel_CRS_pw$depth_avg_mm, output_agemodel_CRS_pw$MaxAD_CRS_pw, xout= seq(0, max(output_agemodel_CRS_pw$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
-    output_agemodel_CRS_pw_inter <- cbind(output_agemodel_CRS_pw_inter, approx(x= output_agemodel_CRS_pw$depth_avg_mm, output_agemodel_CRS_pw[,c(ncol(output_agemodel_CRS_pw)-1)], xout= seq(0, max(output_agemodel_CRS_pw$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
-    output_agemodel_CRS_pw_inter <- cbind(output_agemodel_CRS_pw_inter, approx(x= output_agemodel_CRS_pw$depth_avg_mm, output_agemodel_CRS_pw[,ncol(output_agemodel_CRS_pw)], xout= seq(0, max(output_agemodel_CRS_pw$depth_avg_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_pw_inter <- as.data.frame(seq(0, max(output_agemodel_CRS_pw$depth_top_mm, na.rm = T), stepout))
+    if(mass_depth) output_agemodel_CRS_pw_inter <- cbind(output_agemodel_CRS_pw_inter, approx(x= output_agemodel_CRS_pw$depth_top_mm, output_agemodel_CRS_pw$mass_depth_g.cm.2, xout= seq(0, max(output_agemodel_CRS_pw$depth_top_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_pw_inter <- cbind(output_agemodel_CRS_pw_inter, approx(x= output_agemodel_CRS_pw$depth_top_mm, output_agemodel_CRS_pw$BestAD_CRS_pw, xout= seq(0, max(output_agemodel_CRS_pw$depth_top_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_pw_inter <- cbind(output_agemodel_CRS_pw_inter, approx(x= output_agemodel_CRS_pw$depth_top_mm, output_agemodel_CRS_pw$MinAD_CRS_pw, xout= seq(0, max(output_agemodel_CRS_pw$depth_top_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_pw_inter <- cbind(output_agemodel_CRS_pw_inter, approx(x= output_agemodel_CRS_pw$depth_top_mm, output_agemodel_CRS_pw$MaxAD_CRS_pw, xout= seq(0, max(output_agemodel_CRS_pw$depth_top_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_pw_inter <- cbind(output_agemodel_CRS_pw_inter, approx(x= output_agemodel_CRS_pw$depth_top_mm, output_agemodel_CRS_pw[,c(ncol(output_agemodel_CRS_pw)-1)], xout= seq(0, max(output_agemodel_CRS_pw$depth_top_mm, na.rm = T), stepout), ties = mean)$y)
+    output_agemodel_CRS_pw_inter <- cbind(output_agemodel_CRS_pw_inter, approx(x= output_agemodel_CRS_pw$depth_top_mm, output_agemodel_CRS_pw[,ncol(output_agemodel_CRS_pw)], xout= seq(0, max(output_agemodel_CRS_pw$depth_top_mm, na.rm = T), stepout), ties = mean)$y)
     if(!mass_depth) {
-      colnames(output_agemodel_CRS_pw_inter) <- c("depth_avg_mm", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "SAR_CRS_pw_mm.yr", "SAR_CRS_pw_err_mm.yr")
+      colnames(output_agemodel_CRS_pw_inter) <- c("depth_top_mm", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "SAR_CRS_pw_mm.yr", "SAR_CRS_pw_err_mm.yr")
     } else {
-      colnames(output_agemodel_CRS_pw_inter) <- c("depth_avg_mm", "mass_depth_g.cm.2", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "MAR_CRS_pw_g.cm.2.yr", "MAR_CRS_pw_err_g.cm.2.yr")
+      colnames(output_agemodel_CRS_pw_inter) <- c("depth_top_mm", "mass_depth_g.cm.2", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "MAR_CRS_pw_g.cm.2.yr", "MAR_CRS_pw_err_g.cm.2.yr")
     }
-    write.table(x = output_agemodel_CRS_pw[order(output_agemodel_CRS_pw$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_pw.txt", sep = ""), col.names = T, row.names = F)
-    write.table(x = output_agemodel_CRS_pw_inter[order(output_agemodel_CRS_pw_inter$depth_avg_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_pw_interpolation.txt", sep = ""), col.names = T, row.names = F)
+    write.table(x = output_agemodel_CRS_pw[order(output_agemodel_CRS_pw$depth_top_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_pw.txt", sep = ""), col.names = T, row.names = F)
+    write.table(x = output_agemodel_CRS_pw_inter[order(output_agemodel_CRS_pw_inter$depth_top_mm, decreasing = F), ], file = paste(getwd(), "/Cores/", name, "/", name, "_CRS_pw_interpolation.txt", sep = ""), col.names = T, row.names = F)
 
     # Save output in the list
-    out_list$`CRS piecewise model` <- output_agemodel_CRS_pw[order(output_agemodel_CRS_pw$depth_avg_mm, decreasing = F), ]
-    out_list$`CRS piecewise model age-depth model interpolated` <- output_agemodel_CRS_pw_inter[order(output_agemodel_CRS_pw_inter$depth_avg_mm, decreasing = F), ]
+    out_list$`CRS piecewise model` <- output_agemodel_CRS_pw[order(output_agemodel_CRS_pw$depth_top_mm, decreasing = F), ]
+    out_list$`CRS piecewise model age-depth model interpolated` <- output_agemodel_CRS_pw_inter[order(output_agemodel_CRS_pw_inter$depth_top_mm, decreasing = F), ]
 
     # Parameters for legend
     mylegend <- c(mylegend, "CRS piecewise model")
@@ -2599,7 +2735,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       # determine which depth is used according to mass_depth==T/F
       if(mass_depth)  which_scale=dt$mass_depth_avg else which_scale=dt$depth_avg
       #Chernobyl
-      if (exists("Cher")&&!is.na(Cher)) {
+      if (exists("Cher")&&!all(is.na(Cher))) {
         lines(rep(max(dt$Cs[which_scale>min(Cher_allscales-.01*(max(dt$which_scale, na.rm=T))) & which_scale<max(Cher_allscales+.01*(max(dt$which_scale, na.rm=T)))], na.rm = T)*1.1, 2), c(-Cher_allscales[1], -Cher_allscales[2]), lwd=1.5)
         if(!mass_depth) {
           shadowtext(max(dt$Cs[which_scale>min(Cher_allscales-.01*(max(dt$which_scale, na.rm=T))) & which_scale<max(Cher_allscales+.01*(max(dt$which_scale, na.rm=T)))], na.rm = T)+0.1*max(dt$Cs, na.rm=T), -(min(Cher_allscales)),
@@ -2611,7 +2747,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         }
       }
       #NWT
-      if (exists("NWT")&&!is.na(NWT)) {
+      if (exists("NWT")&&!all(is.na(NWT))) {
         lines(rep(max(dt$Cs[which_scale>min(NWT_allscales-.01*(max(dt$which_scale, na.rm=T))) & which_scale<max(NWT_allscales+.01*(max(dt$which_scale, na.rm=T)))], na.rm = T)*1.2, 2), c(-NWT_allscales[1], -NWT_allscales[2]), lwd=1.5)
         if(!mass_depth) {
           if (Hemisphere == "NH") shadowtext(max(dt$Cs, na.rm = T)+0.1*max(dt$Cs, na.rm=T), -(min(NWT_allscales)),
@@ -2627,7 +2763,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         }
       }
       #First radionuclides fallout
-      if (exists("FF")&&!is.na(FF)) {
+      if (exists("FF")&&!all(is.na(FF))) {
         lines(rep(max(dt$Cs[which_scale>min(FF_allscales-.01*(max(dt$which_scale, na.rm=T))) & which_scale<max(FF_allscales+.01*(max(dt$which_scale, na.rm=T)))], na.rm = T)*1.2, 2), c(-FF_allscales[1], -FF_allscales[2]), lwd=1.5)
         if(!mass_depth) {
           shadowtext(max(dt$Cs, na.rm = T)+0.1*max(dt$Cs, na.rm=T), -(max(FF_allscales)),
@@ -2790,12 +2926,12 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
     if(any(model=="CIC")) {
       # Creating the logical vector which_CIC to plot only the CIC model point with data.
-      which_CIC <- output_agemodel_CIC$depth_avg[-1] %in% dt$depth_avg[!is.na(dt$depth_avg_2)] & !is.na(m_CIC_low)& !is.na(m_CIC_high)
-      pol_x <- c(-c(coring_yr, m_CIC_low[which_CIC]), c(rev(-m_CIC_high[which_CIC]), -coring_yr))
+      which_CIC <- output_agemodel_CIC$depth_avg[-1] %in% dt$depth_avg[!is.na(dt$depth_avg_2)] & !is.na(m_CIC_low[-1])& !is.na(m_CIC_high[-1])
+      pol_x <- c(-c(coring_yr, m_CIC_low[-1][which_CIC]), c(rev(-m_CIC_high[-1][which_CIC]), -coring_yr))
       pol_y <- c(-output_agemodel_CIC$depth_avg[which_CIC], rev(-output_agemodel_CIC$depth_avg[which_CIC]))
       polygon(x=pol_x, y = pol_y, col=adjustcolor(modelcol[2], alpha.f=0.2), border=NA)
-      which_CIC <- output_agemodel_CIC$depth_avg[-1] %in% dt$depth_avg[!is.na(dt$depth_avg_2)] &!is.na(m_CIC)
-      lines(-c(coring_yr, m_CIC[which_CIC]), -output_agemodel_CIC$depth_avg[which_CIC], col=modelcol[2])
+      which_CIC <- output_agemodel_CIC$depth_avg[-1] %in% dt$depth_avg[!is.na(dt$depth_avg_2)] &!is.na(m_CIC[-1])
+      lines(-c(coring_yr, m_CIC[-1][which_CIC]), -output_agemodel_CIC$depth_avg[which_CIC], col=modelcol[2])
     }
 
     if(any(model=="CRS")) {
@@ -2806,7 +2942,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         polygon(x=pol_x, y = pol_y, col=adjustcolor(modelcol[3], alpha.f=0.2), border=NA)
         lines(-new_x_CRS[new_y_CRS>=SML&new_y_CRS<=max(dt$depth_avg)], -new_y_CRS[new_y_CRS>=SML&new_y_CRS<=max(dt$depth_avg)], col=modelcol[3])
       } else {
-        depth_CRS_plot = -complete_core_depth[whichkeep]
+        depth_CRS_plot = -complete_core_depth_top[whichkeep]
         lines(-m_CRS, depth_CRS_plot, col=modelcol[3], lty=2, lwd=.5)
         pol_x <- c(-m_CRS_low, rev(-m_CRS_high))
         pol_y <- c(depth_CRS_plot, rev(depth_CRS_plot))
@@ -2824,7 +2960,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         polygon(x=pol_x, y = pol_y, col=adjustcolor(modelcol[4], alpha.f=0.2), border=NA)
         lines(-new_x_CRS_pw[new_y_CRS_pw>=SML&new_y_CRS_pw<=max(dt$depth_avg)], -new_y_CRS_pw[new_y_CRS_pw>=SML&new_y_CRS_pw<=max(dt$depth_avg)], col=modelcol[4])
       } else {
-        depth_CRS_pw_plot = -c(complete_core_depth[whichkeep])
+        depth_CRS_pw_plot = -c(complete_core_depth_top[whichkeep])
         if(length(depth_CRS_pw_plot) != length(m_CRS_pw)) depth_CRS_pw_plot = -c(0,complete_core_depth[whichkeep])
 
         lines(-m_CRS_pw, depth_CRS_pw_plot, col=modelcol[4], lty=2, lwd=.5)
