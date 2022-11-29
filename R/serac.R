@@ -1857,7 +1857,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       output_agemodel_CRS_pw <- output_agemodel_CRS_pw[order(output_agemodel_CRS_pw$depth_top_mm, output_agemodel_CRS_pw$BestAD_CRS_pw, output_agemodel_CRS_pw$SAR_CRS_pw_mm.yr),]
     } else {
       colnames(output_agemodel_CRS_pw) <- c("depth_top_mm", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "MAR_CRS_pw_g.cm.2.yr", "MAR_CRS_pw_err_g.cm.2.yr")
-      output_agemodel_CRS_pw$mass_depth_g.cm.2 <- c(0, new_y_CRS_pw_massdepth)
+      output_agemodel_CRS_pw$mass_depth_g.cm.2 <- c(0, new_y_CRS_pw_massdepth[-1])
       output_agemodel_CRS_pw <- output_agemodel_CRS_pw[ , c("depth_top_mm", "mass_depth_g.cm.2", "BestAD_CRS_pw", "MinAD_CRS_pw", "MaxAD_CRS_pw", "MAR_CRS_pw_g.cm.2.yr", "MAR_CRS_pw_err_g.cm.2.yr")]
       output_agemodel_CRS_pw <- output_agemodel_CRS_pw[order(output_agemodel_CRS_pw$depth_top_mm, output_agemodel_CRS_pw$BestAD_CRS_pw, output_agemodel_CRS_pw$MAR_CRS_pw_g.cm.2.yr),]
     }
