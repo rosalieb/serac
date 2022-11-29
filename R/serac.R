@@ -596,6 +596,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       inst_deposit_present = FALSE
       dt$d=dt$depth_avg_2
       complete_core_depth_corr <- complete_core_depth[!is.na(complete_core_depth_2)]
+      complete_core_depth_top_corr <- complete_core_depth_top[!is.na(complete_core_depth_top_2)]
+      complete_core_depth_bottom_corr <- complete_core_depth_bottom[!is.na(complete_core_depth_bottom_2)]
 
       # For the full table
       full_depths <- data.frame(
