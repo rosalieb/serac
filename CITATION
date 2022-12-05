@@ -1,15 +1,15 @@
 year <- 2020
 note <- sprintf("R package version %s", meta$Version)
 
-citHeader("serac: A R package for ShortlivEd RAdionuclide chronology of recent sediment cores")
+citHeader("serac: an R package for ShortlivEd RAdionuclide chronology of recent sediment cores")
 
 bibentry(
   bibtype="Article",
-  title= "serac: A R package for ShortlivEd RAdionuclide chronology of recent sediment cores",
+  title= "serac: an R package for ShortlivEd RAdionuclide chronology of recent sediment cores",
   author= "R. Bruel and P. Sabatier",
   journal= "Journal of Environmental Radioactivity",
   year= "2020",
   pages= "106449",
   volume= "225",
-  textVersion="Bruel, R., and Sabatier, P. (2020) serac: A R package for ShortlivEd RAdionuclide chronology of recent sediment cores. Journal of Environmental Radioactivity 225, 106449. https://doi.org/10.1016/j.jenvrad.2020.106449 "
+  textVersion="Bruel, R., and Sabatier, P. (2020) serac: an R package for ShortlivEd RAdionuclide chronology of recent sediment cores. Journal of Environmental Radioactivity 225, 106449. https://doi.org/10.1016/j.jenvrad.2020.106449 "
 )
