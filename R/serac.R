@@ -50,7 +50,7 @@
 #' @param mass_depth Logical argument. If TRUE, require density, and will plot the radionuclides against massic depth. Core photo and supplementary descriptor are not available under this option.
 #' @param prop_height_fig Increase of decrease the height of the figure output using this argument. prop_height_fig < 1 will make the figure smaller, prop_height_fig > 1 will make the figure taller.
 #' @param prop_width_fig Increase of decrease the height of the figure output using this argument. prop_width_fig < 1 will make the figure narrower, prop_width_fig > 1 will make the figure wider.
-#' @param plot_Cs_lines Logical argument. Whether or not to plot the lines in the Cesium window plot. Default = TRUE
+#' @param plot_Cs_line Logical argument. Whether or not to plot the lines in the Cesium window plot. Default = TRUE
 #' @keywords age-depth modelling
 #' @keywords visualisation
 #' @examples
@@ -89,7 +89,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                   error_DBD = 0.07, min_yr = 1880, SML = c(0), stepout = 5, mycex = 1,
                   archive_metadata = FALSE, save_code = TRUE,
                   prop_width_fig = 1, prop_height_fig = 1,
-                  plot_Cs_lines = TRUE)
+                  plot_Cs_line = TRUE)
 .serac(name, model, Cher, NWT, Hemisphere, FF,
        age_forced_CRS, depth_forced_CRS, inst_deposit,
        input_depth_mm, ignore, mass_depth,
@@ -104,7 +104,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
        error_DBD, min_yr, SML, stepout, mycex,
        archive_metadata, save_code,
        prop_width_fig, prop_height_fig,
-       plot_Cs_lines)
+       plot_Cs_line)
 
 .serac <- function(name, model, Cher, NWT, Hemisphere, FF,
                    age_forced_CRS, depth_forced_CRS, inst_deposit,
@@ -120,7 +120,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                    error_DBD, min_yr, SML, stepout, mycex,
                    archive_metadata, save_code,
                    prop_width_fig, prop_height_fig,
-                   plot_Cs_lines) {
+                   plot_Cs_line) {
 
 
   # 0. INITIALIZE ####
@@ -2703,7 +2703,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         lines(c(dt$Cs[i]+dt$Cs_er[i], dt$Cs[i]-dt$Cs_er[i]),
               rep(-which_scale[i], 2), type="o", pch="|", cex=.5, col=grey(.65))
       }
-      if(plot_Cs_lines) lines(dt$Cs[which(dt$depth_avg<SML+2)], -which_scale[which(dt$depth_avg<SML+2)], col=grey(.65), lwd=.5)
+      if(plot_Cs_line) lines(dt$Cs[which(dt$depth_avg<SML+2)], -which_scale[which(dt$depth_avg<SML+2)], col=grey(.65), lwd=.5)
 
       par(new=T)
       if(!mass_depth) {
@@ -2721,8 +2721,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         lines(c(dt$Cs[i]+dt$Cs_er[i], dt$Cs[i]-dt$Cs_er[i]),
               rep(-which_scale[i], 2), type="o", pch="|", cex=.5, col=Pbcol[1])
       }
-      if(plot_Cs_lines) lines(dt$Cs[which(dt$depth_avg>=SML&!is.na(dt$Cs))], -which_scale[which(dt$depth_avg>=SML&!is.na(dt$Cs))], lwd=.5)
-      if(plot_Cs_lines) lines(dt$Cs[which(dt$depth_avg>=SML)], -which_scale[which(dt$depth_avg>=SML)])
+      if(plot_Cs_line) lines(dt$Cs[which(dt$depth_avg>=SML&!is.na(dt$Cs))], -which_scale[which(dt$depth_avg>=SML&!is.na(dt$Cs))], lwd=.5)
+      if(plot_Cs_line) lines(dt$Cs[which(dt$depth_avg>=SML)], -which_scale[which(dt$depth_avg>=SML)])
 
       axis(3,  cex.axis=cex_2)
       mtext(text = bquote(~""^137*"Cs (mBq " ~ g^-1 ~ ")"), side = 3, line=2.2, cex=cex_1)
