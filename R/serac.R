@@ -2795,8 +2795,16 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       }
 
       # Plot the lines
+      for(i in seq_along(dt$Cs[which(dt$depth_avg>=SML)])) {
+        if(i == 1) vecCs = NULL
+        vecCs <- c(vecCs, ifelse(dt$depth_avg[which(dt$depth_avg>=SML)][i] %in% ignore_Cs,
+                                 NA,
+                                 dt$Cs[which(dt$depth_avg>=SML)][i]))
+      }
       if(plot_Cs_line) lines(dt$Cs[which(dt$depth_avg>=SML&!is.na(dt$Cs)&!dt$depth_avg %in% ignore_Cs)], -which_scale[which(dt$depth_avg>=SML&!is.na(dt$Cs)&!dt$depth_avg %in% ignore_Cs)], lwd=.5, lty = 2)
-      if(plot_Cs_line) lines(dt$Cs[which(dt$depth_avg>=SML&!dt$depth_avg %in% ignore_Cs)], -which_scale[which(dt$depth_avg>=SML&!dt$depth_avg %in% ignore_Cs)])
+      #if(plot_Cs_line) lines(dt$Cs[which(dt$depth_avg>=SML&!dt$depth_avg %in% ignore_Cs)], -which_scale[which(dt$depth_avg>=SML&!dt$depth_avg %in% ignore_Cs)])
+      if(plot_Cs_line) lines(vecCs, -which_scale[which(dt$depth_avg>=SML)])
+
 
       axis(3,  cex.axis=cex_2)
       mtext(text = bquote(~""^137*"Cs (mBq " ~ g^-1 ~ ")"), side = 3, line=2.2, cex=cex_1)
