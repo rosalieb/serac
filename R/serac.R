@@ -239,9 +239,11 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
       if(!is.null(DL_Cs) & is.numeric(DL_Cs)) {
         if(length(dt$Cs[dt$Cs<DL_Cs])>0) {
-          cat(paste0(length(dt$Cs[dt$Cs<DL_Cs]), " Cs values were below the detection limit set by the user (", DL_Cs,"): these Cs values and the corresponding Cs_er were changed to NAs.  \n"))
-          dt$Cs_er[dt$Cs<DL_Cs] <- NA
-          dt$Cs[dt$Cs<DL_Cs] <- NA
+          #cat(paste0(length(dt$Cs[dt$Cs<DL_Cs]), " Cs values were below the detection limit set by the user (", DL_Cs,"): these Cs values and the corresponding Cs_er were changed to NAs.  \n"))
+          #dt$Cs_er[dt$Cs<DL_Cs] <- NA
+          #dt$Cs[dt$Cs<DL_Cs] <- NA
+
+          cat(paste0(length(dt$Cs[dt$Cs<DL_Cs]), " Cs values were below the detection limit set by the user (", DL_Cs,"): the Cs values and the corresponding Cs_er will be shown with a different colour on the plot.  \n"))
         }
       }
     } else {
@@ -257,9 +259,11 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
       if(!is.null(DL_Am) & is.numeric(DL_Am)) {
         if(length(dt$Am[dt$Cs<DL_Am])>0) {
-          cat(paste0(length(dt$Am[dt$Cs<DL_Am]), " Am values were below the detection limit set by the user (", DL_Am,"): these Am values and the corresponding Am_er were changed to NAs.  \n"))
-          dt$Am_er[dt$Am<DL_Am] <- NA
-          dt$Am[dt$Am<DL_Am] <- NA
+          #cat(paste0(length(dt$Am[dt$Cs<DL_Am]), " Am values were below the detection limit set by the user (", DL_Am,"): these Am values and the corresponding Am_er were changed to NAs.  \n"))
+          #dt$Am_er[dt$Am<DL_Am] <- NA
+          #dt$Am[dt$Am<DL_Am] <- NA
+
+          cat(paste0(length(dt$Am[dt$Cs<DL_Am]), " Am values were below the detection limit set by the user (", DL_Am,"): the Am values and the corresponding Am_er will be shown with a different colour on the plot.  \n"))
         }
       }
     } else {
@@ -2703,6 +2707,11 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       if(!mass_depth) myxlim_max <- max(dt$Cs, na.rm=T)*1.2+max(dt$Cs_er, na.rm = T) else myxlim_max <- max(dt$Cs, na.rm=T)*1.4+max(dt$Cs_er, na.rm = T)
       myxlim_min <- min(dt$Cs, na.rm=T)-max(dt$Cs_er, na.rm = T)
 
+
+      # Create the ignore vector
+      if(!is.null(DL_Cs) & length(dt$depth_avg[dt$Cs<DL_Cs])>0) ignore_Cs <- dt$depth_avg[dt$Cs<DL_Cs] else ignore_Cs= NULL
+
+      # Back plot (below inst_deposit)
       if(!mass_depth) {
         with (
           data=dt[dt$depth_avg<SML, ]
@@ -2723,6 +2732,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         par(xpd=FALSE)
       }
 
+      # Front plot (above inst_deposit)
       par(new=T)
       if(!mass_depth) {
         with (
@@ -2746,21 +2756,47 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       par(new=T)
       if(!mass_depth) {
         with (
-          data=dt[dt$depth_avg>=SML, ]
-          , expr = errbar(Cs, -depth_avg, c(-depth_avg+thickness/2), c(-depth_avg-thickness/2), pch=16, cap=.01, xlab="", ylab="", axes=F, ylim=myylim, xlim=c(myxlim_min, myxlim_max), col=Pbcol[1], errbar.col = Pbcol[1], cex=.8)
+          data=dt[dt$depth_avg>=SML &!dt$depth_avg %in% ignore_Cs, ]
+          , expr = errbar(Cs, -depth_avg, c(-depth_avg+thickness/2), c(-depth_avg-thickness/2), pch=16, cap=.01, xlab="", ylab="", axes=F, ylim=myylim, xlim=c(myxlim_min, myxlim_max), col="black", errbar.col = "black", cex=.8)
         )
+
+        # Ignored Cs depth
+        if(!is.null(ignore_Cs)) {
+          par(new=T)
+          with (
+            data=dt[dt$depth_avg>=SML &dt$depth_avg %in% ignore_Cs, ]
+            , expr = errbar(Cs, -depth_avg, c(-depth_avg+thickness/2), c(-depth_avg-thickness/2), pch=16, cap=.01, xlab="", ylab="", axes=F, ylim=myylim, xlim=c(myxlim_min, myxlim_max), col=grey(.67), errbar.col = grey(.67), cex=.8)
+          )
+        }
       } else {
         with (
-          data=dt[dt$depth_avg>=SML, ]
-          , expr = errbar(Cs, -mass_depth_avg, -mass_depth_top, -mass_depth_bottom, pch=16, cap=.01, xlab="", ylab="", axes=F, ylim=myylim_md, xlim=c(myxlim_min, myxlim_max), col=Pbcol[1], errbar.col = Pbcol[1], cex=.8)
+          data=dt[dt$depth_avg>=SML &!dt$depth_avg %in% ignore_Cs, ]
+          , expr = errbar(Cs, -mass_depth_avg, -mass_depth_top, -mass_depth_bottom, pch=16, cap=.01, xlab="", ylab="", axes=F, ylim=myylim_md, xlim=c(myxlim_min, myxlim_max), col="black", errbar.col = "black", cex=.8)
         )
+
+        # Ignored Cs depth
+        if(!is.null(ignore_Cs)) {
+          par(new=T)
+          with (
+            data=dt[dt$depth_avg>=SML &dt$depth_avg %in% ignore_Cs, ]
+            , expr = errbar(Cs, -mass_depth_avg, -mass_depth_top, -mass_depth_bottom, pch=16, cap=.01, xlab="", ylab="", axes=F, ylim=myylim_md, xlim=c(myxlim_min, myxlim_max), col=grey(.67), errbar.col = grey(.67), cex=.8)
+          )
+        }
+
       }
-      for (i in which(dt$Cs>0 & !is.na(dt$Cs_er) & dt$depth_avg>=SML)) {
+      for (i in which(dt$Cs>0 & !is.na(dt$Cs_er) & dt$depth_avg>=SML &!dt$depth_avg %in% ignore_Cs)) {
         lines(c(dt$Cs[i]+dt$Cs_er[i], dt$Cs[i]-dt$Cs_er[i]),
-              rep(-which_scale[i], 2), type="o", pch="|", cex=.5, col=Pbcol[1])
+              rep(-which_scale[i], 2), type="o", pch="|", cex=.5, col="black")
       }
-      if(plot_Cs_line) lines(dt$Cs[which(dt$depth_avg>=SML&!is.na(dt$Cs))], -which_scale[which(dt$depth_avg>=SML&!is.na(dt$Cs))], lwd=.5, lty = 2)
-      if(plot_Cs_line) lines(dt$Cs[which(dt$depth_avg>=SML)], -which_scale[which(dt$depth_avg>=SML)])
+      #Ignored Cs depth
+      for (i in which(dt$Cs>0 & !is.na(dt$Cs_er) & dt$depth_avg>=SML &dt$depth_avg %in% ignore_Cs)) {
+        lines(c(dt$Cs[i]+dt$Cs_er[i], dt$Cs[i]-dt$Cs_er[i]),
+              rep(-which_scale[i], 2), type="o", pch="|", cex=.5, col=grey(.67))
+      }
+
+      # Plot the lines
+      if(plot_Cs_line) lines(dt$Cs[which(dt$depth_avg>=SML&!is.na(dt$Cs)&!dt$depth_avg %in% ignore_Cs)], -which_scale[which(dt$depth_avg>=SML&!is.na(dt$Cs)&!dt$depth_avg %in% ignore_Cs)], lwd=.5, lty = 2)
+      if(plot_Cs_line) lines(dt$Cs[which(dt$depth_avg>=SML&!dt$depth_avg %in% ignore_Cs)], -which_scale[which(dt$depth_avg>=SML&!dt$depth_avg %in% ignore_Cs)])
 
       axis(3,  cex.axis=cex_2)
       mtext(text = bquote(~""^137*"Cs (mBq " ~ g^-1 ~ ")"), side = 3, line=2.2, cex=cex_1)
@@ -2822,30 +2858,53 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
       # 6.5. 241Am ####
       if (plot_Am) {
+        # Create the ignore vector
+        if(!is.null(DL_Am) & length(dt$depth_avg[dt$Am<DL_Am])>0) ignore_Am <- dt$depth_avg[dt$Am<DL_Am] else ignore_Am= NULL
+
         legend("bottomright", legend = c("Cesium", "Americium"), bty="n", pch=c(16, 1), cex=mycex, y.intersp = 1.8)
         par(new=T, mar=c(4.1, 1.1, 4.1, 6.1))
         myxlim_max <- max(dt$Am, na.rm=T)*1.2+max(dt$Am_er, na.rm=T)
         myxlim_min <- min(dt$Am, na.rm=T)-max(dt$Am_er, na.rm=T)
         if(!mass_depth) {
           with (
-            data=dt[which(!is.na(dt$Am)&dt$Am>0&dt$depth_avg>SML), ]
-            , expr = errbar(Am, -depth_avg, c(-depth_avg+thickness/2), c(-depth_avg-thickness/2), pch=1, cap=.01, xlab="", ylab="", axes=F, ylim=myylim, xlim=c(myxlim_min, myxlim_max), col=Pbcol[1], errbar.col = Pbcol[1], cex=.8)
+            data=dt[which(!is.na(dt$Am)&dt$Am>0&dt$depth_avg>SML&!dt$depth_avg %in% ignore_Am), ]
+            , expr = errbar(Am, -depth_avg, c(-depth_avg+thickness/2), c(-depth_avg-thickness/2), pch=1, cap=.01, xlab="", ylab="", axes=F, ylim=myylim, xlim=c(myxlim_min, myxlim_max), col="black", errbar.col = "black", cex=.8)
           )
+          if(!is.null(ignore_Am)) {
+            par(new=T)
+            with (
+              data=dt[which(!is.na(dt$Am)&dt$Am>0&dt$depth_avg>SML &dt$depth_avg %in% ignore_Am), ]
+              , expr = errbar(Am, -depth_avg, c(-depth_avg+thickness/2), c(-depth_avg-thickness/2), pch=1, cap=.01, xlab="", ylab="", axes=F, ylim=myylim, xlim=c(myxlim_min, myxlim_max), col=grey(0.67), errbar.col = grey(0.67), cex=.8)
+            )
+          }
+
         } else {
           with (
-            data=dt[which(!is.na(dt$Am)&dt$Am>0&dt$depth_avg>SML), ]
-            , expr = errbar(Am, -mass_depth_avg, -mass_depth_top, -mass_depth_bottom, pch=1, cap=.01, xlab="", ylab="", axes=F, ylim=myylim_md, xlim=c(myxlim_min, myxlim_max), col=Pbcol[1], errbar.col = Pbcol[1], cex=.8)
+            data=dt[which(!is.na(dt$Am)&dt$Am>0&dt$depth_avg>SML&!dt$depth_avg %in% ignore_Am), ]
+            , expr = errbar(Am, -mass_depth_avg, -mass_depth_top, -mass_depth_bottom, pch=1, cap=.01, xlab="", ylab="", axes=F, ylim=myylim_md, xlim=c(myxlim_min, myxlim_max), col="black", errbar.col = "black", cex=.8)
           )
+          if(!is.null(ignore_Am)) {
+            par(new=T)
+            with (
+              data=dt[which(!is.na(dt$Am)&dt$Am>0&dt$depth_avg>SML &dt$depth_avg %in% ignore_Am), ]
+              , expr = errbar(Am, -mass_depth_avg, -mass_depth_top, -mass_depth_bottom, pch=1, cap=.01, xlab="", ylab="", axes=F, ylim=myylim_md, xlim=c(myxlim_min, myxlim_max), col=grey(0.67), errbar.col = grey(0.67), cex=.8)
+            )
+          }
         }
         axis(1, cex.axis=cex_2)
         if(mass_depth)  which_scale=dt$mass_depth_avg else which_scale=dt$depth_avg
         mtext(text = bquote(~""^241*"Am (mBq " ~ g^-1 ~ ")"), side = 1, line=2.4, cex=cex_1)
-        for (i in which(dt$Am>0 & !is.na(dt$Am_er) & dt$depth_avg>SML)) {
+        for (i in which(dt$Am>0 & !is.na(dt$Am_er) & dt$depth_avg>SML &!dt$depth_avg %in% ignore_Am)) {
           lines(c(dt$Am[i]+dt$Am_er[i], dt$Am[i]-dt$Am_er[i]),
-                rep(-which_scale[i], 2), type="o", pch="|", cex=.5, col=Pbcol[1])
+                rep(-which_scale[i], 2), type="o", pch="|", cex=.5, col="black")
+        }
+        for (i in which(dt$Am>0 & !is.na(dt$Am_er) & dt$depth_avg>SML &dt$depth_avg %in% ignore_Am)) {
+          lines(c(dt$Am[i]+dt$Am_er[i], dt$Am[i]-dt$Am_er[i]),
+                rep(-which_scale[i], 2), type="o", pch="|", cex=.5, col=grey(0.67))
         }
         points(dt$Am[which(dt$Am>0&dt$depth_avg>SML)], -which_scale[which(dt$Am>0&dt$depth_avg>SML)], pch=20, col="white")
-        points(dt$Am[which(dt$Am>0&dt$depth_avg>SML)], -which_scale[which(dt$Am>0&dt$depth_avg>SML)])
+        points(dt$Am[which(dt$Am>0&dt$depth_avg>SML &!dt$depth_avg %in% ignore_Am)], -which_scale[which(dt$Am>0&dt$depth_avg>SML &!dt$depth_avg %in% ignore_Am)])
+        points(dt$Am[which(dt$Am>0&dt$depth_avg>SML &dt$depth_avg %in% ignore_Am)], -which_scale[which(dt$Am>0&dt$depth_avg>SML &dt$depth_avg %in% ignore_Am)], col = grey(0.67))
       }
     }
 
