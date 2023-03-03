@@ -51,6 +51,9 @@
 #' @param prop_height_fig Increase of decrease the height of the figure output using this argument. prop_height_fig < 1 will make the figure smaller, prop_height_fig > 1 will make the figure taller.
 #' @param prop_width_fig Increase of decrease the height of the figure output using this argument. prop_width_fig < 1 will make the figure narrower, prop_width_fig > 1 will make the figure wider.
 #' @param plot_Cs_line Logical argument. Whether or not to plot the lines in the Cesium window plot. Default = TRUE
+#' @param DL_Pb Detection limit for Pb - the corresponding depth of any value in the Pbex column that is below DL_Pb is added to the 'ignore' vector. Default to NULL. ||recent addition, modify your data manually and keep the default to NULL if you encounter issues||
+#' @param DL_Cs Detection limit for Cs - any value in the Cs column that is below DL_Cs will be changed to NA, together with the corresponding error. Default to NULL. ||recent addition, modify your data manually and keep the default to NULL if you encounter issues||
+#' @param DL_Am Detection limit for Am - any value in the Am column that is below DL_Am will be changed to NA, together with the corresponding error. Default to NULL. ||recent addition, modify your data manually and keep the default to NULL if you encounter issues||
 #' @keywords age-depth modelling
 #' @keywords visualisation
 #' @examples
@@ -89,7 +92,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                   error_DBD = 0.07, min_yr = 1880, SML = c(0), stepout = 5, mycex = 1,
                   archive_metadata = FALSE, save_code = TRUE,
                   prop_width_fig = 1, prop_height_fig = 1,
-                  plot_Cs_line = TRUE)
+                  plot_Cs_line = TRUE, DL_Pb = NULL, DL_Cs = NULL, DL_Am = NULL)
 .serac(name, model, Cher, NWT, Hemisphere, FF,
        age_forced_CRS, depth_forced_CRS, inst_deposit,
        input_depth_mm, ignore, mass_depth,
@@ -104,7 +107,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
        error_DBD, min_yr, SML, stepout, mycex,
        archive_metadata, save_code,
        prop_width_fig, prop_height_fig,
-       plot_Cs_line)
+       plot_Cs_line, DL_Pb, DL_Cs, DL_Am)
 
 .serac <- function(name, model, Cher, NWT, Hemisphere, FF,
                    age_forced_CRS, depth_forced_CRS, inst_deposit,
@@ -120,7 +123,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                    error_DBD, min_yr, SML, stepout, mycex,
                    archive_metadata, save_code,
                    prop_width_fig, prop_height_fig,
-                   plot_Cs_line) {
+                   plot_Cs_line, DL_Pb, DL_Cs, DL_Am) {
 
 
   # 0. INITIALIZE ####
@@ -214,6 +217,16 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       dt$Pbex <- dt[, intersect(intersect(grep("Pb", colnames(dt)), grep("ex", colnames(dt))), grep("er", colnames(dt), invert=TRUE))[1]]
       dt$Pbex_er <- dt[, intersect(intersect(grep("Pb", colnames(dt)), grep("ex", colnames(dt))), grep("er", colnames(dt)))[1]]
       Pb_exists = T
+      if(!is.null(DL_Pb) & is.numeric(DL_Pb)) {
+        if(length(dt$Pbex[dt$Pbex<DL_Pb])>0) {
+          # For Pb, not turning to NA, but add to list of "ignore"
+          # cat(paste0(length(dt$Pbex[dt$Pbex<DL_Pb]), " Pbex values were below the detection limit set by the user (", DL_Pb,"): these Pbex values and the corresponding Pbex_er were changed to NAs.  \n"))
+          # dt$Pbex_er[dt$Pbex<DL_Pb] <- NA
+          # dt$Pbex[dt$Pbex<DL_Pb] <- NA
+
+          # See the next occurence of DL_Pb to find where we add the depths to the ignore vector (once we calculated the depth_avg)
+        }
+      }
     } else {
       Pb_exists = F
       if(plot_Pb|plot_Pb_inst_deposit) packageStartupMessage("\n Warning. We did not find the Lead column (+ error) in the input file.\n\n")
@@ -223,6 +236,14 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       dt$Cs <- dt[, intersect(grep("Cs", colnames(dt)), grep("er", colnames(dt), invert=TRUE))[1]]
       dt$Cs_er <- dt[, intersect(grep("Cs", colnames(dt)), grep("er", colnames(dt)))[1]]
       Cs_exists = T
+
+      if(!is.null(DL_Cs) & is.numeric(DL_Cs)) {
+        if(length(dt$Cs[dt$Cs<DL_Cs])>0) {
+          cat(paste0(length(dt$Cs[dt$Cs<DL_Cs]), " Cs values were below the detection limit set by the user (", DL_Cs,"): these Cs values and the corresponding Cs_er were changed to NAs.  \n"))
+          dt$Cs_er[dt$Cs<DL_Cs] <- NA
+          dt$Cs[dt$Cs<DL_Cs] <- NA
+        }
+      }
     } else {
       dt$Cs <- rep(NA, nrow(dt))
       dt$Cs_er <- rep(NA, nrow(dt))
@@ -233,6 +254,14 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     if(length(grep("Am", colnames(dt)))>1) {
       dt$Am <- dt[, intersect(grep("Am", colnames(dt)), grep("er", colnames(dt), invert=TRUE))[1]]
       dt$Am_er <- dt[, intersect(grep("Am", colnames(dt)), grep("er", colnames(dt)))[1]]
+
+      if(!is.null(DL_Am) & is.numeric(DL_Am)) {
+        if(length(dt$Am[dt$Cs<DL_Am])>0) {
+          cat(paste0(length(dt$Am[dt$Cs<DL_Am]), " Am values were below the detection limit set by the user (", DL_Am,"): these Am values and the corresponding Am_er were changed to NAs.  \n"))
+          dt$Am_er[dt$Am<DL_Am] <- NA
+          dt$Am[dt$Am<DL_Am] <- NA
+        }
+      }
     } else {
       dt$Am <- rep(NA, nrow(dt))
       dt$Am_er <- rep(NA, nrow(dt))
@@ -255,6 +284,15 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
     if(is.null(dt$depth_top))         dt$depth_top <- dt$depth_avg-dt$thickness/2
     if(is.null(dt$depth_bottom))      dt$depth_bottom <- dt$depth_avg+dt$thickness/2
+
+    # If some Pb values are below the detection limit, add the depth to the ignore vector
+    if(Pb_exists & !is.null(DL_Pb) & is.numeric(DL_Pb)) {
+      if(length(dt$Pbex[dt$Pbex<DL_Pb])>0) {
+        ignore = unique(c(ignore, dt$depth_avg[dt$Pbex<DL_Pb]))
+        cat(paste0(length(dt$Pbex[dt$Pbex<DL_Pb]), " Pbex values were below the detection limit set by the user (", DL_Pb,"): the corresponding depths were added to the 'ignore' vector: ",paste(ignore, collapse = ", "),".  \n"))
+        message()
+      }
+    }
 
     # Same for varves file, if present
     if(varves) {
@@ -2721,7 +2759,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         lines(c(dt$Cs[i]+dt$Cs_er[i], dt$Cs[i]-dt$Cs_er[i]),
               rep(-which_scale[i], 2), type="o", pch="|", cex=.5, col=Pbcol[1])
       }
-      if(plot_Cs_line) lines(dt$Cs[which(dt$depth_avg>=SML&!is.na(dt$Cs))], -which_scale[which(dt$depth_avg>=SML&!is.na(dt$Cs))], lwd=.5)
+      if(plot_Cs_line) lines(dt$Cs[which(dt$depth_avg>=SML&!is.na(dt$Cs))], -which_scale[which(dt$depth_avg>=SML&!is.na(dt$Cs))], lwd=.5, lty = 2)
       if(plot_Cs_line) lines(dt$Cs[which(dt$depth_avg>=SML)], -which_scale[which(dt$depth_avg>=SML)])
 
       axis(3,  cex.axis=cex_2)
