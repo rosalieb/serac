@@ -857,7 +857,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   }
 
   # error message
-  if(rev(dt$Pbex)[1] >= dt$Pbex[1]/16 & any(model %in% c("CRS", "CRS_pw"))) packageStartupMessage("\n Warning, it seems that 210Pb_excess has not reached equilibrium. \n Make sure the conditions of application for CRS model are fulfilled.")
+  if(rev(dt$Pbex[!is.na(dt$Pbex)])[1] >= dt$Pbex[!is.na(dt$Pbex)][1]/16 & any(model %in% c("CRS", "CRS_pw"))) packageStartupMessage("\n Warning, it seems that 210Pb_excess has not reached equilibrium. \n Make sure the conditions of application for CRS model are fulfilled.")
 
   if(length(model)>=1) {
     # Write the result of the model
