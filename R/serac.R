@@ -197,8 +197,6 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   # If limits for Pb plot were not specified (NULL), enter the default values
   if(is.null(custom_xlim_Pb)) {
     custom_xlim_Pb <- c(1, 1000)
-  } else {
-    cat("You manually specified the limit for the Pb plot. Whether it will crop or not your data is left to your attention.\n")
   }
   if(length(custom_xlim_Pb) != 2) {stop("If you specify the limit for the Pb plot, you need to specify two values. Default is c(1, 1000).")}
   # reorder if needed.
