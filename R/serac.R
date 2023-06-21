@@ -54,7 +54,7 @@
 #' @param DL_Pb Detection limit for Pb - the corresponding depth of any value in the Pbex column that is below DL_Pb is added to the 'ignore' vector. Default to NULL. ||recent addition, modify your data manually and keep the default to NULL if you encounter issues||
 #' @param DL_Cs Detection limit for Cs - any value in the Cs column that is below DL_Cs will be changed to NA, together with the corresponding error. Default to NULL. ||recent addition, modify your data manually and keep the default to NULL if you encounter issues||
 #' @param DL_Am Detection limit for Am - any value in the Am column that is below DL_Am will be changed to NA, together with the corresponding error. Default to NULL. ||recent addition, modify your data manually and keep the default to NULL if you encounter issues||
-#' @param myxlim_Pb Min and max limits for the Pb plot. Needs two numeric values. Default to NULL will automatically turn the values to c(1, 1000). Note that the value you enter will be shown on a log scale.
+#' @param custom_xlim_Pb Min and max limits for the Pb plot. Needs two numeric values. Default to NULL will automatically turn the values to c(1, 1000). Note that the value you enter will be shown on a log scale.
 #' @keywords age-depth modelling
 #' @keywords visualisation
 #' @examples
@@ -94,7 +94,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                   archive_metadata = FALSE, save_code = TRUE,
                   prop_width_fig = 1, prop_height_fig = 1,
                   plot_Cs_line = TRUE, DL_Pb = NULL, DL_Cs = NULL, DL_Am = NULL,
-                  myxlim_Pb = NULL)
+                  custom_xlim_Pb = NULL)
 .serac(name, model, Cher, NWT, Hemisphere, FF,
        age_forced_CRS, depth_forced_CRS, inst_deposit,
        input_depth_mm, ignore, mass_depth,
@@ -110,7 +110,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
        archive_metadata, save_code,
        prop_width_fig, prop_height_fig,
        plot_Cs_line, DL_Pb, DL_Cs, DL_Am,
-       myxlim_Pb)
+       custom_xlim_Pb)
 
 .serac <- function(name, model, Cher, NWT, Hemisphere, FF,
                    age_forced_CRS, depth_forced_CRS, inst_deposit,
@@ -127,7 +127,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                    archive_metadata, save_code,
                    prop_width_fig, prop_height_fig,
                    plot_Cs_line, DL_Pb, DL_Cs, DL_Am,
-                   myxlim_Pb) {
+                   custom_xlim_Pb) {
 
 
   # 0. INITIALIZE ####
@@ -195,14 +195,14 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   }
 
   # If limits for Pb plot were not specified (NULL), enter the default values
-  if(is.null(myxlim_Pb)) {
-    myxlim_Pb <- c(1, 1000)
+  if(is.null(custom_xlim_Pb)) {
+    custom_xlim_Pb <- c(1, 1000)
   } else {
     cat("You manually specified the limit for the Pb plot. Whether it will crop or not your data is left to your attention.\n")
   }
-  if(length(myxlim_Pb) != 2) {stop("If you specify the limit for the Pb plot, you need to specify two values. Default is c(1, 1000).")}
+  if(length(custom_xlim_Pb) != 2) {stop("If you specify the limit for the Pb plot, you need to specify two values. Default is c(1, 1000).")}
   # reorder if needed.
-  myxlim_Pb <- myxlim_Pb[order(myxlim_Pb)]
+  custom_xlim_Pb <- custom_xlim_Pb[order(custom_xlim_Pb)]
 
   #### 1. READ DATA ----
   {
@@ -2291,7 +2291,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       if(!mass_depth) { # default
         if(plotphoto || suppdescriptor) {
           par(mar=c(4.1, 1.1, 4.1, 1.1))
-          plot(dt$Pbex, -dt$depth_avg, xlab="", ylab="", axes="F", type="n", xlim=c(log(myxlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), myxlim_Pb[2]))), ylim=myylim)
+          plot(dt$Pbex, -dt$depth_avg, xlab="", ylab="", axes="F", type="n", xlim=c(log(custom_xlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), custom_xlim_Pb[2]))), ylim=myylim)
           myxlim_min=min(log(dt$Pbex), na.rm=T)-.5*(max(log(dt$Pbex), na.rm=T)-min(log(dt$Pbex), na.rm=T))
           myxlim_max=max(log(dt$Pbex), na.rm=T)+.5*(max(log(dt$Pbex), na.rm=T)-min(log(dt$Pbex), na.rm=T))
 
@@ -2302,7 +2302,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
         } else {
           par(mar=c(4.1, 4.1, 4.1, 1.1))
-          plot(dt$Pbex, -dt$depth_avg, xlab="", ylab="", axes="F", type="n", xlim=c(log(myxlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), myxlim_Pb[2]))), ylim=myylim)
+          plot(dt$Pbex, -dt$depth_avg, xlab="", ylab="", axes="F", type="n", xlim=c(log(custom_xlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), custom_xlim_Pb[2]))), ylim=myylim)
           myxlim_min=min(log(dt$Pbex), na.rm=T)-.5*(max(log(dt$Pbex), na.rm=T)-min(log(dt$Pbex), na.rm=T))
           myxlim_max=max(log(dt$Pbex), na.rm=T)+.5*(max(log(dt$Pbex), na.rm=T)-min(log(dt$Pbex), na.rm=T))
 
@@ -2321,7 +2321,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         par(new=T)
         with (
           data=dt_sed1[!is.na(dt_sed1$depth_avg_2), ]
-          , expr = errbar(log(Pbex), -depth_avg, c(-depth_avg+thickness/2), c(-depth_avg-thickness/2), pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(myxlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), myxlim_Pb[2]))), ylim=myylim, col=Pbcol[1], errbar.col = Pbcol[1], cex=.8)
+          , expr = errbar(log(Pbex), -depth_avg, c(-depth_avg+thickness/2), c(-depth_avg-thickness/2), pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(custom_xlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), custom_xlim_Pb[2]))), ylim=myylim, col=Pbcol[1], errbar.col = Pbcol[1], cex=.8)
         )
         for (i in which(dt_sed1$depth_avg_2>0 & !is.na(dt_sed1$Pbex_er) & dt_sed1$Pbex>0)) {
           if(dt_sed1$Pbex[i]-dt_sed1$Pbex_er[i]>0) lines(c(log(dt_sed1$Pbex[i]+dt_sed1$Pbex_er[i]), log(dt_sed1$Pbex[i]-dt_sed1$Pbex_er[i])),
@@ -2334,7 +2334,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           par(new=T)
           with (
             data=dt_sed2[!is.na(dt_sed2$depth_avg_2), ]
-            , expr = errbar(log(Pbex), -depth_avg, c(-depth_avg+thickness/2), c(-depth_avg-thickness/2), pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(myxlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), myxlim_Pb[2]))), ylim=myylim, col=Pbcol[2], errbar.col = Pbcol[2])
+            , expr = errbar(log(Pbex), -depth_avg, c(-depth_avg+thickness/2), c(-depth_avg-thickness/2), pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(custom_xlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), custom_xlim_Pb[2]))), ylim=myylim, col=Pbcol[2], errbar.col = Pbcol[2])
           )
           for (i in which(dt_sed2$depth_avg>0 & !is.na(dt_sed2$Pbex_er) & dt_sed2$Pbex>0)) {
             if(dt_sed2$Pbex[i]-dt_sed2$Pbex_er[i]>0) lines(c(log(dt_sed2$Pbex[i]+dt_sed2$Pbex_er[i]), log(dt_sed2$Pbex[i]-dt_sed2$Pbex_er[i])),
@@ -2346,7 +2346,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
             par(new=T)
             with (
               data=dt_sed3[!is.na(dt_sed3$depth_avg_2), ]
-              , expr = errbar(log(Pbex), -depth_avg, c(-depth_avg+thickness/2), c(-depth_avg-thickness/2), pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(myxlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), myxlim_Pb[2]))), ylim=myylim, col=Pbcol[3], errbar.col = Pbcol[3])
+              , expr = errbar(log(Pbex), -depth_avg, c(-depth_avg+thickness/2), c(-depth_avg-thickness/2), pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(custom_xlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), custom_xlim_Pb[2]))), ylim=myylim, col=Pbcol[3], errbar.col = Pbcol[3])
             )
             for (i in which(dt_sed3$depth_avg>0 & !is.na(dt_sed3$Pbex_er) & dt_sed3$Pbex>0)) {
               if(dt_sed3$Pbex[i]-dt_sed3$Pbex_er[i]>0) lines(c(log(dt_sed3$Pbex[i]+dt_sed3$Pbex_er[i]), log(dt_sed3$Pbex[i]-dt_sed3$Pbex_er[i])),
@@ -2360,7 +2360,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         # Add 'ignore' values
         par(new=T)
         with (data=dt[is.na(dt$depth_avg_2), ]
-              , expr = errbar(log(Pbex), -depth_avg, c(-depth_avg+thickness/2), c(-depth_avg-thickness/2), pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(myxlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), myxlim_Pb[2]))), ylim=myylim, col=grey(.65), errbar.col = grey(.65), cex=.8)
+              , expr = errbar(log(Pbex), -depth_avg, c(-depth_avg+thickness/2), c(-depth_avg-thickness/2), pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(custom_xlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), custom_xlim_Pb[2]))), ylim=myylim, col=grey(.65), errbar.col = grey(.65), cex=.8)
         )
         for (i in which(is.na(dt$depth_avg_2))) {
           lines(c(log(dt$Pbex[i]+dt$Pbex_er[i]), log(dt$Pbex[i]-dt$Pbex_er[i])),
@@ -2369,7 +2369,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       } else { # if plot against massic depth
         # 6.3.a.2 Plot 210Pb in g/cm2 ####
         par(mar=c(4.1, 4.1, 4.1, 1.1))
-        plot(dt$Pbex, -dt$mass_depth_avg, xlab="", ylab="", axes="F", type="n", xlim=c(log(myxlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), myxlim_Pb[2]))), ylim=myylim_md)
+        plot(dt$Pbex, -dt$mass_depth_avg, xlab="", ylab="", axes="F", type="n", xlim=c(log(custom_xlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), custom_xlim_Pb[2]))), ylim=myylim_md)
         myxlim_min=min(log(dt$Pbex), na.rm=T)-.5*(max(log(dt$Pbex), na.rm=T)-min(log(dt$Pbex), na.rm=T))
         myxlim_max=max(log(dt$Pbex), na.rm=T)+.5*(max(log(dt$Pbex), na.rm=T)-min(log(dt$Pbex), na.rm=T))
 
@@ -2388,7 +2388,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         par(new=T)
         with (
           data=dt_sed1[!is.na(dt_sed1$depth_avg_2), ]
-          , expr = errbar(log(Pbex), -mass_depth_avg, -mass_depth_bottom, -mass_depth_top, pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(myxlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), myxlim_Pb[2]))), ylim=myylim_md, col=Pbcol[1], errbar.col = Pbcol[1], cex=.8)
+          , expr = errbar(log(Pbex), -mass_depth_avg, -mass_depth_bottom, -mass_depth_top, pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(custom_xlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), custom_xlim_Pb[2]))), ylim=myylim_md, col=Pbcol[1], errbar.col = Pbcol[1], cex=.8)
         )
         for (i in which(dt_sed1$depth_avg_2>0 & !is.na(dt_sed1$Pbex_er))) {
           lines(c(log(dt_sed1$Pbex[i]+dt_sed1$Pbex_er[i]), log(dt_sed1$Pbex[i]-dt_sed1$Pbex_er[i])),
@@ -2399,7 +2399,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           par(new=T)
           with (
             data=dt_sed2[!is.na(dt_sed2$depth_avg_2), ]
-            , expr = errbar(log(Pbex), -mass_depth_avg, -mass_depth_top, -mass_depth_bottom, pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(myxlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), myxlim_Pb[2]))), ylim=myylim_md, col=Pbcol[2], errbar.col = Pbcol[2])
+            , expr = errbar(log(Pbex), -mass_depth_avg, -mass_depth_top, -mass_depth_bottom, pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(custom_xlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), custom_xlim_Pb[2]))), ylim=myylim_md, col=Pbcol[2], errbar.col = Pbcol[2])
           )
           for (i in which(dt_sed2$depth_avg>0 & !is.na(dt_sed2$Pbex_er))) {
             lines(c(log(dt_sed2$Pbex[i]+dt_sed2$Pbex_er[i]), log(dt_sed2$Pbex[i]-dt_sed2$Pbex_er[i])),
@@ -2409,7 +2409,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
             par(new=T)
             with (
               data=dt_sed3[!is.na(dt_sed3$depth_avg_2), ]
-              , expr = errbar(log(Pbex), -mass_depth_avg, -mass_depth_top, -mass_depth_bottom, pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(myxlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), myxlim_Pb[2]))), ylim=myylim_md, col=Pbcol[3], errbar.col = Pbcol[3])
+              , expr = errbar(log(Pbex), -mass_depth_avg, -mass_depth_top, -mass_depth_bottom, pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(custom_xlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), custom_xlim_Pb[2]))), ylim=myylim_md, col=Pbcol[3], errbar.col = Pbcol[3])
             )
             for (i in which(dt_sed3$depth_avg>0 & !is.na(dt_sed3$Pbex_er))) {
               lines(c(log(dt_sed3$Pbex[i]+dt_sed3$Pbex_er[i]), log(dt_sed3$Pbex[i]-dt_sed3$Pbex_er[i])),
@@ -2421,7 +2421,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         # Add 'ignore' values
         par(new=T)
         with (data=dt[is.na(dt$depth_avg_2), ]
-              , expr = errbar(log(Pbex), -mass_depth_avg, -mass_depth_bottom, -mass_depth_top, pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(myxlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), myxlim_Pb[2]))), ylim=myylim_md, col=grey(.65), errbar.col = grey(.65), cex=.8)
+              , expr = errbar(log(Pbex), -mass_depth_avg, -mass_depth_bottom, -mass_depth_top, pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(custom_xlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), custom_xlim_Pb[2]))), ylim=myylim_md, col=grey(.65), errbar.col = grey(.65), cex=.8)
         )
         for (i in which(is.na(dt$depth_avg_2))) {
           lines(c(log(dt$Pbex[i]+dt$Pbex_er[i]), log(dt$Pbex[i]-dt$Pbex_er[i])),
@@ -2449,7 +2449,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
             par(mar=c(4.1, 1.1, 4.1, 1.1))
             with (
               data=dt_sed1
-              , expr = errbar(log(Pbex), -d, c(-d+thickness/2), c(-d-thickness/2), pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(myxlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), myxlim_Pb[2]))), ylim=myylim, col=Pbcol[1], errbar.col = Pbcol[1], cex=.8)
+              , expr = errbar(log(Pbex), -d, c(-d+thickness/2), c(-d-thickness/2), pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(custom_xlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), custom_xlim_Pb[2]))), ylim=myylim, col=Pbcol[1], errbar.col = Pbcol[1], cex=.8)
             )
 
             par(xpd=T)
@@ -2472,7 +2472,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
             par(mar=c(4.1, 4.1, 4.1, 1.1))
             with (
               data=dt_sed1
-              , expr = errbar(log(Pbex), -d, c(-d+thickness/2), c(-d-thickness/2), pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(myxlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), myxlim_Pb[2]))), ylim=myylim, col=Pbcol[1], errbar.col = Pbcol[1], cex=.8)
+              , expr = errbar(log(Pbex), -d, c(-d+thickness/2), c(-d-thickness/2), pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(custom_xlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), custom_xlim_Pb[2]))), ylim=myylim, col=Pbcol[1], errbar.col = Pbcol[1], cex=.8)
             )
 
             if(inst_deposit_present) {
@@ -2495,7 +2495,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
             par(mar=c(4.1, 1.1, 4.1, 1.1))
             with (
               data=dt_sed1
-              , expr = errbar(log(Pbex), -mass_depth_avg_corr, -mass_depth_bottom_corr, -mass_depth_top_corr, pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(myxlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), myxlim_Pb[2]))), ylim=myylim_md, col=Pbcol[1], errbar.col = Pbcol[1], cex=.8)
+              , expr = errbar(log(Pbex), -mass_depth_avg_corr, -mass_depth_bottom_corr, -mass_depth_top_corr, pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(custom_xlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), custom_xlim_Pb[2]))), ylim=myylim_md, col=Pbcol[1], errbar.col = Pbcol[1], cex=.8)
             )
 
             par(xpd=T)
@@ -2528,7 +2528,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
             par(mar=c(4.1, 4.1, 4.1, 1.1))
             with (
               data=dt_sed1
-              , expr = errbar(log(Pbex), -mass_depth_avg_corr, -mass_depth_bottom_corr, -mass_depth_top_corr, pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(myxlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), myxlim_Pb[2]))), ylim=myylim_md, col=Pbcol[1], errbar.col = Pbcol[1], cex=.8)
+              , expr = errbar(log(Pbex), -mass_depth_avg_corr, -mass_depth_bottom_corr, -mass_depth_top_corr, pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(custom_xlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), custom_xlim_Pb[2]))), ylim=myylim_md, col=Pbcol[1], errbar.col = Pbcol[1], cex=.8)
             )
 
             if(inst_deposit_present&length_id>0) {
@@ -2571,12 +2571,12 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           if(!mass_depth) {
             with (
               data=dt_sed2
-              , expr = errbar(log(Pbex), -d, c(-d+thickness/2), c(-d-thickness/2), pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(myxlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), myxlim_Pb[2]))), ylim=myylim, col=Pbcol[2], errbar.col = Pbcol[2])
+              , expr = errbar(log(Pbex), -d, c(-d+thickness/2), c(-d-thickness/2), pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(custom_xlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), custom_xlim_Pb[2]))), ylim=myylim, col=Pbcol[2], errbar.col = Pbcol[2])
             )
           } else {
             with (
               data=dt_sed2
-              , expr = errbar(log(Pbex), -mass_depth_avg_corr, -mass_depth_bottom_corr, -mass_depth_top_corr, pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(myxlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), myxlim_Pb[2]))), ylim=myylim_md, col=Pbcol[2], errbar.col = Pbcol[2])
+              , expr = errbar(log(Pbex), -mass_depth_avg_corr, -mass_depth_bottom_corr, -mass_depth_top_corr, pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(custom_xlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), custom_xlim_Pb[2]))), ylim=myylim_md, col=Pbcol[2], errbar.col = Pbcol[2])
             )
           }
 
@@ -2592,12 +2592,12 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
             if(!mass_depth) {
               with (
                 data=dt_sed3
-                , expr = errbar(log(Pbex), -d, c(-d+thickness/2), c(-d-thickness/2), pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(myxlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), myxlim_Pb[2]))), ylim=myylim, col=Pbcol[3], errbar.col = Pbcol[3])
+                , expr = errbar(log(Pbex), -d, c(-d+thickness/2), c(-d-thickness/2), pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(custom_xlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), custom_xlim_Pb[2]))), ylim=myylim, col=Pbcol[3], errbar.col = Pbcol[3])
               )
             } else {
               with (
                 data=dt_sed3
-                , expr = errbar(log(Pbex), -mass_depth_avg_corr, -mass_depth_bottom_corr, -mass_depth_top_corr, pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(myxlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), myxlim_Pb[2]))), ylim=myylim_md, col=Pbcol[3], errbar.col = Pbcol[3])
+                , expr = errbar(log(Pbex), -mass_depth_avg_corr, -mass_depth_bottom_corr, -mass_depth_top_corr, pch=16, cap=.01, xlab="", ylab="", axes=F, xlim=c(log(custom_xlim_Pb[1]), log(mround(max(dt$Pbex, na.rm=T), custom_xlim_Pb[2]))), ylim=myylim_md, col=Pbcol[3], errbar.col = Pbcol[3])
               )
             }
 
