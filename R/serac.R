@@ -206,6 +206,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   {
     dt <- read.delim(file = paste(getwd(), "/Cores/", name, "/", name, ".txt", sep=""))
     dt <- dt[, colSums(is.na(dt))<nrow(dt)]
+    dt <- dt[rowSums(is.na(dt))<ncol(dt), ] # Remove a row if it only has NAs
     if(plotphoto) photo <- readJPEG(paste(getwd(), "/Cores/", name, "/", name, ".jpg", sep=""))
     if(varves) varve <- read.delim(file = paste(getwd(), "/Cores/", name, "/", name, "_varves.txt", sep=""))
     if(suppdescriptor) dt_suppdescriptor <- read.delim(file = paste(getwd(), "/Cores/", name, "/", name, "_proxy.txt", sep=""))
