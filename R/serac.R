@@ -55,6 +55,7 @@
 #' @param DL_Cs Detection limit for Cs - any value in the Cs column that is below DL_Cs will be changed to NA, together with the corresponding error. Default to NULL. ||recent addition, modify your data manually and keep the default to NULL if you encounter issues||
 #' @param DL_Am Detection limit for Am - any value in the Am column that is below DL_Am will be changed to NA, together with the corresponding error. Default to NULL. ||recent addition, modify your data manually and keep the default to NULL if you encounter issues||
 #' @param custom_xlim_Pb Min and max limits for the Pb plot. Needs two numeric values. Default to NULL will automatically turn the values to c(1, 1000). Note that the value you enter will be shown on a log scale.
+#' @param plot_unit Default = "mm", but if plot_unit = "cm", will change the ticks marks and units for the plot.
 #' @keywords age-depth modelling
 #' @keywords visualisation
 #' @examples
@@ -94,7 +95,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                   archive_metadata = FALSE, save_code = TRUE,
                   prop_width_fig = 1, prop_height_fig = 1,
                   plot_Cs_line = TRUE, DL_Pb = NULL, DL_Cs = NULL, DL_Am = NULL,
-                  custom_xlim_Pb = NULL)
+                  custom_xlim_Pb = NULL, plot_unit = "mm")
 .serac(name, model, Cher, NWT, Hemisphere, FF,
        age_forced_CRS, depth_forced_CRS, inst_deposit,
        input_depth_mm, ignore, mass_depth,
@@ -110,7 +111,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
        archive_metadata, save_code,
        prop_width_fig, prop_height_fig,
        plot_Cs_line, DL_Pb, DL_Cs, DL_Am,
-       custom_xlim_Pb)
+       custom_xlim_Pb, plot_unit)
 
 .serac <- function(name, model, Cher, NWT, Hemisphere, FF,
                    age_forced_CRS, depth_forced_CRS, inst_deposit,
@@ -127,7 +128,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                    archive_metadata, save_code,
                    prop_width_fig, prop_height_fig,
                    plot_Cs_line, DL_Pb, DL_Cs, DL_Am,
-                   custom_xlim_Pb) {
+                   custom_xlim_Pb, plot_unit) {
 
 
   # 0. INITIALIZE ####
@@ -2218,9 +2219,15 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     if(plotphoto & !mass_depth) {
       par(mar=c(4.1, 3.3, 4.1, 0))
       plot(c(0, 1), myylim, xlab="", ylab="", axes=F, type="n", ylim=myylim)
-      axis(2, at = seq(min(myylim), 0, by=10), NA, cex.axis=cex_2, lwd=.3)
-      axis(2, at = -(pretty(seq(dmin, dmax, 5))), labels=pretty(seq(dmin, dmax, 5)), cex.axis=cex_2)
-      mtext(text = "Depth (mm)", side = 2, line=2.2, cex=cex_1)
+      if(plot_unit == "cm") {
+        axis(2, at = seq(0, min(myylim), by=-100), NA, cex.axis=cex_2, lwd=.3)
+        axis(2, at = -(pretty(seq(dmin, dmax, 5))), labels=pretty(seq(dmin/10, dmax/10, 5)), cex.axis=cex_2)
+        mtext(text = "Depth (cm)", side = 2, line=2.2, cex=cex_1)
+      } else {
+        axis(2, at = seq(0, min(myylim), by=-10), NA, cex.axis=cex_2, lwd=.3)
+        axis(2, at = -(pretty(seq(dmin, dmax, 5))), labels=pretty(seq(dmin, dmax, 5)), cex.axis=cex_2)
+        mtext(text = "Depth (mm)", side = 2, line=2.2, cex=cex_1)
+      }
 
       if(inst_deposit_present) rect(xleft = -2, ybottom = -dmax*1.2, xright = 3, ytop = -dmax, col = "white", border = "white", density = 1)
       par(xpd=TRUE)
@@ -2267,9 +2274,15 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         points(dt_suppdescriptor[, 2], -dt_suppdescriptor[, 1], pch=16, cex=.8, col=suppdescriptorcol[1])
         lines(dt_suppdescriptor[, 2], -dt_suppdescriptor[, 1], col=suppdescriptorcol[1])
         #add y axis if first window to be plotted
-        axis(2, at = seq(min(myylim), 0, by=10), NA, cex.axis=cex_2, lwd=.5)
-        axis(2, at = -(pretty(seq(dmin, dmax, 5))), labels=pretty(seq(dmin, dmax, 5)), cex.axis=cex_2)
-        mtext(text = "Depth (mm)", side = 2, line=2.2, cex=cex_1)
+        if(plot_unit == "cm") {
+          axis(2, at = seq(0, min(myylim), by=-100), NA, cex.axis=cex_2, lwd=.5)
+          axis(2, at = -(pretty(seq(dmin, dmax, 5))), labels=pretty(seq(dmin/10, dmax/10, 5)), cex.axis=cex_2)
+          mtext(text = "Depth (cm)", side = 2, line=2.2, cex=cex_1)
+        } else {
+          axis(2, at = seq(0, min(myylim), by=-10), NA, cex.axis=cex_2, lwd=.5)
+          axis(2, at = -(pretty(seq(dmin, dmax, 5))), labels=pretty(seq(dmin, dmax, 5)), cex.axis=cex_2)
+          mtext(text = "Depth (mm)", side = 2, line=2.2, cex=cex_1)
+        }
       }
       axis(3, cex.axis=cex_2)
       mtext(text = descriptor_lab[1], side = 3, line=2.2, cex=cex_1)
@@ -2312,9 +2325,15 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           if(SML>0) rect(xleft = log(15000), ybottom = -SML, xright = log(max(log(dt$Pbex), na.rm=T)), ytop = 0, col=grey(0.97), border=NA)
           par(xpd=F)
 
-          axis(2, at = seq(min(myylim), 0, by=10), NA, cex.axis=cex_2, lwd=.5)
-          axis(2, at = -(pretty(seq(dmin, dmax, 5))), labels=pretty(seq(dmin, dmax, 5)), cex.axis=cex_2)
-          mtext(text = "Depth (mm)", side = 2, line=2.2, cex=cex_1)
+          if(plot_unit == "cm") {
+            axis(2, at = seq(0, min(myylim), by=-100), NA, cex.axis=cex_2, lwd=.5)
+            axis(2, at = -(pretty(seq(dmin, dmax, 5))), labels=pretty(seq(dmin/10, dmax/10, 5)), cex.axis=cex_2)
+            mtext(text = "Depth (cm)", side = 2, line=2.2, cex=cex_1)
+          } else {
+            axis(2, at = seq(0, min(myylim), by=-10), NA, cex.axis=cex_2, lwd=.5)
+            axis(2, at = -(pretty(seq(dmin, dmax, 5))), labels=pretty(seq(dmin, dmax, 5)), cex.axis=cex_2)
+            mtext(text = "Depth (mm)", side = 2, line=2.2, cex=cex_1)
+          }
         }
 
         par(new=T)
@@ -2936,9 +2955,15 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       plot(c(0, 1), myylim, xlab="", ylab="", axes=F, type="n", ylim=myylim)
       par(mar=c(4.1, 2.1, 4.1, 0))
       plot(c(0, 1), myylim, xlab="", ylab="", axes=F, type="n", ylim=myylim)
-      axis(2, at = seq(min(myylim), 0, by=10), NA, cex.axis=cex_2, lwd=.3)
-      axis(2, at = -(pretty(seq(dmin, dmax, 5))), labels=pretty(seq(dmin, dmax, 5)), cex.axis=cex_2)
-      mtext(text = "Depth (mm)", side = 2, line=2.2, cex=cex_1)
+      if(plot_unit == "cm") {
+        axis(2, at = seq(0, min(myylim), by=-100), NA, cex.axis=cex_2, lwd=.3)
+        axis(2, at = -(pretty(seq(dmin, dmax, 5))), labels=pretty(seq(dmin/10, dmax/10, 5)), cex.axis=cex_2)
+        mtext(text = "Depth (cm)", side = 2, line=2.2, cex=cex_1)
+      } else {
+        axis(2, at = seq(0, min(myylim), by=-10), NA, cex.axis=cex_2, lwd=.3)
+        axis(2, at = -(pretty(seq(dmin, dmax, 5))), labels=pretty(seq(dmin, dmax, 5)), cex.axis=cex_2)
+        mtext(text = "Depth (mm)", side = 2, line=2.2, cex=cex_1)
+      }
 
       if(inst_deposit_present) rect(xleft = -2, ybottom = -dmax*1.2, xright = 3, ytop = -dmax, col = "white", border = "white", density = 1)
       par(xpd=TRUE)
@@ -2985,9 +3010,15 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         points(dt_suppdescriptor[, 2], -dt_suppdescriptor[, 1], pch=16, cex=.8, col=suppdescriptorcol[1])
         lines(dt_suppdescriptor[, 2], -dt_suppdescriptor[, 1], col=suppdescriptorcol[1])
         #add y axis if first window to be plotted
-        axis(2, at = seq(min(myylim), 0, by=10), NA, cex.axis=cex_2, lwd=.5)
-        axis(2, at = -(pretty(seq(dmin, dmax, 5))), labels=pretty(seq(dmin, dmax, 5)), cex.axis=cex_2)
-        mtext(text = "Depth (mm)", side = 2, line=2.2, cex=cex_1)
+        if(plot_unit == "cm") {
+          axis(2, at = seq(0, min(myylim), by=-100), NA, cex.axis=cex_2, lwd=.5)
+          axis(2, at = -(pretty(seq(dmin, dmax, 5))), labels=pretty(seq(dmin/10, dmax/10, 5)), cex.axis=cex_2)
+          mtext(text = "Depth (cm)", side = 2, line=2.2, cex=cex_1)
+        } else {
+          axis(2, at = seq(0, min(myylim), by=-10), NA, cex.axis=cex_2, lwd=.5)
+          axis(2, at = -(pretty(seq(dmin, dmax, 5))), labels=pretty(seq(dmin, dmax, 5)), cex.axis=cex_2)
+          mtext(text = "Depth (mm)", side = 2, line=2.2, cex=cex_1)
+        }
       }
       axis(3, cex.axis=cex_2)
       mtext(text = descriptor_lab[1], side = 3, line=2.2, cex=cex_1)
@@ -3028,9 +3059,15 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     par(xpd=F)
 
 
-    axis(4, at = seq(min(myylim), 0, by=10), NA, cex.axis=cex_2, lwd=.3)
-    axis(4, at = -(pretty(seq(dmin, dmax, 5))), labels=pretty(seq(dmin, dmax, 5)), cex.axis=cex_2)
-    mtext(text = "Depth (mm)", side = 4, line=2.2, cex=cex_1)
+    if(plot_unit == "cm") {
+      axis(4, at = seq(0, min(myylim), by=-100), NA, cex.axis=cex_2, lwd=.3)
+      axis(4, at = -(pretty(seq(dmin, dmax, 5))), labels=pretty(seq(dmin/10, dmax/10, 5)), cex.axis=cex_2)
+      mtext(text = "Depth (cm)", side = 4, line=2.2, cex=cex_1)
+    } else {
+      axis(4, at = seq(0, min(myylim), by=-10), NA, cex.axis=cex_2, lwd=.3)
+      axis(4, at = -(pretty(seq(dmin, dmax, 5))), labels=pretty(seq(dmin, dmax, 5)), cex.axis=cex_2)
+      mtext(text = "Depth (mm)", side = 4, line=2.2, cex=cex_1)
+    }
     axis(3, at = seq(-mround(coring_yr, 10), -min_yr+20, 20), labels = seq(mround(coring_yr, 10), min_yr-20, -20), cex.axis=cex_2)
     mtext(text = "Year (C.E.)", side = 3, line=2.2, cex=cex_1)
 
