@@ -21,6 +21,8 @@ serac_map <- function(which_lakes=NULL, output_name=NULL, lon_lim=NULL, lat_lim=
   pkgTest("raster")
   pkgTest("sf")
   pkgTest("rnaturalearth")
+  pkgTest("grid")
+  pkgTest("ggplot2")
 
   # which lakes - either a selection, or all the folder in the Cores subfolder
   if(!is.null(which_lakes)) which_lakes=which_lakes else which_lakes <- list.dirs(path = "./Cores", full.names = FALSE, recursive = TRUE)
@@ -66,6 +68,8 @@ serac_map <- function(which_lakes=NULL, output_name=NULL, lon_lim=NULL, lat_lim=
   proj4string(my_coord)<-CRS("+proj=longlat +datum=WGS84")
   my_coord<-spTransform(my_coord,crs(world))
   my_coord$labels <- which_lakes2
+  my_coord$lon <- system_x
+  my_coord$lat <- system_y
 
   # Using GGPLOT, plot the Base World Map
   if(!is.null(lon_lim) & !is.null(lat_lim) & length(lon_lim) == 2 & length(lat_lim) == 2) {
@@ -75,7 +79,8 @@ serac_map <- function(which_lakes=NULL, output_name=NULL, lon_lim=NULL, lat_lim=
       annotation_north_arrow(location = "bl", which_north = "true",
                              pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
                              style = north_arrow_fancy_orienteering) +
-      xlab("Longitude") + ylab("Latitude") + coord_sf(xlim = lon_lim, ylim = lat_lim, crs = crs(world))
+      labs(x = "Longitude", y = "Latitude") +
+      coord_sf(xlim = lon_lim, ylim = lat_lim, crs = crs(world))
   } else {
     mapWorld <- ggplot() +
       geom_sf(data = world, color = "black", fill = "lightgrey")  +
@@ -83,15 +88,15 @@ serac_map <- function(which_lakes=NULL, output_name=NULL, lon_lim=NULL, lat_lim=
       annotation_north_arrow(location = "bl", which_north = "true",
                              pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
                              style = north_arrow_fancy_orienteering) +
-      xlab("Longitude") + ylab("Latitude")
+      labs(x = "Longitude", y = "Latitude")
   }
 
 
   # Now Layer the coring locations on top
-  mp <- mapWorld + geom_point(aes(x=my_coord$lon, y=my_coord$lat),color="orange", alpha=0.6)
+  mp <- mapWorld + geom_point(aes(x = my_coord$lon, y = my_coord$lat), color="orange", alpha=0.6)
 
   # Add label if add_labels=T
-  if(add_labels) mp <- mp + geom_label(aes(x=my_coord$lon, y=my_coord$lat, label=my_coord$labels),hjust = 0, nudge_x = 0.1)
+  if(add_labels) mp <- mp + geom_label(aes(x = my_coord$lon, y = my_coord$lat, label = my_coord$labels),hjust = 0, nudge_x = 0.1)
 
   # Save the output
   if (is.null(output_name)) output_name <- "" else output_name <- paste("_",output_name, sep="")
