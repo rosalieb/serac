@@ -47,6 +47,7 @@
 #' @param stepout Depth resolution for the file out in mm - unless "input_depth_mm=F".
 #' @param mycex Graphical parameter: a multiplication factor to increase (mycex>1) ou decrease (mycex<1) label sizes.
 #' @param archive_metadata Logical argument. If TRUE, require fields regarding the measurements on the core. Allows missing information; just press 'ENTER' in your computer (leave an empty field).
+#' @param hiatus If there are any hiatus, enter it/them here. The input form is a list of as many vectors as there are hiatuses, and each vector is made of two elements: the depth of the hiatus in mm and the length, in years. For example, enter 'hiatus = list(c(100, 5))' for a 5-years hiatus at 100mm. Default = NULL.
 #' @param mass_depth Logical argument. If TRUE, require density, and will plot the radionuclides against massic depth. Core photo and supplementary descriptor are not available under this option.
 #' @param prop_height_fig Increase of decrease the height of the figure output using this argument. prop_height_fig < 1 will make the figure smaller, prop_height_fig > 1 will make the figure taller.
 #' @param prop_width_fig Increase of decrease the height of the figure output using this argument. prop_width_fig < 1 will make the figure narrower, prop_width_fig > 1 will make the figure wider.
@@ -92,6 +93,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                   plot_Pb_inst_deposit = FALSE, plot_CFCS_regression = c(),
                   varves = FALSE, dmin = c(), dmax = c(), sedchange = c(0),
                   error_DBD = 0.07, min_yr = 1880, SML = c(0), stepout = 5, mycex = 1,
+                  hiatus = NULL,
                   archive_metadata = FALSE, save_code = TRUE,
                   prop_width_fig = 1, prop_height_fig = 1,
                   plot_Cs_line = TRUE, DL_Pb = NULL, DL_Cs = NULL, DL_Am = NULL,
@@ -108,6 +110,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
        plot_Pb_inst_deposit, plot_CFCS_regression,
        varves, dmin, dmax, sedchange,
        error_DBD, min_yr, SML, stepout, mycex,
+       hiatus,
        archive_metadata, save_code,
        prop_width_fig, prop_height_fig,
        plot_Cs_line, DL_Pb, DL_Cs, DL_Am,
@@ -125,6 +128,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                    plot_Pb_inst_deposit, plot_CFCS_regression,
                    varves, dmin, dmax, sedchange,
                    error_DBD, min_yr, SML, stepout, mycex,
+                   hiatus,
                    archive_metadata, save_code,
                    prop_width_fig, prop_height_fig,
                    plot_Cs_line, DL_Pb, DL_Cs, DL_Am,
@@ -150,6 +154,14 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   # coring year is one of the two mandatory argument
   if(is.null(coring_yr)) {
     if(exists("coring_year") && !is.null(coring_year)) coring_yr = coring_year else stop("\n Warning, please enter the 'coring_yr'.\n\n")
+  }
+
+  # if hiatus are provided, they must be provided as a list
+  if(!is.null(hiatus)) {
+    if(!is.list(hiatus)) stop("\n Warning, hiatus must be provided as a list. For example, list(c(100, 5), c(120, 5)) for two 5-years hiatuses at 100 and 120 mm. \n\n")
+    if(any(lapply(hiatus, function(x) length(x)) != 2)) stop("\n Warning, hiatus must be provided as a list, with each element being made of one depth and one age (length == 2). For example, list(c(100, 5), c(120, 5)) for two 5-years hiatuses at 100 and 120 mm. \n\n")
+    if(mass_depth) message("\n You tried running the code with mass_depth == TRUE and hiatus != NULL. The code was not developped to match this scenario (you can only use hiatus with CFCS and when mass_depth == FALSE). \n\n")
+    if(any(model != "CFCS")) message("\n You provided hiatus(es) and selected more than the CFCS model: hiatus(es) are only taken in account for the CFCS model so far. \n\n")
   }
 
   # serac support 2 changes in sedimentation rates maximum
@@ -200,6 +212,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     custom_xlim_Pb <- c(1, 1000)
   }
   if(length(custom_xlim_Pb) != 2) {stop("If you specify the limit for the Pb plot, you need to specify two values. Default is c(1, 1000).")}
+
   # reorder if needed.
   custom_xlim_Pb <- custom_xlim_Pb[order(custom_xlim_Pb)]
 
@@ -349,6 +362,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     # Create the vector complete_core_depth when the measurements haven't been done for all the layers.
     # Necessary for inventory for instance.
     complete_core_temporary <- c(0, dt$depth_top, dt$depth_bottom, inst_deposit)
+    if(!is.null(hiatus)) complete_core_temporary <- c(complete_core_temporary, unlist(lapply(hiatus, function(x) head(x, 1))))
     # Remove the instantaneous deposit depth deeper than measured depth.
     # We do not want to extrapolate 210Pbex and 137Cs below the actual measurement.
     complete_core_temporary <- complete_core_temporary[complete_core_temporary<=max(dt$depth_bottom, na.rm=T)]
@@ -736,6 +750,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     #     - (b) The corrected version of this 1st vector, with instantaneous deposit removed
     #     - (c) Depth vector that will be used to visualise CFCS model
     d_for_CFCS <- unique(c(inst_deposit, max(dt$depth_avg[!is.na(dt$d)])))
+    if(!is.null(hiatus)) d_for_CFCS <- unique(c(d_for_CFCS, unlist(lapply(hiatus, function(x) head(x, 1)))))
+
     if(SML!=0) d_for_CFCS <- c(d_for_CFCS, SML)
     if(mass_depth) {
       d_for_CFCS <- c(d_for_CFCS, dt$depth_avg[!is.na(dt$mass_depth_avg)])
@@ -816,7 +832,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                            paste(sedchange, collapse = ", "),
                            SML,
                            ifelse(is.null(age_forced_CRS), NA, paste(age_forced_CRS, collapse = ", ")),
-                           ifelse(is.null(depth_forced_CRS), NA, paste(depth_forced_CRS, collapse = ", ")))
+                           ifelse(is.null(depth_forced_CRS), NA, paste(depth_forced_CRS, collapse = ", ")),
+                           ifelse(is.null(hiatus), NA, paste(hiatus, collapse = ", ")))
     this_code_history[this_code_history==""]=NA
     this_code_history<- as.data.frame(matrix(this_code_history, nrow=1))
     colnames(this_code_history) <- c("name", "coring_yr", "date_computation", "model_tested",
@@ -824,7 +841,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                      "inst_deposit", "ignore_depths",
                                      "historic_depth", "historic_age", "historic_name",
                                      "suppdescriptor", "descriptor_lab",
-                                     "varves", "sedchange", "SML", "age_forced_CRS_pw", "depth_forced_CRS_pw")
+                                     "varves", "sedchange", "SML", "age_forced_CRS_pw", "depth_forced_CRS_pw",
+                                     "hiatus")
     # First, check whether a file already exists
     if(length(list.files(paste(getwd(), "/Cores/", name, "/", sep=""), pattern="serac_model_history*", full.names=TRUE))==1) {
       # Read previous file
@@ -1571,11 +1589,36 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     }
     output_agemodel_CFCS <- as.data.frame(output_agemodel_CFCS)
     colnames(output_agemodel_CFCS) <- c("depth", "BestAD", "MinAD", "MaxAD")
+
+    # Any duplicated depth
+    output_agemodel_CFCS <- output_agemodel_CFCS[!duplicated(output_agemodel_CFCS[, 1]), ]
+
+    # Enter here for any hiatus (we will recreate duplicated depths here for depths with hiatuses)
+    if(!is.null(hiatus)) {
+      for(h in order(unlist(lapply(hiatus, function(x) head(x, 1))))) { # This line here guarantee that we take the hiatuses in depth order
+        output_agemodel_CFCS <- rbind(
+          # Prior to hiatus
+          data.frame(
+            depth = output_agemodel_CFCS$depth[output_agemodel_CFCS$depth <= hiatus[[h]][1]],
+            BestAD = output_agemodel_CFCS$BestAD[output_agemodel_CFCS$depth <= hiatus[[h]][1]],
+            MinAD = output_agemodel_CFCS$MinAD[output_agemodel_CFCS$depth <= hiatus[[h]][1]],
+            MaxAD = output_agemodel_CFCS$MaxAD[output_agemodel_CFCS$depth <= hiatus[[h]][1]]
+          ),
+          # After hiatus
+          data.frame(
+            depth = output_agemodel_CFCS$depth[output_agemodel_CFCS$depth >= hiatus[[h]][1]],
+            BestAD = output_agemodel_CFCS$BestAD[output_agemodel_CFCS$depth >= hiatus[[h]][1]] - hiatus[[h]][2],
+            MinAD = output_agemodel_CFCS$MinAD[output_agemodel_CFCS$depth >= hiatus[[h]][1]] - hiatus[[h]][2],
+            MaxAD = output_agemodel_CFCS$MaxAD[output_agemodel_CFCS$depth >= hiatus[[h]][1]] - hiatus[[h]][2]
+          )
+        )
+      }
+    }
+
     if(mass_depth) {
       output_agemodel_CFCS$mass_depth_g.cm.2 <- depth_avg_to_date_allscales
       output_agemodel_CFCS <- output_agemodel_CFCS[, c("depth", "mass_depth_g.cm.2", "BestAD", "MinAD", "MaxAD")]
     }
-    output_agemodel_CFCS <- output_agemodel_CFCS[!duplicated(output_agemodel_CFCS[, 1]), ]
 
     # Warning message if r2 of sr_sed1> r2 of sr_sed2
     #              or if r2 of sr_sed2> r2 of sr_sed3
@@ -1611,8 +1654,19 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     # if mass depth, we do not want to interpolate below the last depth with measurement
     if(mass_depth) output_agemodel_CFCS <- output_agemodel_CFCS[output_agemodel_CFCS$depth<=max(dt$depth_bottom[!is.na(dt$Pbex)], na.rm=T), ]
 
-    output_agemodel_CFCS_inter <- as.data.frame(seq(0, max(output_agemodel_CFCS$depth, na.rm = T), by=stepout))
-    if (length(historic_d)>=1 && !all(is.na(historic_d)) && any(is.na(historic_a))) {
+    if(is.null(hiatus)) {
+      vector_depth_interpolated <- seq(0, max(output_agemodel_CFCS$depth, na.rm = T), by=stepout)
+    } else { # Replace by the option below if there is a hiatus
+      vector_depth_interpolated <- seq(0, max(output_agemodel_CFCS$depth, na.rm = T), by=stepout)
+      # We remove below any depth that are already a hiatus, because we will add two of them.
+      # If we skip this step, we will end up with three depths.
+      vector_depth_interpolated <- vector_depth_interpolated[!vector_depth_interpolated %in% unlist(lapply(hiatus, function(x) head(x, 1)))]
+      vector_depth_interpolated <- c(vector_depth_interpolated, rep(unlist(lapply(hiatus, function(x) head(x, 1))), 2))
+      vector_depth_interpolated <- vector_depth_interpolated[order(vector_depth_interpolated)]
+    }
+    output_agemodel_CFCS_inter <- as.data.frame(vector_depth_interpolated)
+
+    if(length(historic_d)>=1 && !all(is.na(historic_d)) && any(is.na(historic_a))) {
       whichNA <- which(is.na(historic_a))
       historic_d_dt <- matrix(historic_d, ncol = 2, byrow = T)
       myage_low <- approx(x= output_agemodel_CFCS$depth, output_agemodel_CFCS$MinAD, xout= historic_d_dt[is.na(historic_a), 2], ties = mean)$y
@@ -1636,16 +1690,30 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
     # Interpolate to get the age-depth model with the input stepout
     # We were extra-cautious and first interpolated to a 0.1 mm resolution to be sure we wouldn't miss a change in sedimentation rate.
+    vector_depth_interpolated_high <- c(seq(0, max(output_agemodel_CFCS$depth, na.rm = T), .1), unlist(lapply(hiatus, function(x) head(x, 1))))
+    vector_depth_interpolated_high <- vector_depth_interpolated_high[order(vector_depth_interpolated_high)]
     if(mass_depth) {
-      temporary <- approx(x= output_agemodel_CFCS$depth, output_agemodel_CFCS$mass_depth_g.cm.2, xout= seq(0, max(output_agemodel_CFCS$depth, na.rm = T), .1))
+      temporary <- approx(x= output_agemodel_CFCS$depth, output_agemodel_CFCS$mass_depth_g.cm.2, xout= vector_depth_interpolated)
       output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter, approx(x= temporary$x, temporary$y, xout= seq(0, max(output_agemodel_CFCS$depth, na.rm = T), stepout), ties = mean)$y)
     }
-    temporary <- approx(x= output_agemodel_CFCS$depth, output_agemodel_CFCS$BestAD, xout= seq(0, max(output_agemodel_CFCS$depth, na.rm = T), .1))
-    output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter, approx(x= temporary$x, temporary$y, xout= seq(0, max(output_agemodel_CFCS$depth, na.rm = T), stepout), ties = mean)$y)
-    temporary <- approx(x= output_agemodel_CFCS$depth, output_agemodel_CFCS$MinAD, xout= seq(0, max(output_agemodel_CFCS$depth, na.rm = T), .1))
-    output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter, approx(x= temporary$x, temporary$y, xout= seq(0, max(output_agemodel_CFCS$depth, na.rm = T), stepout), ties = mean)$y)
-    temporary <- approx(x= output_agemodel_CFCS$depth, output_agemodel_CFCS$MaxAD, xout= seq(0, max(output_agemodel_CFCS$depth, na.rm = T), .1))
-    output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter, approx(x= temporary$x, temporary$y, xout= seq(0, max(output_agemodel_CFCS$depth, na.rm = T), stepout), ties = mean)$y)
+    # The "+c(1:nrow(output_agemodel_CFCS)/100000)" is to avoid ties created by hiatuses...
+    temporary <- approx(x= output_agemodel_CFCS$depth+c(1:nrow(output_agemodel_CFCS)/100000), output_agemodel_CFCS$BestAD, xout= vector_depth_interpolated_high)
+    output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter, approx(x= round(temporary$x, 1), temporary$y, xout= vector_depth_interpolated, ties = mean)$y)
+    temporary <- approx(x= output_agemodel_CFCS$depth+c(1:nrow(output_agemodel_CFCS)/100000), output_agemodel_CFCS$MinAD, xout= vector_depth_interpolated_high)
+    output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter, approx(x= round(temporary$x, 1), temporary$y, xout= vector_depth_interpolated, ties = mean)$y)
+    temporary <- approx(x= output_agemodel_CFCS$depth+c(1:nrow(output_agemodel_CFCS)/100000), output_agemodel_CFCS$MaxAD, xout= vector_depth_interpolated_high)
+    output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter, approx(x= round(temporary$x, 1), temporary$y, xout= vector_depth_interpolated, ties = mean)$y)
+
+    # Needs to correct for hiatuses - second value must be corrected
+    if(!is.null(hiatus)) {
+      for(h in order(unlist(lapply(hiatus, function(x) head(x, 1))))) { # This line here guarantee that we take the hiatuses in depth order
+        index2correct <- output_agemodel_CFCS_inter[, 1] == hiatus[[h]][1]
+        output_agemodel_CFCS_inter[index2correct, 2][2] <- output_agemodel_CFCS_inter[index2correct, 2][2] - hiatus[[h]][2]
+        output_agemodel_CFCS_inter[index2correct, 3][2] <- output_agemodel_CFCS_inter[index2correct, 3][2] - hiatus[[h]][2]
+        output_agemodel_CFCS_inter[index2correct, 4][2] <- output_agemodel_CFCS_inter[index2correct, 4][2] - hiatus[[h]][2]
+      }
+    }
+
 
     if(!mass_depth) {
       colnames(output_agemodel_CFCS_inter) <- c("depth_avg_mm", "BestAD", "MinAD", "MaxAD")
@@ -2049,6 +2117,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                        "Historic_age", paste(historic_a, collapse = ", "),
                        "Historic_name", paste(historic_n, collapse = ", "),
                        "Step_out", paste(stepout, collapse = ""),
+                       "Hiatus", paste(hiatus, collapse = ", "),
                        "", "",
                        "AGE_MODEL_OUTPUT", ""),
                      ncol = 2, byrow = T)
