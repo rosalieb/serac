@@ -14,14 +14,14 @@
 #' @param age_forced_CRS If CRS_pw is chosen, which age(s) to be used to force the model. Must be the same length as depth_forced_CRS. Using by default 1986 for Chernobyl event.
 #' @param depth_forced_CRS If CRS_pw is chosen, which depth(s) to be used to force the model. Must be the same length as age_forced_CRS. Using by default the average depth chosen in the argument Cher, i.e., if Cher = c(55, 65) and depth_forced_CRS is left NULL, then the function will calculate depth_forced_CRS to be 60.
 #' @param inst_deposit Upper and lower depths (in mm) of sections of abrupt accumulation that inst_deposit c() should be excised, e.g., c(100, 120, 185, 195) for two sections of 10.0-12.0 cm and 18.5-19.5 cm depth
-#' @param input_depth_mm Units for SML, radionuclides peaks (Chernobyl, Nuclear War Tests, and First Fallouts), instantaneous deposits, depths to ignore. Default is TRUE, and inputs must be in mm - unless "input_depth_mm=F". If turned to FALSE, input can be given in g/cm2.
-#' @param ignore The depth (in mm - unless "input_depth_mm=F") of any sample that should be ignored from the age-depth model computation, e.g., c(55) will remove the measurement done at 5.5 cm. The data will be ploted by default in grey on the output graph (you can change this with the inst_depositcol argument)
+#' @param input_depth_mm Units for SML, radionuclides peaks (Chernobyl, Nuclear War Tests, and First Fallouts), instantaneous deposits, depths to ignore, and hiatus (if any). Default is TRUE, and inputs must be in mm - unless "input_depth_mm = FALSE". If turned to FALSE, input can be given in g/cm2.
+#' @param ignore The depth (in mm - unless "input_depth_mm = FALSE") of any sample that should be ignored from the age-depth model computation, e.g., c(55) will remove the measurement done at 5.5 cm. The data will be ploted by default in grey on the output graph (you can change this with the inst_depositcol argument)
 #' @param plotpdf Logical argument to indicate whether you want the output graph to be saved to your folder in pdf format. We recommend the plottiff (plot in tiff) for publication.
 #' @param plottiff Logical argument to indicate whether you want the output graph to be saved to your folder in tiff format. While taking more space on the disk, we recommend this option for publication because we found some polygons to be missing on some computers. We will update the code as we learn more about that issue.
 #' @param preview Logical argument to indicate whether you want the output graph to be ploted. Default is TRUE, and the graph is ploted within your R session. It might be convenient to turn this argument to FALSE if errors keep coming telling you your R window is too small.
-#' @param plotphoto Logical argument to indicate whether you want to plot the photo of the core along your age-model. If plotphoto=TRUE, you need to indicate the upper and lower limit of the photo in mm - unless "input_depth_mm=F" in following arguments.
-#' @param minphoto Mandatory if plotphoto=TRUE. Lower limit of the core photo in mm - unless "input_depth_mm=F", e.g., minphoto=0 indicates that the photo starts at 0 mm. The photo will automatically be truncated acording to the minimum and maximum depth of the age model given in other arguments.
-#' @param maxphoto Mandatory if plotphoto=TRUE. Upper limit of the core photo in mm - unless "input_depth_mm=F", e.g., maxphoto=320 indicates that the photo ends at 32 cm. The photo will automatically be truncated acording to the minimum and maximum depth of the age model given in other arguments.
+#' @param plotphoto Logical argument to indicate whether you want to plot the photo of the core along your age-model. If plotphoto=TRUE, you need to indicate the upper and lower limit of the photo in mm - unless "input_depth_mm = FALSE" in following arguments.
+#' @param minphoto Mandatory if plotphoto=TRUE. Lower limit of the core photo in mm - unless "input_depth_mm = FALSE", e.g., minphoto=0 indicates that the photo starts at 0 mm. The photo will automatically be truncated acording to the minimum and maximum depth of the age model given in other arguments.
+#' @param maxphoto Mandatory if plotphoto=TRUE. Upper limit of the core photo in mm - unless "input_depth_mm = FALSE", e.g., maxphoto=320 indicates that the photo ends at 32 cm. The photo will automatically be truncated acording to the minimum and maximum depth of the age model given in other arguments.
 #' @param Pbcol Vector of color to plot 210Pbex data. If length(Pbcol)>1, the different colors will be used to plot the different slopes in between change(s) in sedimentation rate. Example of color vector: Pbcol=c("black", "midnightblue", "darkgreen").
 #' @param inst_depositcol A color to plot the data points within instantaneous deposit or ignored data. Example: inst_depositcol=grey(0.85).
 #' @param modelcol Vector of color to plot different model if length(model)>1. If length(modelcol)>1, the different colors will be used to plot the different change in sedimentation rate. Example of color vector: modelcol=c("black", "red", "darkorange") to plot "CFCS", "CIC", "CRS" models in this order.
@@ -43,11 +43,11 @@
 #' @param sedchange Up to two changes in sedimentation rate, e.g., sedchange=c(175, 290) indicates two changes of sedimentation rate at 17.5 and 29.0 cm.
 #' @param error_DBD By default, error_DBD = 0.07, as Appleby (2001) suggest a 7% error on dry bulk density (DBD).
 #' @param min_yr The minimum year limit for the age-depth model plot. The user can adjust this argument after a first computation of the model
-#' @param SML Surface Mixed Layer: a depth in mm - unless "input_depth_mm=F" above which the sediment is considered to be mixed. E.g., SML=30 indicates that the first 3 cm are mixed sediment: the data point are ploted but not included in the Pb models.
-#' @param stepout Depth resolution for the file out in mm - unless "input_depth_mm=F".
+#' @param SML Surface Mixed Layer: a depth in mm - unless "input_depth_mm = FALSE" above which the sediment is considered to be mixed. E.g., SML=30 indicates that the first 3 cm are mixed sediment: the data point are ploted but not included in the Pb models.
+#' @param stepout Depth resolution for the file out in mm - unless "input_depth_mm = FALSE".
 #' @param mycex Graphical parameter: a multiplication factor to increase (mycex>1) ou decrease (mycex<1) label sizes.
 #' @param archive_metadata Logical argument. If TRUE, require fields regarding the measurements on the core. Allows missing information; just press 'ENTER' in your computer (leave an empty field).
-#' @param hiatus If there are any hiatus, enter it/them here. The input form is a list of as many vectors as there are hiatuses, and each vector is made of two elements: the depth of the hiatus in mm and the length, in years. For example, enter 'hiatus = list(c(100, 5))' for a 5-years hiatus at 100mm. Default = NULL.
+#' @param hiatus If there are any hiatus, enter it/them here. The input form is a list of as many vectors as there are hiatuses, and each vector is made of two elements minimum: the depth of the hiatus in mm and the length, in years. For example, enter 'hiatus = list(c(100, 5))' for a 5-years hiatus at 100mm. By default, "hiatus" will be printed on the graph. Optionally, the user can specify a name and a color to the by adding element to the vector in the list. Example: hiatus = list(c(100, 5, "hiatus", "blue"), c(100, 5, "", "red")) will had two hiatuses. Only the first one will have a name, and they will each be plotted with a different colors. Default = NULL.
 #' @param mass_depth Logical argument. If TRUE, require density, and will plot the radionuclides against massic depth. Core photo and supplementary descriptor are not available under this option.
 #' @param prop_height_fig Increase of decrease the height of the figure output using this argument. prop_height_fig < 1 will make the figure smaller, prop_height_fig > 1 will make the figure taller.
 #' @param prop_width_fig Increase of decrease the height of the figure output using this argument. prop_width_fig < 1 will make the figure narrower, prop_width_fig > 1 will make the figure wider.
@@ -79,6 +79,7 @@
 #'
 #' # Pierre-Blanche lagoon
 #' # serac(name="PB06", coring_yr=2006, model=c("CFCS", "CRS"), plotphoto=TRUE, minphoto=c(0), maxphoto=c(350), plot_Pb=T, plot_Pb_inst_deposit=T, inst_deposit=c(315, 350), SML=30, plot_Cs=T, Cher=c(50, 60), Hemisphere=c("NH"), NWT=c(100, 120), suppdescriptor=T, descriptor_lab=c("Si/Al"), historic_d=c(315, 350), historic_a=c(1893), historic_n=c("1894 storm"), min_yr=1870, dmax=c(350), plotpdf=TRUE)
+#'
 #'
 
 serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere = NA, FF = NA,
@@ -159,7 +160,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   # if hiatus are provided, they must be provided as a list
   if(!is.null(hiatus)) {
     if(!is.list(hiatus)) stop("\n Warning, hiatus must be provided as a list. For example, list(c(100, 5), c(120, 5)) for two 5-years hiatuses at 100 and 120 mm. \n\n")
-    if(any(lapply(hiatus, function(x) length(x)) != 2)) stop("\n Warning, hiatus must be provided as a list, with each element being made of one depth and one age (length == 2). For example, list(c(100, 5), c(120, 5)) for two 5-years hiatuses at 100 and 120 mm. \n\n")
+    if(any(lapply(hiatus, function(x) length(x)) < 2)) stop("\n Warning, hiatus must be provided as a list, with each element being made of one depth and one age (length >= 2). For example, list(c(100, 5), c(120, 5)) for two 5-years hiatuses at 100 and 120 mmz.  \n\n")
     if(mass_depth) message("\n You tried running the code with mass_depth == TRUE and hiatus != NULL. The code was not developped to match this scenario (you can only use hiatus with CFCS and when mass_depth == FALSE). \n\n")
     if(any(model != "CFCS")) message("\n You provided hiatus(es) and selected more than the CFCS model: hiatus(es) are only taken in account for the CFCS model so far. \n\n")
   }
@@ -213,10 +214,11 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   }
   if(length(custom_xlim_Pb) != 2) {stop("If you specify the limit for the Pb plot, you need to specify two values. Default is c(1, 1000).")}
 
+
   # reorder if needed.
   custom_xlim_Pb <- custom_xlim_Pb[order(custom_xlim_Pb)]
 
-  #### 1. READ DATA ----
+  # 1. READ DATA ----
   {
     dt <- read.delim(file = paste(getwd(), "/Cores/", name, "/", name, ".txt", sep=""))
     dt <- dt[, colSums(is.na(dt))<nrow(dt)]
@@ -362,7 +364,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     # Create the vector complete_core_depth when the measurements haven't been done for all the layers.
     # Necessary for inventory for instance.
     complete_core_temporary <- c(0, dt$depth_top, dt$depth_bottom, inst_deposit)
-    if(!is.null(hiatus)) complete_core_temporary <- c(complete_core_temporary, unlist(lapply(hiatus, function(x) head(x, 1))))
+    if(!is.null(hiatus)) complete_core_temporary <- c(complete_core_temporary, unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))))
     # Remove the instantaneous deposit depth deeper than measured depth.
     # We do not want to extrapolate 210Pbex and 137Cs below the actual measurement.
     complete_core_temporary <- complete_core_temporary[complete_core_temporary<=max(dt$depth_bottom, na.rm=T)]
@@ -539,7 +541,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       colnames(md_interp) <- c("depth_mm", "md_top", "md_bott", "md_avg")
     }
     # 1.7 If scale was given in mass_depth, convert in mm so the rest of the script work####
-    if(input_depth_mm==F) {
+    if(!input_depth_mm) {
       # User gave the input in g/cm2. Converting it in mm, because the script was initially built that way.
       # message if conversion
       msg_conversion <- " (depth converted from g/cm2)\n     "
@@ -559,7 +561,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       }
       # ignore
       if(!is.null(ignore)&&!all(is.na(ignore)))  for(i in seq_along(ignore))    ignore[i] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - ignore[i]))]
-    } else msg_conversion<-NULL
+    } else { msg_conversion <- NULL }
 
 
     # 1.8 Create composite free depth_avg ####
@@ -750,7 +752,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     #     - (b) The corrected version of this 1st vector, with instantaneous deposit removed
     #     - (c) Depth vector that will be used to visualise CFCS model
     d_for_CFCS <- unique(c(inst_deposit, max(dt$depth_avg[!is.na(dt$d)])))
-    if(!is.null(hiatus)) d_for_CFCS <- unique(c(d_for_CFCS, unlist(lapply(hiatus, function(x) head(x, 1)))))
+    if(!is.null(hiatus)) d_for_CFCS <- unique(c(d_for_CFCS, unlist(lapply(hiatus, function(x) as.numeric(head(x, 1))))))
 
     if(SML!=0) d_for_CFCS <- c(d_for_CFCS, SML)
     if(mass_depth) {
@@ -1595,21 +1597,21 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
     # Enter here for any hiatus (we will recreate duplicated depths here for depths with hiatuses)
     if(!is.null(hiatus)) {
-      for(h in order(unlist(lapply(hiatus, function(x) head(x, 1))))) { # This line here guarantee that we take the hiatuses in depth order
+      for(h in order(unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))))) { # This line here guarantee that we take the hiatuses in depth order
         output_agemodel_CFCS <- rbind(
           # Prior to hiatus
           data.frame(
-            depth = output_agemodel_CFCS$depth[output_agemodel_CFCS$depth <= hiatus[[h]][1]],
-            BestAD = output_agemodel_CFCS$BestAD[output_agemodel_CFCS$depth <= hiatus[[h]][1]],
-            MinAD = output_agemodel_CFCS$MinAD[output_agemodel_CFCS$depth <= hiatus[[h]][1]],
-            MaxAD = output_agemodel_CFCS$MaxAD[output_agemodel_CFCS$depth <= hiatus[[h]][1]]
+            depth = output_agemodel_CFCS$depth[output_agemodel_CFCS$depth <= as.numeric(hiatus[[h]][1])],
+            BestAD = output_agemodel_CFCS$BestAD[output_agemodel_CFCS$depth <= as.numeric(hiatus[[h]][1])],
+            MinAD = output_agemodel_CFCS$MinAD[output_agemodel_CFCS$depth <= as.numeric(hiatus[[h]][1])],
+            MaxAD = output_agemodel_CFCS$MaxAD[output_agemodel_CFCS$depth <= as.numeric(hiatus[[h]][1])]
           ),
           # After hiatus
           data.frame(
-            depth = output_agemodel_CFCS$depth[output_agemodel_CFCS$depth >= hiatus[[h]][1]],
-            BestAD = output_agemodel_CFCS$BestAD[output_agemodel_CFCS$depth >= hiatus[[h]][1]] - hiatus[[h]][2],
-            MinAD = output_agemodel_CFCS$MinAD[output_agemodel_CFCS$depth >= hiatus[[h]][1]] - hiatus[[h]][2],
-            MaxAD = output_agemodel_CFCS$MaxAD[output_agemodel_CFCS$depth >= hiatus[[h]][1]] - hiatus[[h]][2]
+            depth = output_agemodel_CFCS$depth[output_agemodel_CFCS$depth >= as.numeric(hiatus[[h]][1])],
+            BestAD = output_agemodel_CFCS$BestAD[output_agemodel_CFCS$depth >= as.numeric(hiatus[[h]][1])] - as.numeric(hiatus[[h]][2]),
+            MinAD = output_agemodel_CFCS$MinAD[output_agemodel_CFCS$depth >= as.numeric(hiatus[[h]][1])] - as.numeric(hiatus[[h]][2]),
+            MaxAD = output_agemodel_CFCS$MaxAD[output_agemodel_CFCS$depth >= as.numeric(hiatus[[h]][1])] - as.numeric(hiatus[[h]][2])
           )
         )
       }
@@ -1660,8 +1662,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       vector_depth_interpolated <- seq(0, max(output_agemodel_CFCS$depth, na.rm = T), by=stepout)
       # We remove below any depth that are already a hiatus, because we will add two of them.
       # If we skip this step, we will end up with three depths.
-      vector_depth_interpolated <- vector_depth_interpolated[!vector_depth_interpolated %in% unlist(lapply(hiatus, function(x) head(x, 1)))]
-      vector_depth_interpolated <- c(vector_depth_interpolated, rep(unlist(lapply(hiatus, function(x) head(x, 1))), 2))
+      vector_depth_interpolated <- vector_depth_interpolated[!vector_depth_interpolated %in% unlist(lapply(hiatus, function(x) as.numeric(head(x, 1))))]
+      vector_depth_interpolated <- c(vector_depth_interpolated, rep(unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))), 2))
       vector_depth_interpolated <- vector_depth_interpolated[order(vector_depth_interpolated)]
     }
     output_agemodel_CFCS_inter <- as.data.frame(vector_depth_interpolated)
@@ -1690,7 +1692,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
     # Interpolate to get the age-depth model with the input stepout
     # We were extra-cautious and first interpolated to a 0.1 mm resolution to be sure we wouldn't miss a change in sedimentation rate.
-    vector_depth_interpolated_high <- c(seq(0, max(output_agemodel_CFCS$depth, na.rm = T), .1), unlist(lapply(hiatus, function(x) head(x, 1))))
+    vector_depth_interpolated_high <- c(seq(0, max(output_agemodel_CFCS$depth, na.rm = T), .1), unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))))
     vector_depth_interpolated_high <- vector_depth_interpolated_high[order(vector_depth_interpolated_high)]
     if(mass_depth) {
       temporary <- approx(x= output_agemodel_CFCS$depth, output_agemodel_CFCS$mass_depth_g.cm.2, xout= vector_depth_interpolated)
@@ -1706,11 +1708,11 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
     # Needs to correct for hiatuses - second value must be corrected
     if(!is.null(hiatus)) {
-      for(h in order(unlist(lapply(hiatus, function(x) head(x, 1))))) { # This line here guarantee that we take the hiatuses in depth order
-        index2correct <- output_agemodel_CFCS_inter[, 1] == hiatus[[h]][1]
-        output_agemodel_CFCS_inter[index2correct, 2][2] <- output_agemodel_CFCS_inter[index2correct, 2][2] - hiatus[[h]][2]
-        output_agemodel_CFCS_inter[index2correct, 3][2] <- output_agemodel_CFCS_inter[index2correct, 3][2] - hiatus[[h]][2]
-        output_agemodel_CFCS_inter[index2correct, 4][2] <- output_agemodel_CFCS_inter[index2correct, 4][2] - hiatus[[h]][2]
+      for(h in order(unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))))) { # This line here guarantee that we take the hiatuses in depth order
+        index2correct <- output_agemodel_CFCS_inter[, 1] == as.numeric(hiatus[[h]][1])
+        output_agemodel_CFCS_inter[index2correct, 2][2] <- output_agemodel_CFCS_inter[index2correct, 2][2] - as.numeric(hiatus[[h]][2])
+        output_agemodel_CFCS_inter[index2correct, 3][2] <- output_agemodel_CFCS_inter[index2correct, 3][2] - as.numeric(hiatus[[h]][2])
+        output_agemodel_CFCS_inter[index2correct, 4][2] <- output_agemodel_CFCS_inter[index2correct, 4][2] - as.numeric(hiatus[[h]][2])
       }
     }
 
@@ -2340,6 +2342,22 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         if(SML>0) rect(xleft = myxlim_min, ybottom = -SML, xright = myxlim_max, ytop = 0, col=grey(0.97), border=NA)
         par(xpd=FALSE)
 
+        if(!is.null(hiatus)) {
+          for(h in order(unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))))) { # This line here guarantee that we take the hiatuses in depth order
+            # determine which depth is used according to mass_depth==T/F
+            if(mass_depth)  which_scale=dt$mass_depth_avg else which_scale=dt$depth_avg
+            #lines(rep(max(dt$Cs[which_scale>min(Cher_allscales-.01*(max(dt$which_scale, na.rm=T))) & which_scale<max(Cher_allscales+.01*(max(dt$which_scale, na.rm=T)))], na.rm = T)*1.1, 2), c(-Cher_allscales[1], -Cher_allscales[2]), lwd=1.5)
+            if(!mass_depth) {
+              lines(c(myxlim_min, max(dt_suppdescriptor[, 2], na.rm=T)), -rep(as.numeric(as.numeric(hiatus[[h]][1])), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+              par(xpd=TRUE)
+              lines(c(max(dt_suppdescriptor[, 2], na.rm=T), myxlim_max), -rep(as.numeric(as.numeric(hiatus[[h]][1])), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+              par(xpd=FALSE)
+            } else {
+              # to implement for mass_depth = TRUE
+            }
+          }
+        }
+
         points(dt_suppdescriptor[, 2], -dt_suppdescriptor[, 1], pch=16, cex=.8, col=suppdescriptorcol[1])
         lines(dt_suppdescriptor[, 2], -dt_suppdescriptor[, 1], col=suppdescriptorcol[1])
         #add y axis if first window to be plotted
@@ -2365,6 +2383,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         legend("bottomright", legend = descriptor_lab, bty="n", pch=c(16, 1), col=suppdescriptorcol, cex=mycex, y.intersp = 1.8)
       }
     }
+
 
     # 6.3.a Plot 210Pb ####
     # 6.3.a.1 Plot 210Pb in mm ####
@@ -2405,6 +2424,21 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           }
         }
 
+        if(!is.null(hiatus)) {
+          for(h in order(unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))))) { # This line here guarantee that we take the hiatuses in depth order
+            # determine which depth is used according to mass_depth==T/F
+            if(mass_depth)  which_scale=dt$mass_depth_avg else which_scale=dt$depth_avg
+            #lines(rep(max(dt$Cs[which_scale>min(Cher_allscales-.01*(max(dt$which_scale, na.rm=T))) & which_scale<max(Cher_allscales+.01*(max(dt$which_scale, na.rm=T)))], na.rm = T)*1.1, 2), c(-Cher_allscales[1], -Cher_allscales[2]), lwd=1.5)
+            if(!mass_depth) {
+              # lines(c(-1000, myxlim_max), -rep(as.numeric(as.numeric(hiatus[[h]][1])), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+              par(xpd=TRUE)
+              lines(c(-100,100), -rep(as.numeric(as.numeric(hiatus[[h]][1])), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+              par(xpd=FALSE)
+            } else {
+              # to implement for mass_depth = TRUE
+            }
+          }
+        }
         par(new=T)
         with (
           data=dt_sed1[!is.na(dt_sed1$depth_avg_2), ]
@@ -2467,6 +2501,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         if(SML>0) rect(xleft = log(15000), ybottom = -md_interp$md_avg[which.min(abs(md_interp$depth_mm - SML))], xright = log(max(log(dt$Pbex), na.rm=T)), ytop = 0, col=grey(0.97), border=NA)
         par(xpd=F)
 
+
         axis(2, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 20), n=40), labels = NA, cex.axis=cex_2, lwd=.5)
         axis(2, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 5)), labels=-(pretty(seq(myylim_md[1], myylim_md[2], length.out = 5))), cex.axis=cex_2)
         mtext(text = bquote("Mass depth (g cm"*~""^-2*")"), side = 2, line=2.2, cex=cex_1)
@@ -2526,6 +2561,9 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       mtext(text = bquote(~""^210*Pb[ex]*" (mBq " ~ g^-1 ~ ")"), side = 3, line=2.2, cex=cex_1)
 
     }
+
+
+
 
     # 6.3.b Plot 210Pb without inst_deposits ####
     # 6.3.b.1 Plot 210Pb without inst_deposits in mm ####
@@ -2650,7 +2688,22 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           if(dt_sed1$Pbex[i]-dt_sed1$Pbex_er[i]>0) lines(c(log(dt_sed1$Pbex[i]+dt_sed1$Pbex_er[i]), log(dt_sed1$Pbex[i]-dt_sed1$Pbex_er[i])),
                                                          rep(-which_scale[i], 2), type="o", pch="|", cex=.5, col=Pbcol[1])
         }
-
+        # # Hiatus on corrected Pb depth
+        # if(!is.null(hiatus)) {
+        #   for(h in order(unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))))) { # This line here guarantee that we take the hiatuses in depth order
+        #     # determine which depth is used according to mass_depth==T/F
+        #     if(mass_depth)  which_scale=dt$mass_depth_avg else which_scale=dt$depth_avg
+        #     #lines(rep(max(dt$Cs[which_scale>min(Cher_allscales-.01*(max(dt$which_scale, na.rm=T))) & which_scale<max(Cher_allscales+.01*(max(dt$which_scale, na.rm=T)))], na.rm = T)*1.1, 2), c(-Cher_allscales[1], -Cher_allscales[2]), lwd=1.5)
+        #     if(!mass_depth) {
+        #       # lines(c(-1000, myxlim_max), -rep(as.numeric(as.numeric(hiatus[[h]][1])), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+        #       par(xpd=TRUE)
+        #       lines(c(-100,100), -rep(as.numeric(as.numeric(hiatus[[h]][1])), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+        #       par(xpd=FALSE)
+        #     } else {
+        #       # to implement for mass_depth = TRUE
+        #     }
+        #   }
+        # }
         # This was the base graph for the points until the 1st sedimentation rate
         # Now doing the same if changes in sed rate were identified.
         if (max(sedchange)>0) {
@@ -2800,7 +2853,6 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       }
     }
 
-
     # 6.4. 137Cs ####
     if(plot_Cs) {
       if(plotphoto || suppdescriptor || plot_Pb || plot_Pb_inst_deposit) par(mar=c(4.1, 1.1, 4.1, 1.1)) else par(mar=c(4.1, 4.1, 4.1, 1.1))
@@ -2831,6 +2883,23 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         if(inst_deposit_present&length_id>0) for (i in 1:length_id) rect(xleft = -2000, ybottom = -md_interp$md_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i, 2]))], xright = max(dt$Cs, na.rm=T)*1.7+2000, ytop = -md_interp$md_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i, 1]))], col=inst_depositcol, border=inst_depositcol, lwd=.4)
         if(SML>0) rect(xleft = -2000, ybottom = -md_interp$md_avg[which.min(abs(md_interp$depth_mm - SML))], xright = max(dt$Cs, na.rm=T)*1.5, ytop = 0, col=grey(0.97), border=NA)
         par(xpd=FALSE)
+      }
+
+      # Plot hiatus on Cs
+      if(!is.null(hiatus)) {
+        for(h in order(unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))))) { # This line here guarantee that we take the hiatuses in depth order
+          # determine which depth is used according to mass_depth==T/F
+          if(mass_depth)  which_scale=dt$mass_depth_avg else which_scale=dt$depth_avg
+          #lines(rep(max(dt$Cs[which_scale>min(Cher_allscales-.01*(max(dt$which_scale, na.rm=T))) & which_scale<max(Cher_allscales+.01*(max(dt$which_scale, na.rm=T)))], na.rm = T)*1.1, 2), c(-Cher_allscales[1], -Cher_allscales[2]), lwd=1.5)
+          if(!mass_depth) {
+            # lines(c(-1000, myxlim_max), -rep(as.numeric(as.numeric(hiatus[[h]][1])), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+            par(xpd=TRUE)
+            lines(c(-2000, max(dt$Cs, na.rm=T)*3), -rep(as.numeric(as.numeric(hiatus[[h]][1])), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+            par(xpd=FALSE)
+          } else {
+            # to implement for mass_depth = TRUE
+          }
+        }
       }
 
       # Front plot (above inst_deposit)
@@ -2965,6 +3034,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       }
       par(xpd=FALSE)
 
+      #
       # 6.5. 241Am ####
       if (plot_Am) {
         # Create the ignore vector
@@ -3015,6 +3085,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         points(dt$Am[which(dt$Am>0&dt$depth_avg>SML &!dt$depth_avg %in% ignore_Am)], -which_scale[which(dt$Am>0&dt$depth_avg>SML &!dt$depth_avg %in% ignore_Am)])
         points(dt$Am[which(dt$Am>0&dt$depth_avg>SML &dt$depth_avg %in% ignore_Am)], -which_scale[which(dt$Am>0&dt$depth_avg>SML &dt$depth_avg %in% ignore_Am)], col = grey(0.67))
       }
+
     }
 
 
@@ -3258,6 +3329,27 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         }
       }
     }
+
+    # 6.8.c Plot hiatus(es) on age model ####
+    if(!is.null(hiatus)) {
+      for(h in order(unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))))) { # This line here guarantee that we take the hiatuses in depth order
+        # determine which depth is used according to mass_depth==T/F
+        if(mass_depth)  which_scale=dt$mass_depth_avg else which_scale=dt$depth_avg
+        #lines(rep(max(dt$Cs[which_scale>min(Cher_allscales-.01*(max(dt$which_scale, na.rm=T))) & which_scale<max(Cher_allscales+.01*(max(dt$which_scale, na.rm=T)))], na.rm = T)*1.1, 2), c(-Cher_allscales[1], -Cher_allscales[2]), lwd=1.5)
+        if(!mass_depth) {
+          lines(c(-coring_yr, -100), -rep(as.numeric(as.numeric(hiatus[[h]][1])), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+          par(xpd=TRUE)
+          lines(c(coring_yr, -1000), -rep(as.numeric(as.numeric(hiatus[[h]][1])), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+          par(xpd=FALSE)
+          shadowtext(-(min_yr+(coring_yr-min_yr)*.17), -(as.numeric(as.numeric(hiatus[[h]][1]))),
+                     labels = ifelse(!is.na(hiatus[[h]][3]), hiatus[[h]][3], "hiatus"), pos = 3, col=ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4, bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
+
+        } else {
+          # to implement for mass_depth = TRUE
+        }
+      }
+    }
+
 
     # Save plot as a pseudo-object
     out_list$plot <- recordPlot()
