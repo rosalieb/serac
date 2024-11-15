@@ -15,7 +15,6 @@
 #' @source \href{https://doi.org/10.1016/j.chemgeo.2016.03.016}{Guédron et al (2016)}
 #'
 #' @examples
-#' @examples
 #' # The file LUI must be in a folder Cores/LUI for this code to work (see Bruel and Sabatier 2020)
 #' serac(name ="LUI", coring_yr =2012, model =c("CFCS", "CRS", "CRS_pw"),
 #'       mass_depth =TRUE, plot_Pb =TRUE, plot_Cs = TRUE, Cher = c(115, 125),

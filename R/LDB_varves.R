@@ -10,9 +10,9 @@
 #'
 #' @keywords datasets
 #'
-#' @references
+#' @references Giguet-Covex, C., Arnaud, F., Poulenard, J., Enters, D., Reyss, J.-L., Millet, L., Lazzaroto, J., Vidal, O., 2010. Sedimentological and geochemical records of past trophic state and hypolimnetic anoxia in large, hard-water lake bourget, French alps. J. Paleolimnol. 43, 171–190. https://doi.org/10.1007/s10933-009-9324-9
 #'
-#' @source \href{}{}
+#' @source \href{https://doi.org/10.1007/s10933-009-9324-9}{Giguet-Covex et al (2010)}
 #'
 #' @examples
 #' # The files LDB and LDB_varves must be in a folder Cores/LDB for this code to work (see Bruel and Sabatier 2020)
