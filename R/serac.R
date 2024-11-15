@@ -82,6 +82,7 @@
 #'
 #'
 
+
 serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere = NA, FF = NA,
                   age_forced_CRS = NULL, depth_forced_CRS = NULL, inst_deposit = c(0),
                   input_depth_mm = T, ignore = c(), mass_depth = FALSE,
@@ -1538,8 +1539,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       peakFF_allscales <- NULL
       for(i in seq_along(peakFF)) peakFF_allscales <- c(peakFF_allscales, -md_interp$md_avg[which.min(abs(md_interp$depth_mm - peakFF[i]))])
     }
+    hiatus_allscales <- NULL
     if (all(!is.null(hiatus))) {
-      hiatus_allscales <- NULL
       for(i in seq_along(hiatus)) hiatus_allscales <- c(hiatus_allscales, md_interp$md_avg[which.min(abs(md_interp$depth_mm - as.numeric(hiatus[[i]][1])))])
     }
   } else {
@@ -1553,6 +1554,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     if (all(!is.na(Cher))) peakCher_allscales       <- peakCher
     if (all(!is.na(NWT))) peakNWT_allscales        <- peakNWT
     if (all(!is.na(FF))) peakFF_allscales         <- peakFF
+    hiatus_allscales <- NULL
     if (all(!is.null(hiatus))) hiatus_allscales   <- unlist(lapply(hiatus, function(x) as.numeric(head(x, 1))))
   }
 
