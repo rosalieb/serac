@@ -154,51 +154,51 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   # warn and stop if abnormal settings are provided
   # coring year is one of the two mandatory argument
   if(is.null(coring_yr)) {
-    if(exists("coring_year") && !is.null(coring_year)) coring_yr = coring_year else stop("\n Warning, please enter the 'coring_yr'.\n\n")
+    if(exists("coring_year") && !is.null(coring_year)) coring_yr = coring_year else stop("\n Warning: please enter the 'coring_yr'.\n\n")
   }
 
   # if hiatus are provided, they must be provided as a list
   if(!is.null(hiatus)) {
-    if(!is.list(hiatus)) stop("\n Warning, hiatus must be provided as a list. For example, list(c(100, 5), c(120, 5)) for two 5-years hiatuses at 100 and 120 mm. \n\n")
-    if(any(lapply(hiatus, function(x) length(x)) < 2)) stop("\n Warning, hiatus must be provided as a list, with each element being made of one depth and one age (length >= 2). For example, list(c(100, 5), c(120, 5)) for two 5-years hiatuses at 100 and 120 mmz.  \n\n")
-    if(mass_depth) message("\n You tried running the code with mass_depth == TRUE and hiatus != NULL. The code was not developped to match this scenario (you can only use hiatus with CFCS and when mass_depth == FALSE). \n\n")
+    if(!is.list(hiatus)) stop("\n Warning: hiatus must be provided as a list. For example, list(c(100, 5), c(120, 5)) for two 5-years hiatuses at 100 and 120 mm. \n\n")
+    if(any(lapply(hiatus, function(x) length(x)) < 2)) stop("\n Warning: hiatus must be provided as a list, with each element being made of one depth and one age (length >= 2). For example, list(c(100, 5), c(120, 5)) for two 5-years hiatuses at 100 and 120 mmz.  \n\n")
+    # if(mass_depth) message("\n You tried running the code with mass_depth == TRUE and hiatus != NULL. The code was not developped to match this scenario (you can only use hiatus with CFCS and when mass_depth == FALSE). \n\n")
     if(any(model != "CFCS")) message("\n You provided hiatus(es) and selected more than the CFCS model: hiatus(es) are only taken in account for the CFCS model so far. \n\n")
   }
 
   # serac support 2 changes in sedimentation rates maximum
-  if(length(sedchange)>2)    stop("\n Warning, serac only support two changes in sedimentation rate. Please check the manual.\n\n", call.=FALSE)
+  if(length(sedchange)>2)    stop("\n Warning: serac only support two changes in sedimentation rate. Please check the manual.\n\n", call.=FALSE)
 
   # Chernobyl fallouts are dated at different years depending on the hemisphere
-  if(!all(is.na(Cher)) && (Hemisphere=="NH"|Hemisphere=="SH")==FALSE)  stop("\n Warning, please select the hemisphere where your system is located.\n 'NH' or 'SH' for Northern/Southern Hemisphere.\n\n")
+  if(!all(is.na(Cher)) && (Hemisphere=="NH"|Hemisphere=="SH")==FALSE)  stop("\n Warning: please select the hemisphere where your system is located.\n 'NH' or 'SH' for Northern/Southern Hemisphere.\n\n")
 
   # if the argument plotphoto is true, then a photo with the exact same name and the extension .jpg must be provided in the folder
   # min and max depth must be provided so the image is automatically cropped.
   if(plotphoto==TRUE) {
-    if(!file.exists(paste(getwd(), "/Cores/", name, "/", name, ".jpg", sep=""))) stop("\n Warning, you asked to include the photo of the core but it was not found in the repository.\n Check the name (must be the same than input data name) and the extension (must be .jpg).\n\n")
-    if(is.null(minphoto) | (is.null(maxphoto)))                             stop("\n Warning, you need to indicate upper (minphoto) and lower (maxphoto) depth_avg of the core (mm).\n\n")
+    if(!file.exists(paste(getwd(), "/Cores/", name, "/", name, ".jpg", sep=""))) stop("\n Warning: you asked to include the photo of the core but it was not found in the repository.\n Check the name (must be the same than input data name) and the extension (must be .jpg).\n\n")
+    if(is.null(minphoto) | (is.null(maxphoto)))                             stop("\n Warning: you need to indicate upper (minphoto) and lower (maxphoto) depth_avg of the core (mm).\n\n")
   }
 
   # depth must be provided by pair (upper and lower depths)
   if(length(historic_d)>=1 && !all(is.na(historic_d))) {
-    if (length(historic_a) != length(historic_d)/2) stop("\n Warning, length(historic_a) != length(historic_d)/2 \n Depths for historic events must be given by pair - upper and lower depth.\n Read the help section.\n\n")
+    if (length(historic_a) != length(historic_d)/2) stop("\n Warning: length(historic_a) != length(historic_d)/2 \n Depths for historic events must be given by pair - upper and lower depth.\n Read the help section.\n\n")
   }
 
   # specific requirements to run CIC model.
   if(any(model=="CIC")) {
-    if(!is.null(inst_deposit)&&max(inst_deposit)>0) cat("\n Warning, in most of the situations, CIC model should not be run if you assume the\n presence of instantaneous deposit. Be cautious while interpreting this output. \n\n")
-    if(SML>0)                                       stop("\n Warning, CIC model should not be run if you assume the presence of a surface mixed layer. \n\n")
+    if(!is.null(inst_deposit)&&max(inst_deposit)>0) cat("\n Warning: in most of the situations, CIC model should not be run if you assume the\n presence of instantaneous deposit. Be cautious while interpreting this output. \n\n")
+    if(SML>0)                                       stop("\n Warning: CIC model should not be run if you assume the presence of a surface mixed layer. \n\n")
   }
 
   # specific requirements to run CRS piecewise model.
   if(any(model=="CRS_pw")) {
-    if(is.null(age_forced_CRS)&&is.null(depth_forced_CRS)&&is.null(Cher)) stop("\n Warning, if choosing to use the CRS piecewise model, you need to enter an age and\n a depth to force the model.\n Alternatively, the model can use Chernobyl if depths are given in the Cher argument.\n\n")
+    if(is.null(age_forced_CRS)&&is.null(depth_forced_CRS)&&is.null(Cher)) stop("\n Warning: if choosing to use the CRS piecewise model, you need to enter an age and\n a depth to force the model.\n Alternatively, the model can use Chernobyl if depths are given in the Cher argument.\n\n")
     if(is.null(age_forced_CRS)&&is.null(depth_forced_CRS)) {
       age_forced_CRS = 1986
       depth_forced_CRS = mean(Cher)
       message(paste0("\n You chose to use the CRS piecewise model but did not indicate how to force the model. \n By default, we are using the information you entered for Chernobyl (1986, depth = ",depth_forced_CRS," mm).\n\n"))
     }
-    if(length(age_forced_CRS) != length(depth_forced_CRS)) stop("\n Warning, age_forced_CRS and depth_forced_CRS must be vector of the same length. \n   (for every age_forced_CRS, one depth_forced_CRS)\n\n")
-    if(is.null(age_forced_CRS)|is.null(depth_forced_CRS)) stop("\n Warning, if choosing to use the CRS piecewise model, you need to enter both an age and a depth to force the model.\n\n")
+    if(length(age_forced_CRS) != length(depth_forced_CRS)) stop("\n Warning: age_forced_CRS and depth_forced_CRS must be vector of the same length. \n   (for every age_forced_CRS, one depth_forced_CRS)\n\n")
+    if(is.null(age_forced_CRS)|is.null(depth_forced_CRS)) stop("\n Warning: if choosing to use the CRS piecewise model, you need to enter both an age and a depth to force the model.\n\n")
 
   }
 
@@ -302,7 +302,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     }
 
     # 1.2 Calculate thickness if missing, or conversely calculate upper and lower depth of samples ####
-    if(is.null(dt$thickness) & is.null(dt$depth_top) & is.null(dt$depth_bottom) & is.null(dt$depth_min) & is.null(dt$depth_max)) stop("\n Warning, please indicate the thickness of each sample in mm or the top and \nbottom section of each sample so we can compute it for you.\n\n")
+    if(is.null(dt$thickness) & is.null(dt$depth_top) & is.null(dt$depth_bottom) & is.null(dt$depth_min) & is.null(dt$depth_max)) stop("\n Warning: please indicate the thickness of each sample in mm or the top and \nbottom section of each sample so we can compute it for you.\n\n")
 
     # Change dt$depth_min/dt$depth_max by top and bottom - correction to international format
     if(length(dt$depth_min)==nrow(dt)) dt$depth_top <- dt$depth_min
@@ -332,7 +332,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       varve$depth_avg <- varve[, grep("epth", colnames(varve))]
       varve$thickness <- varve[, grep("hickness", colnames(varve))]
 
-      if(is.null(varve$thickness) & is.null(varve$depth_top) & is.null(varve$depth_bottom)) stop("\n Warning, please indicate in the 'varves' input data file the thickness \nof each sample in mm or the top and bottom section of each sample so \nwe can compute it for you.\n\n")
+      if(is.null(varve$thickness) & is.null(varve$depth_top) & is.null(varve$depth_bottom)) stop("\n Warning: please indicate in the 'varves' input data file the thickness \nof each sample in mm or the top and bottom section of each sample so \nwe can compute it for you.\n\n")
 
       if(is.null(varve$thickness)) {
         varve$thickness <- rep(NA, nrow(varve))
@@ -342,8 +342,9 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
     # Additional warning not so related to this section
     # If density is missing, cannot calculate CRS
-    if(any(model %in% c("CRS", "CRS_pw"))) if(is.null(dt$density)) stop("\n Warning, you need to include the density in g/cm2 for each sample to compute CRS model.\n\n")
-    if(mass_depth) if(is.null(dt$density)) stop("\n Warning, you need to include the density in g/cm2 for each sample to calculate mass accumulation rate.\n\n")
+    if(any(model %in% c("CRS", "CRS_pw"))) if(is.null(dt$density)) stop("\n Warning: you need to include the density in g/cm2 for each sample to compute CRS model.\n\n")
+    if(mass_depth) if(is.null(dt$density)) stop("\n Warning: you need to include the density in g/cm2 for each sample to calculate mass accumulation rate.\n\n")
+    if(!input_depth_mm) if(is.null(dt$density)) stop("\n Warning: you indicated that the input depth were given in mass depth (argument input_depth_mm = FALSE). You need to include the density in g/cm2 for each sample to calculate mass accumulation rate.\n\n")
 
     # Additional warning if density is not given continuously
     for (i in 2:nrow(dt)) {
@@ -351,11 +352,11 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       test1 <- c(test1, dt$depth_top[i]-dt$depth_bottom[i-1])
     }
     if(!is.null(dt$density) && !all(test1==0)) {
-      packageStartupMessage(paste0("\n Warning, density is not given continuously for the whole core.\n Inventories, CRS model, and mass accumulation rate should be\n interpreted very carefully. Alternatively, enter the density\n for the whole core.\n Density is missing for ", length(test1[test1!=0]), " layer(s): "))
+      packageStartupMessage(paste0("\n Warning: density is not given continuously for the whole core.\n Inventories, CRS model, and mass accumulation rate should be\n interpreted very carefully. Alternatively, enter the density\n for the whole core.\n Density is missing for ", length(test1[test1!=0]), " layer(s): "))
       packageStartupMessage(paste0("     - ", dt$depth_bottom[which(test1>0)], "-", dt$depth_top[which(test1>0)+1], " mm \n"))
     }
 
-    # Warning, if CRS_pw is selected, then depth forced cannot be max or min depth of a section (ideally, it is a mid-section, but we have a warning message for that later)
+    # Warning: if CRS_pw is selected, then depth forced cannot be max or min depth of a section (ideally, it is a mid-section, but we have a warning message for that later)
     if(any(model %in% c("CRS_pw"))) if(any(depth_forced_CRS %in% c(dt$depth_min, dt$depth_max))) {
       stop("\n Warning: depth_forced_CRS cannot be the min or max depth of a layer.\n    Add or remove 0.1 mm to your depth_forced_CRS to run the code.")
     }
@@ -492,7 +493,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     mycollegend <- NULL
 
     # 1.6 Mass depth - create mass depth vector and interpolation ####
-    if(mass_depth) {
+    if(mass_depth | input_depth_mm) {
       # 1.6.1 mass_depth - Create the composite mass depth ####
       # Step 1.1: mass thickness (epaisseur massique)
       dt$mass_depth_top    <- rep(NA, nrow(dt))
@@ -529,7 +530,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       #      of info.
       # This temporary vector will just interpolate mass_depth between two
       #      calculated values.
-      # It's an apporximation; the higher the resolution of input data,
+      # It's an approximation; the higher the resolution of input data,
       #      the better (less approximation are needed)
       step_out_md   <- 1 # every mm
       md_interp     <- c(seq(min(c(dt$depth_top, dt$depth_bottom), na.rm=T), max(c(dt$depth_top, dt$depth_bottom), na.rm=T), by = step_out_md))
@@ -561,6 +562,10 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       }
       # ignore
       if(!is.null(ignore)&&!all(is.na(ignore)))  for(i in seq_along(ignore))    ignore[i] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - ignore[i]))]
+      # hiatus
+      if(!is.null(hiatus)) {
+        for(i in seq_along(hiatus)) hiatus[[i]][1] <- md_interp$depth_mm[which.min(abs(md_interp$md_avg - as.numeric(hiatus[[i]][1])))]
+      }
     } else { msg_conversion <- NULL }
 
 
@@ -594,7 +599,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
     if(exists("inst_deposit")&length(inst_deposit) > 1)
     {
-      if(length(inst_deposit) %% 2 == 1) stop("\n Warning, inst_deposits need both upper and lower depths. Please check the manual.", call.=FALSE)
+      if(length(inst_deposit) %% 2 == 1) stop("\n Warning: inst_deposits need both upper and lower depths. Please check the manual.", call.=FALSE)
       inst_deposit_present = TRUE # Argument inst_deposit_present = FALSE decided elsewhere if no inst_deposit
       inst_deposit <- matrix(sort(inst_deposit), ncol=2, byrow=TRUE)
       for(i in 1:nrow(inst_deposit)) {
@@ -634,11 +639,15 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       complete_core_depth_corr <- complete_core_depth[!is.na(complete_core_depth_2)]
       complete_core_depth_top_corr <- complete_core_depth_top[!is.na(complete_core_depth_top_2)]
       complete_core_depth_bottom_corr <- complete_core_depth_bottom[!is.na(complete_core_depth_bottom_2)]
+      hiatus_corr <-  unlist(lapply(hiatus, function(x) as.numeric(head(x, 1))))
 
       if(inst_deposit_present) for(i in 1:nrow(inst_deposit))
       {
         d[d > min(inst_deposit_corr[i, ])] <- d[d > min(inst_deposit_corr[i, ])] - (max(inst_deposit_corr[i, ]) - min(inst_deposit_corr[i, ]))
         dfull[dfull > min(inst_deposit_corr[i, ])] <- dfull[dfull > min(inst_deposit_corr[i, ])] - (max(inst_deposit_corr[i, ]) - min(inst_deposit_corr[i, ]))
+
+        # Corr hiatus
+        hiatus_corr[hiatus_corr  > min(inst_deposit_corr[i, ])] <- hiatus_corr[hiatus_corr > min(inst_deposit_corr[i, ])] - (max(inst_deposit_corr[i, ]) - min(inst_deposit_corr[i, ]))
 
         # The depth for CRS should also be corrected for instantaneous events
         # We could also extract these depths from the full_depths table we are about to create
@@ -674,6 +683,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       complete_core_depth_corr <- complete_core_depth[!is.na(complete_core_depth_2)]
       complete_core_depth_top_corr <- complete_core_depth_top[!is.na(complete_core_depth_top_2)]
       complete_core_depth_bottom_corr <- complete_core_depth_bottom[!is.na(complete_core_depth_bottom_2)]
+      hiatus_corr <-  unlist(lapply(hiatus, function(x) as.numeric(head(x, 1))))
 
       # For the full table
       full_depths <- data.frame(
@@ -891,7 +901,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   }
 
   # error message
-  if(rev(dt$Pbex[!is.na(dt$Pbex)])[1] >= dt$Pbex[!is.na(dt$Pbex)][1]/16 & any(model %in% c("CRS", "CRS_pw"))) packageStartupMessage("\n Warning, it seems that 210Pb_excess has not reached equilibrium. \n Make sure the conditions of application for CRS model are fulfilled.")
+  if(rev(dt$Pbex[!is.na(dt$Pbex)])[1] >= dt$Pbex[!is.na(dt$Pbex)][1]/16 & any(model %in% c("CRS", "CRS_pw"))) packageStartupMessage("\n Warning: it seems that 210Pb_excess has not reached equilibrium. \n Make sure the conditions of application for CRS model are fulfilled.")
 
   if(length(model)>=1) {
     # Write the result of the model
@@ -1518,15 +1528,19 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     depth_avg_to_date_corr_allscales[1] <- 0
     if (!all(is.na(Cher))) {
       peakCher_allscales <- NULL
-      for(i in seq_along(peakCher)) peakCher_allscales <- c(peakCher_allscales, -md_interp$md_avg[which.min(abs(md_interp$depth_mm + peakCher[i]))])
+      for(i in seq_along(peakCher)) peakCher_allscales <- c(peakCher_allscales, -md_interp$md_avg[which.min(abs(md_interp$depth_mm - peakCher[i]))])
     }
     if (all(!is.na(NWT))) {
       peakNWT_allscales <- NULL
-      for(i in seq_along(peakNWT)) peakNWT_allscales <- c(peakNWT_allscales, -md_interp$md_avg[which.min(abs(md_interp$depth_mm + peakNWT[i]))])
+      for(i in seq_along(peakNWT)) peakNWT_allscales <- c(peakNWT_allscales, -md_interp$md_avg[which.min(abs(md_interp$depth_mm - peakNWT[i]))])
     }
     if (all(!is.na(FF))) {
       peakFF_allscales <- NULL
-      for(i in seq_along(peakFF)) peakFF_allscales <- c(peakFF_allscales, -md_interp$md_avg[which.min(abs(md_interp$depth_mm + peakFF[i]))])
+      for(i in seq_along(peakFF)) peakFF_allscales <- c(peakFF_allscales, -md_interp$md_avg[which.min(abs(md_interp$depth_mm - peakFF[i]))])
+    }
+    if (all(!is.null(hiatus))) {
+      hiatus_allscales <- NULL
+      for(i in seq_along(hiatus)) hiatus_allscales <- c(hiatus_allscales, md_interp$md_avg[which.min(abs(md_interp$depth_mm - as.numeric(hiatus[[i]][1])))])
     }
   } else {
     sedchange_corr_allscales <- sedchange_corr
@@ -1539,6 +1553,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     if (all(!is.na(Cher))) peakCher_allscales       <- peakCher
     if (all(!is.na(NWT))) peakNWT_allscales        <- peakNWT
     if (all(!is.na(FF))) peakFF_allscales         <- peakFF
+    if (all(!is.null(hiatus))) hiatus_allscales   <- unlist(lapply(hiatus, function(x) as.numeric(head(x, 1))))
   }
 
   # 4. Actual code for depth age model ####
@@ -1618,7 +1633,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     }
 
     if(mass_depth) {
-      output_agemodel_CFCS$mass_depth_g.cm.2 <- depth_avg_to_date_allscales
+      output_agemodel_CFCS <- output_agemodel_CFCS[order(output_agemodel_CFCS$depth),]
+      output_agemodel_CFCS$mass_depth_g.cm.2 <- c(depth_avg_to_date_allscales, hiatus_allscales)[order(c(depth_avg_to_date_allscales, hiatus_allscales))]
       output_agemodel_CFCS <- output_agemodel_CFCS[, c("depth", "mass_depth_g.cm.2", "BestAD", "MinAD", "MaxAD")]
     }
 
@@ -1695,16 +1711,19 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     vector_depth_interpolated_high <- c(seq(0, max(output_agemodel_CFCS$depth, na.rm = T), .1), unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))))
     vector_depth_interpolated_high <- vector_depth_interpolated_high[order(vector_depth_interpolated_high)]
     if(mass_depth) {
-      temporary <- approx(x= output_agemodel_CFCS$depth, output_agemodel_CFCS$mass_depth_g.cm.2, xout= vector_depth_interpolated)
-      output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter, approx(x= temporary$x, temporary$y, xout= seq(0, max(output_agemodel_CFCS$depth, na.rm = T), stepout), ties = mean)$y)
+      # The "+c(1:nrow(output_agemodel_CFCS)/100000)" is to avoid ties created by hiatuses...
+      temporary <- approx(x= output_agemodel_CFCS$depth+c(1:nrow(output_agemodel_CFCS)/100000), output_agemodel_CFCS$mass_depth_g.cm.2, xout= vector_depth_interpolated)
+      # For mass_depth = TRUE, I was not using vector_depth_interpolated but remaking the vector. Why? I don't think I need it anymore but keeping it here just in case...
+      # output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter, approx(x= temporary$x, temporary$y, xout= seq(0, max(output_agemodel_CFCS$depth, na.rm = T), stepout), ties = mean)$y)
+      output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter, approx(x= temporary$x, temporary$y, xout= vector_depth_interpolated, ties = mean)$y)
     }
     # The "+c(1:nrow(output_agemodel_CFCS)/100000)" is to avoid ties created by hiatuses...
     temporary <- approx(x= output_agemodel_CFCS$depth+c(1:nrow(output_agemodel_CFCS)/100000), output_agemodel_CFCS$BestAD, xout= vector_depth_interpolated_high)
-    output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter, approx(x= round(temporary$x, 1), temporary$y, xout= vector_depth_interpolated, ties = mean)$y)
+    output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter, approx(x= round(temporary$x, 1), temporary$y, xout= vector_depth_interpolated, ties = max)$y)
     temporary <- approx(x= output_agemodel_CFCS$depth+c(1:nrow(output_agemodel_CFCS)/100000), output_agemodel_CFCS$MinAD, xout= vector_depth_interpolated_high)
-    output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter, approx(x= round(temporary$x, 1), temporary$y, xout= vector_depth_interpolated, ties = mean)$y)
+    output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter, approx(x= round(temporary$x, 1), temporary$y, xout= vector_depth_interpolated, ties = max)$y)
     temporary <- approx(x= output_agemodel_CFCS$depth+c(1:nrow(output_agemodel_CFCS)/100000), output_agemodel_CFCS$MaxAD, xout= vector_depth_interpolated_high)
-    output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter, approx(x= round(temporary$x, 1), temporary$y, xout= vector_depth_interpolated, ties = mean)$y)
+    output_agemodel_CFCS_inter <- cbind(output_agemodel_CFCS_inter, approx(x= round(temporary$x, 1), temporary$y, xout= vector_depth_interpolated, ties = max)$y)
 
     # Needs to correct for hiatuses - second value must be corrected
     if(!is.null(hiatus)) {
@@ -2348,9 +2367,9 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
             if(mass_depth)  which_scale=dt$mass_depth_avg else which_scale=dt$depth_avg
             #lines(rep(max(dt$Cs[which_scale>min(Cher_allscales-.01*(max(dt$which_scale, na.rm=T))) & which_scale<max(Cher_allscales+.01*(max(dt$which_scale, na.rm=T)))], na.rm = T)*1.1, 2), c(-Cher_allscales[1], -Cher_allscales[2]), lwd=1.5)
             if(!mass_depth) {
-              lines(c(myxlim_min, max(dt_suppdescriptor[, 2], na.rm=T)), -rep(as.numeric(as.numeric(hiatus[[h]][1])), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+              lines(c(myxlim_min, max(dt_suppdescriptor[, 2], na.rm=T)), -rep(hiatus_allscales[h], 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
               par(xpd=TRUE)
-              lines(c(max(dt_suppdescriptor[, 2], na.rm=T), myxlim_max), -rep(as.numeric(as.numeric(hiatus[[h]][1])), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+              lines(c(max(dt_suppdescriptor[, 2], na.rm=T), myxlim_max), -rep(hiatus_allscales[h], 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
               par(xpd=FALSE)
             } else {
               # to implement for mass_depth = TRUE
@@ -2424,21 +2443,15 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           }
         }
 
+        # Plot hiatus (depth = mm)
         if(!is.null(hiatus)) {
           for(h in order(unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))))) { # This line here guarantee that we take the hiatuses in depth order
-            # determine which depth is used according to mass_depth==T/F
-            if(mass_depth)  which_scale=dt$mass_depth_avg else which_scale=dt$depth_avg
-            #lines(rep(max(dt$Cs[which_scale>min(Cher_allscales-.01*(max(dt$which_scale, na.rm=T))) & which_scale<max(Cher_allscales+.01*(max(dt$which_scale, na.rm=T)))], na.rm = T)*1.1, 2), c(-Cher_allscales[1], -Cher_allscales[2]), lwd=1.5)
-            if(!mass_depth) {
-              # lines(c(-1000, myxlim_max), -rep(as.numeric(as.numeric(hiatus[[h]][1])), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
-              par(xpd=TRUE)
-              lines(c(-100,100), -rep(as.numeric(as.numeric(hiatus[[h]][1])), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
-              par(xpd=FALSE)
-            } else {
-              # to implement for mass_depth = TRUE
-            }
+            par(xpd=TRUE)
+            lines(c(-100,100), -rep(hiatus_allscales[h], 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+            par(xpd=FALSE)
           }
         }
+
         par(new=T)
         with (
           data=dt_sed1[!is.na(dt_sed1$depth_avg_2), ]
@@ -2501,6 +2514,15 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         if(SML>0) rect(xleft = log(15000), ybottom = -md_interp$md_avg[which.min(abs(md_interp$depth_mm - SML))], xright = log(max(log(dt$Pbex), na.rm=T)), ytop = 0, col=grey(0.97), border=NA)
         par(xpd=F)
 
+        # Plot hiatus (depth = g/m2)
+        if(!is.null(hiatus)) {
+          for(h in order(unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))))) {
+            lines(c(-100,log(max(log(dt$Pbex), na.rm=T))), -rep(hiatus_allscales[h], 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+            par(xpd=T)
+            lines(c(log(max(log(dt$Pbex), na.rm=T)),100), -rep(hiatus_allscales[h], 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+            par(xpd=F)
+          }
+        }
 
         axis(2, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 20), n=40), labels = NA, cex.axis=cex_2, lwd=.5)
         axis(2, at = pretty(seq(myylim_md[1], myylim_md[2], length.out = 5)), labels=-(pretty(seq(myylim_md[1], myylim_md[2], length.out = 5))), cex.axis=cex_2)
@@ -2590,6 +2612,20 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
               for (i in 1:nrow(inst_deposit)) rect(xleft = log(max(dt$Pbex, na.rm=T))+log(2)-log(.8), ybottom = -inst_deposit[i, 2], xright = log(18000), ytop = -inst_deposit[i, 1], col=inst_depositcol, border=inst_depositcol, lwd=.4)
               points(log(dt_sed1$Pbex), -dt_sed1$d, pch=16, cex=.8)
             }
+            if(!is.null(hiatus)) {
+              for(h in order(unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))))) { # This line here guarantee that we take the hiatuses in depth order
+                par(xpd=TRUE)
+                if(mass_depth) lines(c(log(.1), log(.8)), -rep(md_interp$md_avg[which.min(abs(md_interp$depth_mm - as.numeric(hiatus[[h]][1])))], 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+                if(!mass_depth) lines(c(log(.1), log(.8)), -rep(full_depths$corrected[which.min(abs(full_depths$full - as.numeric(hiatus[[h]][1])))], 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+                lines(c(log(.8), log(2)), -c(as.numeric(hiatus[[h]][1]), hiatus_corr[h]), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+                lines(c(log(2),  log(max(dt$Pbex, na.rm=T))), -rep(hiatus_corr[h], 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+                lines(c( log(max(dt$Pbex, na.rm=T)),  log(max(dt$Pbex, na.rm=T))+log(2)-log(.8)), -c(hiatus_corr[h], as.numeric(hiatus[[h]][1])), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+                if(mass_depth) lines(c(log(max(dt$Pbex, na.rm=T))+log(2)-log(.8), log(18000)), -rep(md_interp$md_avg[which.min(abs(md_interp$depth_mm - as.numeric(hiatus[[h]][1])))], 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+                if(!mass_depth) lines(c(log(max(dt$Pbex, na.rm=T))+log(2)-log(.8), log(18000)), -rep(full_depths$corrected[which.min(abs(full_depths$full - as.numeric(hiatus[[h]][1])))], 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+
+                par(xpd=FALSE)
+              }
+            }
             par(xpd=F)
 
 
@@ -2645,6 +2681,18 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                                                    ybottom = -md_interp$md_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i, 2]))], xright = log(18000),
                                                    ytop = -md_interp$md_avg[which.min(abs(md_interp$depth_mm - inst_deposit[i, 1]))], col=inst_depositcol, border=inst_depositcol, lwd=.4)
               points(log(dt_sed1$Pbex), -dt_sed1$mass_depth_avg_corr, pch=16, cex=.8)
+
+              if(!is.null(hiatus)) {
+                for(h in order(unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))))) { # This line here guarantee that we take the hiatuses in depth order
+                  par(xpd=TRUE)
+                  lines(c(log(.1), log(.8)), -rep(md_interp$md_avg[which.min(abs(md_interp$depth_mm - as.numeric(hiatus[[h]][1])))], 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+                  lines(c(log(.8), log(2)), -c(md_interp$md_avg[which.min(abs(md_interp$depth_mm - as.numeric(hiatus[[h]][1])))], md_interp$md_avg[which.min(abs(md_interp$depth_mm - hiatus_corr[h]))]), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+                  lines(c(log(2),  log(max(dt$Pbex, na.rm=T))), -rep(md_interp$md_avg[which.min(abs(md_interp$depth_mm - hiatus_corr[h]))], 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+                  lines(c( log(max(dt$Pbex, na.rm=T)),  log(max(dt$Pbex, na.rm=T))+log(2)-log(.8)), -c(md_interp$md_avg[which.min(abs(md_interp$depth_mm - hiatus_corr[h]))], md_interp$md_avg[which.min(abs(md_interp$depth_mm - as.numeric(hiatus[[h]][1])))]), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+                  lines(c(log(max(dt$Pbex, na.rm=T))+log(2)-log(.8), log(18000)), -rep(md_interp$md_avg[which.min(abs(md_interp$depth_mm - as.numeric(hiatus[[h]][1])))], 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+                  par(xpd=FALSE)
+                }
+              }
             }
             par(xpd=F)
 
@@ -2688,22 +2736,8 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           if(dt_sed1$Pbex[i]-dt_sed1$Pbex_er[i]>0) lines(c(log(dt_sed1$Pbex[i]+dt_sed1$Pbex_er[i]), log(dt_sed1$Pbex[i]-dt_sed1$Pbex_er[i])),
                                                          rep(-which_scale[i], 2), type="o", pch="|", cex=.5, col=Pbcol[1])
         }
-        # # Hiatus on corrected Pb depth
-        # if(!is.null(hiatus)) {
-        #   for(h in order(unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))))) { # This line here guarantee that we take the hiatuses in depth order
-        #     # determine which depth is used according to mass_depth==T/F
-        #     if(mass_depth)  which_scale=dt$mass_depth_avg else which_scale=dt$depth_avg
-        #     #lines(rep(max(dt$Cs[which_scale>min(Cher_allscales-.01*(max(dt$which_scale, na.rm=T))) & which_scale<max(Cher_allscales+.01*(max(dt$which_scale, na.rm=T)))], na.rm = T)*1.1, 2), c(-Cher_allscales[1], -Cher_allscales[2]), lwd=1.5)
-        #     if(!mass_depth) {
-        #       # lines(c(-1000, myxlim_max), -rep(as.numeric(as.numeric(hiatus[[h]][1])), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
-        #       par(xpd=TRUE)
-        #       lines(c(-100,100), -rep(as.numeric(as.numeric(hiatus[[h]][1])), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
-        #       par(xpd=FALSE)
-        #     } else {
-        #       # to implement for mass_depth = TRUE
-        #     }
-        #   }
-        # }
+
+
         # This was the base graph for the points until the 1st sedimentation rate
         # Now doing the same if changes in sed rate were identified.
         if (max(sedchange)>0) {
@@ -2770,7 +2804,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
 
     # 6.3.c Plot 210Pb model on top of 210Pb measurements ####
     if(any(model=="CFCS")) {
-      # Warning, you shouldn't plot the linear regression on the point without instantaneous deposit while you mentioned there were some
+      # Warning: you shouldn't plot the linear regression on the point without instantaneous deposit while you mentioned there were some
       if(exists("inst_deposit")&length(inst_deposit)>1&min(inst_deposit)<max(dt$depth_avg)&plot_Pb_inst_deposit==F&plot_CFCS_regression==F) {
         packageStartupMessage("\n Warning. You are trying to visualise the linear regression between raw 210Pbex\n and depth calculated with the CFCS model, while you identified instantaneous\n deposits. Add the argument plot_Pb_inst_deposit=TRUE to visualise the regression\n line on the corrected 210Pbex profile (i.e., instantaneous deposits removed).\n Keep in mind the regression line won't necesseraly match the points.\n\n")
       }
@@ -2888,17 +2922,10 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
       # Plot hiatus on Cs
       if(!is.null(hiatus)) {
         for(h in order(unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))))) { # This line here guarantee that we take the hiatuses in depth order
-          # determine which depth is used according to mass_depth==T/F
-          if(mass_depth)  which_scale=dt$mass_depth_avg else which_scale=dt$depth_avg
-          #lines(rep(max(dt$Cs[which_scale>min(Cher_allscales-.01*(max(dt$which_scale, na.rm=T))) & which_scale<max(Cher_allscales+.01*(max(dt$which_scale, na.rm=T)))], na.rm = T)*1.1, 2), c(-Cher_allscales[1], -Cher_allscales[2]), lwd=1.5)
-          if(!mass_depth) {
-            # lines(c(-1000, myxlim_max), -rep(as.numeric(as.numeric(hiatus[[h]][1])), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
-            par(xpd=TRUE)
-            lines(c(-2000, max(dt$Cs, na.rm=T)*3), -rep(as.numeric(as.numeric(hiatus[[h]][1])), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
-            par(xpd=FALSE)
-          } else {
-            # to implement for mass_depth = TRUE
-          }
+          # lines(c(-1000, myxlim_max), -rep(hiatus_allscales[h], 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+          par(xpd=TRUE)
+          lines(c(-2000, max(dt$Cs, na.rm=T)*3), -rep(hiatus_allscales[h], 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+          par(xpd=FALSE)
         }
       }
 
@@ -3127,6 +3154,7 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
         par(xpd=TRUE)
         if(inst_deposit_present) for (i in 1:nrow(inst_deposit)) rect(xleft = myxlim_min, ybottom = -inst_deposit[i, 2], xright = myxlim_max, ytop = -inst_deposit[i, 1], col=inst_depositcol, border=inst_depositcol, lwd=.4)
         if(SML>0) rect(xleft = myxlim_min, ybottom = -SML, xright = myxlim_max, ytop = 0, col=grey(0.97), border=NA)
+        if(!is.null(hiatus)) for(h in order(unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))))) lines(c(myxlim_min, myxlim_max), -rep(hiatus_allscales[h], 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
         par(xpd=FALSE)
 
         points(dt_suppdescriptor[, 2], -dt_suppdescriptor[, 1], pch=16, cex=.8, col=suppdescriptorcol[1])
@@ -3142,9 +3170,11 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
           rect(xleft = myxlim_min, ybottom = -SML, xright = max(dt_suppdescriptor[, 2], na.rm=T), ytop = 0, col=grey(0.97), border=NA)
           abline(h=-SML, lwd=.6, col="darkgrey")
         }
+        if(!is.null(hiatus)) for(h in order(unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))))) lines(c(myxlim_min, max(dt_suppdescriptor[, 2], na.rm=T)), -rep(as.numeric(hiatus[[h]][1]), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
         par(xpd=TRUE)
         if(inst_deposit_present) for (i in 1:nrow(inst_deposit)) rect(xleft = max(dt_suppdescriptor[, 2], na.rm=T), ybottom = -inst_deposit[i, 2], xright = myxlim_max, ytop = -inst_deposit[i, 1], col=inst_depositcol, border=inst_depositcol, lwd=.4)
         if(SML>0) rect(xleft = myxlim_min, ybottom = -SML, xright = myxlim_max, ytop = 0, col=grey(0.97), border=NA)
+        if(!is.null(hiatus)) for(h in order(unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))))) lines(c(max(dt_suppdescriptor[, 2], na.rm=T), myxlim_max), -rep(as.numeric(hiatus[[h]][1]), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
         par(xpd=FALSE)
 
         points(dt_suppdescriptor[, 2], -dt_suppdescriptor[, 1], pch=16, cex=.8, col=suppdescriptorcol[1])
@@ -3198,6 +3228,19 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     }
     par(xpd=F)
 
+    # Plot hiatus
+
+    if(!is.null(hiatus)) {
+      for(h in order(unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))))) { # This line here guarantee that we take the hiatuses in depth order
+        lines(c(-coring_yr, -min_yr+20), -rep(as.numeric(hiatus[[h]][1]), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+        par(xpd=TRUE)
+        lines(c(-2300, -coring_yr), -rep(as.numeric(hiatus[[h]][1]), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
+        par(xpd=FALSE)
+
+        shadowtext(-(min_yr+(coring_yr-min_yr)*.17), -(as.numeric(hiatus[[h]][1])),
+                   labels = ifelse(!is.na(hiatus[[h]][3]), hiatus[[h]][3], "hiatus"), pos = 3, col=ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4, bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
+      }
+    }
 
     if(plot_unit == "cm") {
       axis(4, at = seq(0, min(myylim), by=-100), NA, cex.axis=cex_2, lwd=.3)
@@ -3326,26 +3369,6 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
                        labels = as.character(historic_n[i]), col="black", bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex = 1*mycex)
           }
           par(xpd=F)
-        }
-      }
-    }
-
-    # 6.8.c Plot hiatus(es) on age model ####
-    if(!is.null(hiatus)) {
-      for(h in order(unlist(lapply(hiatus, function(x) as.numeric(head(x, 1)))))) { # This line here guarantee that we take the hiatuses in depth order
-        # determine which depth is used according to mass_depth==T/F
-        if(mass_depth)  which_scale=dt$mass_depth_avg else which_scale=dt$depth_avg
-        #lines(rep(max(dt$Cs[which_scale>min(Cher_allscales-.01*(max(dt$which_scale, na.rm=T))) & which_scale<max(Cher_allscales+.01*(max(dt$which_scale, na.rm=T)))], na.rm = T)*1.1, 2), c(-Cher_allscales[1], -Cher_allscales[2]), lwd=1.5)
-        if(!mass_depth) {
-          lines(c(-coring_yr, -100), -rep(as.numeric(as.numeric(hiatus[[h]][1])), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
-          par(xpd=TRUE)
-          lines(c(coring_yr, -1000), -rep(as.numeric(as.numeric(hiatus[[h]][1])), 2), lty=3, col = ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4)
-          par(xpd=FALSE)
-          shadowtext(-(min_yr+(coring_yr-min_yr)*.17), -(as.numeric(as.numeric(hiatus[[h]][1]))),
-                     labels = ifelse(!is.na(hiatus[[h]][3]), hiatus[[h]][3], "hiatus"), pos = 3, col=ifelse(!is.na(hiatus[[h]][4]), hiatus[[h]][4], "tomato"), lwd = .4, bg = "white", theta = seq(pi/4, 2 * pi, length.out = 8), r = 0.1, cex=mycex)
-
-        } else {
-          # to implement for mass_depth = TRUE
         }
       }
     }
