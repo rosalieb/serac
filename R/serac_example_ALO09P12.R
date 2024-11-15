@@ -6,7 +6,7 @@
 #'
 #' @usage serac_example_ALO09P12
 #'
-#' @format txt file
+#' @format rda file
 #'
 #' @keywords datasets
 #'
