@@ -1,10 +1,10 @@
-#' Lake Allos shortlived radionuclides
+#' Lake Allos shortlived proxy data
 #'
 #' @description Example of data used for serac
 #'
 #' @docType data
 #'
-#' @usage serac_example_ALO09P12
+#' @usage serac_example_ALO09P12_proxy
 #'
 #' @format txt file
 #'
@@ -25,4 +25,4 @@
 #' # Go to serac
 #' # e.g.
 #' serac("serac_example_ALO09P12", coring_yr = 2009)
-"serac_example_ALO09P12"
+"serac_example_ALO09P12_proxy"
