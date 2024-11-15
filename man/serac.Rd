@@ -139,7 +139,7 @@ serac(
 
 \item{sedchange}{Up to two changes in sedimentation rate, e.g., sedchange=c(175, 290) indicates two changes of sedimentation rate at 17.5 and 29.0 cm.}
 
-\item{error_DBD}{By default, error_DBD = 0.07, as Appleby (2001) suggest a 7% error on dry bulk density (DBD).}
+\item{error_DBD}{By default, error_DBD = 0.07, as Appleby (2001) suggest a 7\% error on dry bulk density (DBD).}
 
 \item{min_yr}{The minimum year limit for the age-depth model plot. The user can adjust this argument after a first computation of the model}
 
@@ -170,7 +170,7 @@ serac(
 \item{plot_unit}{Default = "mm", but if plot_unit = "cm", will change the ticks marks and units for the plot.}
 }
 \description{
-This is the main age-depth modelling function. The default values can be changed permanently within this file or temporarily when calling serac(). If there is any options you would like to see included in future version, please contact one of the authors
+This is the main age-depth modelling function. The default values can be changed permanently within this file or temporarily when calling serac(). If there is any options you would like to see included in future version, please contact one of the authors.
 }
 \examples{
 # Lake Bourget

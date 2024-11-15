@@ -1,6 +1,6 @@
 #' serac age-depth modelling function
 #'
-#' @description This is the main age-depth modelling function. The default values can be changed permanently within this file or temporarily when calling serac(). If there is any options you would like to see included in future version, please contact one of the authors
+#' @description This is the main age-depth modelling function. The default values can be changed permanently within this file or temporarily when calling serac(). If there is any options you would like to see included in future version, please contact one of the authors.
 #'
 #' @export
 #' @param name Name of the core, given using quotes. Defaults to the core provided with serac. Use preferably the published name of the core for traceability.
@@ -41,7 +41,7 @@
 #' @param dmin Maximum depth of age-depth model (useful if the user doesn't want to plot the lower region).
 #' @param dmax Maximum depth of age-depth model (useful if the user doesn't want to plot the lower region). dmax cannot be in the middle of an instantaneous deposit. e.g. if there is an instantaneous deposit between 180 and 200 mm, dmax cannot be 190 mm, and will be converted to 200 mm automatically.
 #' @param sedchange Up to two changes in sedimentation rate, e.g., sedchange=c(175, 290) indicates two changes of sedimentation rate at 17.5 and 29.0 cm.
-#' @param error_DBD By default, error_DBD = 0.07, as Appleby (2001) suggest a 7% error on dry bulk density (DBD).
+#' @param error_DBD By default, error_DBD = 0.07, as Appleby (2001) suggest a 7\% error on dry bulk density (DBD).
 #' @param min_yr The minimum year limit for the age-depth model plot. The user can adjust this argument after a first computation of the model
 #' @param SML Surface Mixed Layer: a depth in mm - unless "input_depth_mm = FALSE" above which the sediment is considered to be mixed. E.g., SML=30 indicates that the first 3 cm are mixed sediment: the data point are ploted but not included in the Pb models.
 #' @param stepout Depth resolution for the file out in mm - unless "input_depth_mm = FALSE".
@@ -57,8 +57,10 @@
 #' @param DL_Am Detection limit for Am - any value in the Am column that is below DL_Am will be changed to NA, together with the corresponding error. Default to NULL. ||recent addition, modify your data manually and keep the default to NULL if you encounter issues||
 #' @param custom_xlim_Pb Min and max limits for the Pb plot. Needs two numeric values. Default to NULL will automatically turn the values to c(1, 1000). Note that the value you enter will be shown on a log scale.
 #' @param plot_unit Default = "mm", but if plot_unit = "cm", will change the ticks marks and units for the plot.
+#'
 #' @keywords age-depth modelling
 #' @keywords visualisation
+#'
 #' @examples
 #' # Lake Bourget
 #' # serac(name="LDB", coring_yr=2004)
