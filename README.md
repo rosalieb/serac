@@ -64,3 +64,12 @@ model_ALO09P12 <-
         plotpdf=T, preview=T,
         save_code=FALSE)
 ```
+
+
+### Version
+Code versioning was not done systematically, but starting November 2024, we will specify whenever modifications are done and whether it warrants a change in the version number.  
+
+Version | Date | Comment
+:--------|:------|:--------
+__V1.0.0__ | | Initial release (Bruel and Sabatier, 2020)  
+__V1.1.0__ | _(2024-11-15)_ | Possibility to add hiatuses with the argument `hiatus`. See [Issue #4](https://github.com/rosalieb/serac/issues/4) for details.
