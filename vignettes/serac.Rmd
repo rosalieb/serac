@@ -1,7 +1,7 @@
 ---
 title: "Introduction to _serac_"
 author: "Rosalie Bruel and Pierre Sabatier"
-date: "Last update: 2021-12-10"
+date: "Last update: 2024-11-15"
 output: 
   rmarkdown::html_vignette:
     toc: yes
@@ -37,6 +37,9 @@ library(serac)
 
 The present vignette helps you compute your first age-depth model with _serac_, an R package for ShortlivEd RAdionuclide Chronology of recent sediment cores. <a href="https://github.com/rosalieb/serac" target="_blank"><img src="figures/hex-serac.png" align="right" height="220" width="190" ></a>
 
+Note that the package evolves with time, so be sure to update your version when starting a new project.  
+
+Since its publication in 2020, we added a few options to the code. The most detailed list of arguments are in the help notice (`?serac` in the console). We are also including a few of the new options in this vignette (see sections [NEW] below)
 
 # 1 First time user
 
@@ -160,6 +163,50 @@ For example, for the example core *serac_example_ALO09P12*, you would need to in
 | 2003   | 35      |
 | 2002   | 40      |
 | 2001   | 45      |
+
+
+## 2.5 Set detection limits for the radionuclides [NEW]  
+
+New arguments were added in March 2023 to enter detection limits for Pb, Cs and Am. The arguments are respectively DL_Pb, DL_Cs, and DL_Am. Any value below what is specified will be plotted with a different color and not included in the model (they are treated the same as the depths entered in the `ignore` argument).  
+
+An example of how to use it is provided below with the hiatus example.  
+
+If any value was below the detection limit, a message will be printed in the console  
+
+_Example:_ `3 Pbex values were below the detection limit set by the user (25)`
+
+## 2.6 Add a hiatus [NEW]  
+
+As of November 15th, 2024, the function was modified to allow for hiatuses to be included in the model.
+
+The description of the new argument and how to use it:
+
+> If there are any hiatus, enter it/them here. The input form is a list of as many vectors as there are hiatuses, and each vector is made of two elements minimum: the depth of the hiatus in mm and the length, in years. For example, enter 'hiatus = list(c(100, 5))' for a 5-years hiatus at 100mm. By default, "hiatus" will be printed on the graph. Optionally, the user can specify a name and a color to the by adding element to the vector in the list. Example: hiatus = list(c(100, 5, "hiatus", "blue"), c(100, 5, "", "red")) will had two hiatuses. Only the first one will have a name, and they will each be plotted with a different colors. Default = NULL.
+
+Below is an example of how to use the new argument hiatus, with the example data included in the R package. Note that the hiatuses are not real for this core and that mass depth is not the recommended approach.
+
+```{r plot in mass depth and hiatus}
+model_ALO09P12_hiatus <-
+  serac(name="serac_example_ALO09P12", coring_yr=2009, model=c("CFCS"),
+        plotphoto=FALSE, minphoto=c(0), maxphoto=c(210), mass_depth = TRUE,
+        plot_Pb=T, plot_Am=T, plot_Cs=T, Cher=c(30,40), Hemisphere=c("NH"), NWT=c(51,61),
+        sedchange=c(75.5),
+        plot_Pb_inst_deposit=T, inst_deposit=c(20,28,100,107,135,142,158,186),
+        suppdescriptor=TRUE, descriptor_lab=c("Ca/Fe"),
+        historic_d=c(20,28,100,107,135,142,158,186),
+        historic_a=c(1994,1920,1886,1868),
+        historic_n=c("sept 1994 flood","1920 flood","1886 flood","1868 flood ?"), 
+        min_yr=c(1750),
+        dmax=c(180), 
+        plotpdf=T, preview=T,
+        save_code=FALSE,
+        plot_unit = "mm", 
+        DL_Pb = 25, DL_Cs = 25, DL_Am = 3, 
+        hiatus = list(c(50, 5, "test hiatus", "black"), c(132, 15)))
+
+
+
+```
 
 
 # 3 Explore outputs

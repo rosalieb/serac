@@ -146,6 +146,10 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
   pkgTest("jpeg")
   pkgTest("TeachingDemos")
 
+  # Initial message #
+  cat("\n\n ________________________\n")
+  cat(paste0("Running serac for core '", name,"'.\n\n"))
+
   # create empty list where outputs will be saved
   out_list <- list()
 
