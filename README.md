@@ -67,10 +67,11 @@ model_ALO09P12 <-
 
 
 ### Version
-Code versioning was not done systematically, but starting November 2024, we will specify whenever modifications are done and whether it warrants a change in the version number.  
+Code versioning was not done systematically, but starting November 2024, we will specify whenever modifications are done and whether it warrants a change in the version number.   
 
 Version | Date | Comment
 :--------|:------|:--------
-__V1.0.0__ | | Initial release (Bruel and Sabatier, 2020)  
+__V1.2.1__ | _2026-07-15_ | Fixing issue arising when reading file with no density available.
+__V1.2.0__ | _2024-11-15_ | Possibility to add hiatuses with the argument `hiatus`. See [Issue #4](https://github.com/rosalieb/serac/issues/4) for details.
 __V1.1.0__ | _2023-03-03_ | Modifications: (1) Include detection limits for the radionuclides with the arguments `DL_Pb`, `DL_Cs`, and `DL_Am`. (2) Possibility not to plot the Cesium line with the logical argument `plot_Cs_lines`. Default = TRUE.
-__V1.2.0__ | _2024-11-15)_ | Possibility to add hiatuses with the argument `hiatus`. See [Issue #4](https://github.com/rosalieb/serac/issues/4) for details.
+__V1.0.0__ | | Initial release (Bruel and Sabatier, 2020)  

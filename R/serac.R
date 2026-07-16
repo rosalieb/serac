@@ -500,53 +500,55 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     mycollegend <- NULL
 
     # 1.6 Mass depth - create mass depth vector and interpolation ####
-    if(mass_depth | input_depth_mm) {
-      # 1.6.1 mass_depth - Create the composite mass depth ####
-      # Step 1.1: mass thickness (epaisseur massique)
-      dt$mass_depth_top    <- rep(NA, nrow(dt))
-      dt$mass_depth_bottom <- dt$density/10 * (dt$depth_bottom - dt$depth_top)
-      for(i in 2:nrow(dt)) {
-        if(dt$depth_top[i]==dt$depth_bottom[i-1]) {
-          dt$mass_depth_top[i] = dt$mass_depth_bottom[i-1]
-        } else {
-          dt$mass_depth_top[i] = complete_core_density[which(complete_core_depth_bottom==dt$depth_top[i])] *
-            (complete_core_depth_bottom[which(complete_core_depth_bottom==dt$depth_top[i])] - complete_core_depth_top[which(complete_core_depth_bottom==dt$depth_top[i])])
+    if(mass_depth) {
+      if(input_depth_mm) {
+        # 1.6.1 mass_depth - Create the composite mass depth ####
+        # Step 1.1: mass thickness (epaisseur massique)
+        dt$mass_depth_top    <- rep(NA, nrow(dt))
+        dt$mass_depth_bottom <- dt$density/10 * (dt$depth_bottom - dt$depth_top)
+        for(i in 2:nrow(dt)) {
+          if(dt$depth_top[i]==dt$depth_bottom[i-1]) {
+            dt$mass_depth_top[i] = dt$mass_depth_bottom[i-1]
+          } else {
+            dt$mass_depth_top[i] = complete_core_density[which(complete_core_depth_bottom==dt$depth_top[i])] *
+              (complete_core_depth_bottom[which(complete_core_depth_bottom==dt$depth_top[i])] - complete_core_depth_top[which(complete_core_depth_bottom==dt$depth_top[i])])
+          }
         }
+        dt$mass_depth_top[1]=0
+        if(dt$depth_top[1]!=0) packageStartupMessage(paste0("\n Warning. Mass depth for your first sample (", dt$depth_top[1], "-", dt$depth_bottom[1], " mm) was set\n to 0 to allow further calculation, but you did not provide\n density for the surface layer (0-", dt$depth_top[1], " mm). Include density for\n the surface layer if you can, or interpret the results with care.\n\n"))
+
+        # Save these for later if inst_deposit_present
+        md_top <- dt$mass_depth_top
+        md_bot <- dt$mass_depth_bottom
+
+
+        dt$mass_depth_avg         <- rep(NA, nrow(dt))
+
+        # Step 2: calculate actual mass depth, integral starting from the surface
+        for(i in 2:nrow(dt)) {
+          dt$mass_depth_top[i]    <- dt$mass_depth_top[i-1]    + dt$mass_depth_top[i]
+          dt$mass_depth_bottom[i] <- dt$mass_depth_bottom[i-1] + dt$mass_depth_bottom[i]
+        }
+        dt$mass_depth_avg         <- (dt$mass_depth_bottom + dt$mass_depth_top)/2
+
+        # 1.6.2 mass_depth - Create an interpolated mass_depth vector ####
+        # If mass_depth=T, we'll need to match depths in g/cm2 to depths in mm.
+        # CFCS ages between two depths are easy to find (linear relationship)
+        # For mass_depth, if the interval is too big, we can really lose a lot
+        #      of info.
+        # This temporary vector will just interpolate mass_depth between two
+        #      calculated values.
+        # It's an approximation; the higher the resolution of input data,
+        #      the better (less approximation are needed)
+        step_out_md   <- 1 # every mm
+        md_interp     <- c(seq(min(c(dt$depth_top, dt$depth_bottom), na.rm=T), max(c(dt$depth_top, dt$depth_bottom), na.rm=T), by = step_out_md))
+        md_interp     <- matrix(c(md_interp, rep(NA, length(md_interp)*3)), ncol = 4)
+        md_interp[, 2] <- approx(x= dt$depth_top, dt$mass_depth_top, xout= md_interp[, 1], rule=2, ties = mean)$y
+        md_interp[, 3] <- approx(x= dt$depth_bottom, dt$mass_depth_bottom, xout= md_interp[, 1], rule=2, ties = mean)$y
+        md_interp[, 4] <- approx(x= dt$depth_avg, dt$mass_depth_avg, xout= md_interp[, 1], rule=2, ties = mean)$y
+        md_interp     <- as.data.frame(md_interp)
+        colnames(md_interp) <- c("depth_mm", "md_top", "md_bott", "md_avg")
       }
-      dt$mass_depth_top[1]=0
-      if(dt$depth_top[1]!=0) packageStartupMessage(paste0("\n Warning. Mass depth for your first sample (", dt$depth_top[1], "-", dt$depth_bottom[1], " mm) was set\n to 0 to allow further calculation, but you did not provide\n density for the surface layer (0-", dt$depth_top[1], " mm). Include density for\n the surface layer if you can, or interpret the results with care.\n\n"))
-
-      # Save these for later if inst_deposit_present
-      md_top <- dt$mass_depth_top
-      md_bot <- dt$mass_depth_bottom
-
-
-      dt$mass_depth_avg         <- rep(NA, nrow(dt))
-
-      # Step 2: calculate actual mass depth, integral starting from the surface
-      for(i in 2:nrow(dt)) {
-        dt$mass_depth_top[i]    <- dt$mass_depth_top[i-1]    + dt$mass_depth_top[i]
-        dt$mass_depth_bottom[i] <- dt$mass_depth_bottom[i-1] + dt$mass_depth_bottom[i]
-      }
-      dt$mass_depth_avg         <- (dt$mass_depth_bottom + dt$mass_depth_top)/2
-
-      # 1.6.2 mass_depth - Create an interpolated mass_depth vector ####
-      # If mass_depth=T, we'll need to match depths in g/cm2 to depths in mm.
-      # CFCS ages between two depths are easy to find (linear relationship)
-      # For mass_depth, if the interval is too big, we can really lose a lot
-      #      of info.
-      # This temporary vector will just interpolate mass_depth between two
-      #      calculated values.
-      # It's an approximation; the higher the resolution of input data,
-      #      the better (less approximation are needed)
-      step_out_md   <- 1 # every mm
-      md_interp     <- c(seq(min(c(dt$depth_top, dt$depth_bottom), na.rm=T), max(c(dt$depth_top, dt$depth_bottom), na.rm=T), by = step_out_md))
-      md_interp     <- matrix(c(md_interp, rep(NA, length(md_interp)*3)), ncol = 4)
-      md_interp[, 2] <- approx(x= dt$depth_top, dt$mass_depth_top, xout= md_interp[, 1], rule=2, ties = mean)$y
-      md_interp[, 3] <- approx(x= dt$depth_bottom, dt$mass_depth_bottom, xout= md_interp[, 1], rule=2, ties = mean)$y
-      md_interp[, 4] <- approx(x= dt$depth_avg, dt$mass_depth_avg, xout= md_interp[, 1], rule=2, ties = mean)$y
-      md_interp     <- as.data.frame(md_interp)
-      colnames(md_interp) <- c("depth_mm", "md_top", "md_bott", "md_avg")
     }
     # 1.7 If scale was given in mass_depth, convert in mm so the rest of the script work####
     if(!input_depth_mm) {
@@ -1533,15 +1535,15 @@ serac <- function(name = "", model = c("CFCS"), Cher = NA, NWT = NA, Hemisphere 
     depth_avg_to_date_corr_allscales <- NULL
     for(i in seq_along(depth_avg_to_date_corr)) depth_avg_to_date_corr_allscales <- c(depth_avg_to_date_corr_allscales, md_interp$md_avg[which.min(abs(md_interp$depth_mm - depth_avg_to_date_corr[i]))])
     depth_avg_to_date_corr_allscales[1] <- 0
-    if (!all(is.na(Cher))) {
+    if (plot_Cs & !all(is.na(Cher))) {
       peakCher_allscales <- NULL
       for(i in seq_along(peakCher)) peakCher_allscales <- c(peakCher_allscales, -md_interp$md_avg[which.min(abs(md_interp$depth_mm - peakCher[i]))])
     }
-    if (all(!is.na(NWT))) {
+    if (plot_Cs & all(!is.na(NWT))) {
       peakNWT_allscales <- NULL
       for(i in seq_along(peakNWT)) peakNWT_allscales <- c(peakNWT_allscales, -md_interp$md_avg[which.min(abs(md_interp$depth_mm - peakNWT[i]))])
     }
-    if (all(!is.na(FF))) {
+    if (plot_Cs & all(!is.na(FF))) {
       peakFF_allscales <- NULL
       for(i in seq_along(peakFF)) peakFF_allscales <- c(peakFF_allscales, -md_interp$md_avg[which.min(abs(md_interp$depth_mm - peakFF[i]))])
     }
